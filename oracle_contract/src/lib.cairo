@@ -3,12 +3,15 @@
 #[starknet::interface]
 trait IOracleConsensus<TContractState> {
     // fn update_prediction(ref self: TContractState, predicted_state);
+    
     // fn replace_oracle
+    // fn estimate_failure
 }
 
 #[starknet::contract]
 mod OracleConsensus {
-    use starknet::ContractAddress;
+    use core::option::OptionTrait;
+use starknet::ContractAddress;
     use starknet::syscalls::storage_read_syscall;
     use starknet::syscalls::storage_write_syscall;
 
@@ -31,21 +34,37 @@ mod OracleConsensus {
 
     // fn estimate_centroid
     // fn estimate_failure
-    // 
+
+    fn fill_admins(ref self: ContractState, array : Span<ContractAddress>) {
+        let mut i = 0;
+        loop {
+            if i == array.len() {
+                break();
+            }
+            
+            let value = *array.at(i);
+            self.admins.write(i, value);
+
+            i += 1;
+        }
+    }
+
     
     #[constructor]
     fn constructor(ref self: ContractState, 
-        admins : Array<ContractAddress>,
+        admins : Span<ContractAddress>,
         required_majority : u128,
         failure_percentage : u128, 
-        oracles: Array<(ContractAddress, u128)>,
+        oracles: Span<(ContractAddress, u128)>,
         consensus_value: u128,
         consensus_credibility: u128
     ) {
-        // self.admins.write(admins);
+
+        fill_admins(ref self, admins);
+        // fill_oracles(ref self, oracles);
+        
         self.required_majority.write(required_majority);
         self.failure_percentage.write(failure_percentage);
-        // self.oracles.write(oracles);
         self.consensus_value.write(consensus_value);
         self.consensus_credibility.write(consensus_credibility);
     }
