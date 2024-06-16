@@ -2,7 +2,9 @@
 
 [StarkHack Hackaton](https://ethglobal.com/events/starkhack) participation.
 
-Establish a consensus over oracles' predictions that can evolve through time.
+Establish on-chain consensus over predictions from multiple oracles that can evolve over time.
+
+The consensus are implemented on starknet using smartcontracts developped in Cairo.
 
 ![](resources/consensus_graphic.png)
 
