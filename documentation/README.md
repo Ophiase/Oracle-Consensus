@@ -35,8 +35,10 @@ It is assumed that oracles from different societies can use different algorithms
 
 A first assumption we can make to simplify the problem is to consider that not matter the society and the algorithm, \
 the denormalized prediction $f(X)$ is a gaussian law centered in $e$ :
-- $f : X \to \tan((X - 0.5) \pi)$ $\qquad$ to map $]0, 1[$ to $\mathbb{R}$
-    - Hence we have $f^{-1} : Y \to {arctan(Y) \over \pi} + 0.5$
+- $f$ is the denormalized function : $]0, 1[ \to \mathbb{R}$
+    - $f : X \to \tan((X - 0.5) \pi)$ $\qquad$
+- $f^{-1}$ the normalize function.
+    - $f^{-1} : Y \to {arctan(Y) \over \pi} + 0.5$
 - $f(X) \sim \mathcal N(e, \sigma Id_M)^N \sim \mathcal N(E, \sigma Id_{MN})$
 
 ## Binary Gaussian Modeling
