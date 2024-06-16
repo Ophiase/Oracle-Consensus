@@ -4,6 +4,8 @@
 
 Establish a consensus over oracles' predictions that can evolve through time.
 
+![](resources/consensus_graphic.png)
+
 ## Mathematical Details of the oracle modelization.
 
 See the mathematical details at [documentation/README.md](documentation/README.md).
