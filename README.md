@@ -56,5 +56,11 @@ Now, we will consider that when an oracle makes a prediction, it has a probabili
 - Security issues: An oracle can get hacked
 - Bug
 
+Consequence : we want to be able to replace only the worst oracle relatively to the consensus.
+
 ## Algorithms
+
+In the following, we'll consider a smart contract that establish a consensus on $e$ value.
+Each oracle we'll be represented by an address.
+The contract will keep in memory an accuracy score for each address.
 
