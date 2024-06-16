@@ -4,12 +4,15 @@
 
 Establish a consensus over oracles' predictions that can evolve through time.
 
-See the mathematical details in [documentation/README.md](documentation/README.md).
+## Mathematical Details of the oracle modelization.
 
+See the mathematical details at [documentation/README.md](documentation/README.md).
 
+## Oracle Smart Contract Interface
 
-## Documentation
+See the smart contract interface for oracles at : [oracle_contract/README.md](oreacle_contract/README.md).
 
-### Installation
+## Oracle Client
 
-### Execution
+See the Oracle Client at : [oracle_client/README.md](oracle_client/README.md).
+
