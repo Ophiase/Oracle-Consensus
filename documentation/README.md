@@ -3,11 +3,11 @@
 
 ### Statistical Model
 
-Let $M$ be the number of attributes.
+Let $M$ be the number of attributes. \
 Let $N$ be the number of oracles.
 
-Let $\Omega = C = ]0, 1[^M \subset \mathbb{R}^M$ be the state space.
-Let's assume $e \in \Omega$ is the true essence of the phenomenon.
+Let $\Omega = C = ]0, 1[^M \subset \mathbb{R}^M$ be the state space. \
+Let's assume $e \in \Omega$ is the true essence of the phenomenon. \
 Let $\mu : \Omega \to ]0, 1[$ be the probability law of an oracle.
 
 An oracle's prediction is a realization of the law $\mu$ over $C$.
@@ -41,12 +41,14 @@ the denormalized prediction $f(X)$ is a gaussian law centered in $e$ :
     - $f^{-1} : Y \to {arctan(Y) \over \pi} + 0.5$
 - $f(X) \sim \mathcal N(e, \sigma Id_M)^N \sim \mathcal N(E, \sigma Id_{MN})$
 
-## Binary Gaussian Modeling
+The samples in ``oracle_contract/drafts/first_algorithm_demo.ipynb`` suggest that the gaussian modelization is hardly workable.
+
+## Multi Modeling
 
 In a second time we might even consider a case with $K$ instances of $e$ with $\mu_k \sim \mathcal{N}(e_k, \sigma_k)$. \
 Each oracle will have a probability of $p_k$ to follow $\mu_k$. Mathematicaly :
 - $w \sim Mult(1, p)$ ie. $w$ is a discrete random variable of law $p$
-- $f(x) \sim \sum^K_k \mathcal{N}(e_k, \sigma_k) \times \mathbb{1}_w$
+- $f(x) \sim \sum^K_k \mathcal{N}(e_k, \sigma_k) \times \mathbb{1}_w$ if $\mu$ are gaussians
 
 ## Failing Oracle
 
