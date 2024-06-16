@@ -41,7 +41,7 @@ the denormalized prediction $f(X)$ is a gaussian law centered in $e$ :
     - $f^{-1} : Y \to {arctan(Y) \over \pi} + 0.5$
 - $f(X) \sim \mathcal N(e, \sigma Id_M)^N \sim \mathcal N(E, \sigma Id_{MN})$
 
-The samples in ``oracle_contract/drafts/first_algorithm_demo.ipynb`` suggest that the gaussian modelization is hardly workable.
+The samples in ``oracle_contract/drafts/gaussian_algorithm_demo.ipynb`` suggest that the gaussian modelization is hardly workable.
 
 ## Multi Modeling
 
