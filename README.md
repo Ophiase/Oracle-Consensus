@@ -1,5 +1,7 @@
 # Stochastic Vector Oracle Consensus
 
+[StarkHack Hackaton](https://ethglobal.com/events/starkhack) participation.
+
 Establish a consensus over oracles' predictions that can evolve through time.
 
 ## Global Modeling
@@ -10,7 +12,7 @@ Let $M$ be the number of attributes.
 Let $N$ be the number of oracles.
 
 Let $\Omega = C = [0, 1]^M \subset \mathbb{R}^M$ be the state space.
-Let's assume $c \in \Omega$ is the true essence of the phenomenon.
+Let's assume $e \in \Omega$ is the true essence of the phenomenon.
 Let $\mu : \Omega \to [0, 1]$ be the probability law of an oracle.
 
 An oracle's prediction is a realization of the law $\mu$ over $C$.
@@ -36,10 +38,16 @@ It is assumed that oracles from different societies can use different algorithms
 
 ## Gaussian Modeling
 
-A first assumption we can make to simplify the problem is to consider that every
+A first assumption we can make to simplify the problem is to consider that not matter the society and the algorithm, \
+the prediction $X$ is a gaussian law centered in $e$ : \
+- $X \sim \mathcal N(e, \sigma Id_M)^N \sim \mathcal N(E, \sigma Id_{MN})$
 
 ## Binary Gaussian Modeling
 
+In a second time we might even consider a case with $K$ instances of $e$ with $\mu_k \sim \mathcal{N}(e_k, \sigma_k)$. \
+Each oracle will have a probability of $p_k$ to follow $\mu_k$. Mathematicaly :
+- $w \sim Mult(1, p)$ ie. $w$ is a discrete random variable of law $p$
+- $x \sim \sum^K_k \mathcal{N}(e_k, \sigma_k) \times \mathbb{1}_w$
 
 ## Failing Oracle
 
@@ -47,3 +55,6 @@ Now, we will consider that when an oracle makes a prediction, it has a probabili
 
 - Security issues: An oracle can get hacked
 - Bug
+
+## Algorithms
+
