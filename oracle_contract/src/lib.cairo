@@ -1,5 +1,3 @@
-// On peut imaginer plusieurs instances de validations pour l'introduction d'un nouveau contract
-
 #[starknet::interface]
 trait IOracleConsensus<TContractState> {
     fn update_prediction(ref self: TContractState, predicted_state : u128);
@@ -24,7 +22,7 @@ mod OracleConsensus {
     #[storage]
     struct Storage {
         admins : LegacyMap<usize, ContractAddress>, // ContractAddress list
-        required_majority : u128, // by default 100%
+        required_majority : u128, // by default 1
         
         failure_percentage : u128, // 
         oracles: LegacyMap<usize, (ContractAddress, u128)>, // ContractAddress list with a credibility score
@@ -32,9 +30,6 @@ mod OracleConsensus {
         consensus_value: u128,
         consensus_credibility : u128
     }
-
-    // fn estimate_centroid
-    // fn estimate_failure
 
     fn fill_admins(ref self: ContractState, array : Span<ContractAddress>) {
         let mut i = 0;
@@ -63,7 +58,6 @@ mod OracleConsensus {
             i += 1;
         }
     }
-
     
     #[constructor]
     fn constructor(ref self: ContractState, 

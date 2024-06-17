@@ -14,7 +14,8 @@ An oracle's prediction is a realization of the law $\mu$ over $C$.
 
 In this project, we consider $N$ oracles' predictions of the same phenomenon: $(C^N, \mathcal{B}(C)^{\otimes N}, \mu^{\otimes N})$
 
-We want to approximate the value of $c$ and estimate the credibility of this estimation.
+We want to approximate the value of $e$ and estimate the credibility of this estimation. \
+For basic law distributions, the visual intution is to characterize the $e$ value as the mode / center of the spike. 
 
 ### Example
 
@@ -24,14 +25,14 @@ We can base our analysis on the following criteria:
 (stress, anger, euphoria) with values between $0$ and $1$.
 - We consider the following two groups: (crowd, famous investors)
 
-An oracle will predict a vector with the following labeled coordinates:
+An oracle will predict a vector with the following labeled coordinates: \
 (crowd stress, crowd anger, crowd euphoria, famous investors stress, famous investors anger, famous investors euphoria)
 
 We consider 3 societies (A, B, C) and 10 oracles with 5 from A, 3 from B, and 2 from C.
 
 It is assumed that oracles from different societies can use different algorithms.
 
-## Gaussian Modeling
+## Uni Modeling
 
 A first assumption we can make to simplify the problem is to consider that not matter the society and the algorithm, \
 the denormalized prediction $f(X)$ is a gaussian law centered in $e$ :
@@ -41,14 +42,21 @@ the denormalized prediction $f(X)$ is a gaussian law centered in $e$ :
     - $f^{-1} : Y \to {arctan(Y) \over \pi} + 0.5$
 - $f(X) \sim \mathcal N(e, \sigma Id_M)^N \sim \mathcal N(E, \sigma Id_{MN})$
 
-The samples in ``oracle_contract/drafts/gaussian_algorithm_demo.ipynb`` suggest that the gaussian modelization is hardly workable.
+The samples in ``oracle_contract/drafts/gaussian_algorithm_demo.ipynb`` suggests that the use of the normalizing function is hardly workable. \
+Hence, the gaussian assumption cannot hold on $]0, 1[$.
+
+Instead, we will now consider the [Bêta](https://fr.wikipedia.org/wiki/Loi_b%C3%AAta) law and [Kumaraswamy](https://fr.wikipedia.org/wiki/Loi_de_Kumaraswamy) law. \
+Experiments are done in ``oracle_contract/drafts/beta_kumaraswamy_algorithm_demo``.
+
+Those laws seem more to fit the basic intution we have on the distribution of predictions. \
+The essence will now be modelized by the mode of the distribution.
 
 ## Multi Modeling
 
-In a second time we might even consider a case with $K$ instances of $e$ with $\mu_k \sim \mathcal{N}(e_k, \sigma_k)$. \
+In a second time we might even consider a case with $K$ instances of $e$ with $\mu_k$ centered in $e$. \
 Each oracle will have a probability of $p_k$ to follow $\mu_k$. Mathematicaly :
 - $w \sim Mult(1, p)$ ie. $w$ is a discrete random variable of law $p$
-- $f(x) \sim \sum^K_k \mathcal{N}(e_k, \sigma_k) \times \mathbb{1}_w$ if $\mu$ are gaussians
+- $f(x) \sim \sum^K_k \mathcal{N}(e_k, \sigma_k) \times \mathbb{1}_w$ if $\mu_k$ are gaussians
 
 ## Failing Oracle
 
@@ -61,7 +69,9 @@ Consequence : we want to be able to replace only the worst oracle relatively to 
 
 ## Algorithms
 
-In the following, we'll consider a smart contract that establish a consensus on $e$ value.
-Each oracle we'll be represented by an address.
-The contract will keep in memory an accuracy score for each address.
+In the following, we'll consider a smart contract that establish a consensus on $e$ value. \
+Each oracle we'll be represented by an address. \
+The contract will keep in memory an accuracy score for each address. 
+
+It will be required to be able to quantify the accuracy of an $e$ value.
 
