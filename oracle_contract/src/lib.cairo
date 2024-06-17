@@ -21,12 +21,16 @@ mod OracleConsensus {
     
     #[storage]
     struct Storage {
-        admins : LegacyMap<usize, ContractAddress>, // ContractAddress list
-        required_majority : u128, // by default 1
+        n_admins : usize,
+        admins : LegacyMap<usize, ContractAddress>,
         
-        failure_percentage : u128, // 
-        oracles: LegacyMap<usize, (ContractAddress, u128)>, // ContractAddress list with a credibility score
-
+        enable_oracle_replacement : bool,
+        required_majority : usize,
+        
+        n_failing_oracles : usize,
+        n_oracles : usize,
+        oracles: LegacyMap<usize, (ContractAddress, Option<u128>)>,
+ 
         consensus_value: u128,
         consensus_credibility : u128
     }
@@ -42,7 +46,9 @@ mod OracleConsensus {
             self.admins.write(i, value);
 
             i += 1;
-        }
+        };
+
+        self.n_admins.write(array.len());
     }
 
     fn fill_oracles(ref self: ContractState, array : Span<ContractAddress>) {
@@ -53,29 +59,50 @@ mod OracleConsensus {
             }
             
             let value = *array.at(i);
-            self.oracles.write(i, (value, 0));
+            self.oracles.write(i, (value, Option::None));
 
             i += 1;
-        }
+        };
+
+        self.n_oracles.write(array.len());
+    }
+
+    fn oracles_values(ref self: ContractState) -> Array<Option<u128>> {
+        let mut result = ArrayTrait::new();
+     
+        let mut i = 0;
+        loop {
+            if i == self.n_oracles.read() {
+                break();
+            }
+            
+            result.append(self.oracles.read(i));
+            i += 1;
+        };
+
+        result
     }
     
     #[constructor]
     fn constructor(ref self: ContractState, 
         admins : Span<ContractAddress>,
-        required_majority : u128,
-        failure_percentage : u128, 
+
+        enable_oracle_replacement : bool,
+        required_majority : usize,
+        n_failing_oracles : usize, 
+        
         oracles: Span<ContractAddress>,
-        consensus_value: u128,
-        consensus_credibility: u128
     ) {
 
         fill_admins(ref self, admins);
-        // fill_oracles(ref self, oracles);
+        fill_oracles(ref self, oracles);
         
+        self.enable_oracle_replacement.write(enable_oracle_replacement);
         self.required_majority.write(required_majority);
-        self.failure_percentage.write(failure_percentage);
-        self.consensus_value.write(consensus_value);
-        self.consensus_credibility.write(consensus_credibility);
+        self.n_failing_oracles.write(n_failing_oracles);
+        
+        self.consensus_value.write(0_u128);
+        self.consensus_credibility.write(0_u128);
     }
     
     #[abi(embed_v0)]
