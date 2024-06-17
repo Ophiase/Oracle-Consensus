@@ -54,10 +54,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "alexandria_sorting"
+version = "0.1.0"
+source = "git+https://github.com/keep-starknet-strange/alexandria.git#3041887b95cf10f9d3cd8d75326c754b331f9573"
+dependencies = [
+ "alexandria_data_structures",
+]
+
+[[package]]
 name = "oracle_consensus"
 version = "0.1.0"
 dependencies = [
  "alexandria_math",
+ "alexandria_sorting",
  "snforge_std",
 ]
 

@@ -13,7 +13,8 @@ use alexandria_math::wad_ray_math::{
     half_ray, half_wad
 };
 use alexandria_math::{pow};
-
+use alexandria_sorting::{QuickSort, MergeSort};
+    
 use oracle_consensus::math::data_science::{addition};
 
 #[test]
@@ -25,6 +26,53 @@ fn test_import() {
     let result = addition(x, y);
     assert(result == 13 * wad(), 'error add');
     assert(wad_mul(x, y) == 30 * wad(), 'error mult');
+}
+
+// fn show_array(array: Span<u256>) {
+//     let i = 0;
+//     let mut res = String::from("");
+//     loop {
+//         if i == array.len() {
+//             println!("{}", res);
+//         }
+
+//         res = res + String::from(array.at(i));
+
+//         i += 1;
+//     }
+// }
+
+#[test]
+#[available_gas(30000000)]
+fn test_median() {
+    // reminder pow(10,18) = 1 wad
+
+    // let mut array : Array<Option<u256>> = ArrayTrait::new();
+    // array.append(Option::Some(1 * pow(10, 17)));
+    // array.append(Option::Some(10 * pow(10, 17)));
+    // array.append(Option::Some(35 * pow(10, 16)));
+    // array.append(Option::Some(3 * pow(10, 17)));
+    // array.append(Option::Some(7 * pow(10, 17)));
+    // array.append(Option::Some(5 * pow(10, 17)));
+    // array.append(Option::Some(2 * pow(10, 17)));
+    
+
+    // let sorted = QuickSort::sort(array);
+    // println!(sorted);
+
+    let data = array![10_u32, 20, 30, 30, 35, 50, 70, 10].span();
+
+    let expected_median_idx = 4;
+    let expected_median_value = 35_u32;
+
+    let sorted = MergeSort::sort(data);
+
+    assert(
+        *sorted.at(expected_median_idx) == expected_median_value, 
+        'error');
+
+    // println!("{}", data);
+    // println!("{}", sorted);
 }
 
 #[test]
