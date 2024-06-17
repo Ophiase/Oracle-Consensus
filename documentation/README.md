@@ -32,7 +32,7 @@ We consider 3 societies (A, B, C) and 10 oracles with 5 from A, 3 from B, and 2 
 
 It is assumed that oracles from different societies can use different algorithms.
 
-## Uni Modeling
+## Unimodal Modeling
 
 A first assumption we can make to simplify the problem is to consider that not matter the society and the algorithm, \
 the denormalized prediction $f(X)$ is a gaussian law centered in $e$ :
@@ -51,7 +51,7 @@ Experiments are done in ``oracle_contract/drafts/beta_kumaraswamy_algorithm_demo
 Those laws seem more to fit the basic intution we have on the distribution of predictions. \
 The essence will now be modelized by the mode of the distribution.
 
-## Multi Modeling
+## Multimodal Modeling
 
 In a second time we might even consider a case with $K$ instances of $e$ with $\mu_k$ centered in $e$. \
 Each oracle will have a probability of $p_k$ to follow $\mu_k$. Mathematicaly :
@@ -60,7 +60,9 @@ Each oracle will have a probability of $p_k$ to follow $\mu_k$. Mathematicaly :
 
 ## Failing Oracle
 
-Now, we will consider that when an oracle makes a prediction, it has a probability of $\alpha$ to fail.
+Now, we will consider that when an oracle makes a prediction, it has a probability of $\alpha$ to fail. \
+A failing oracle can be modelized as a uniform distribution over $]0, 1[$.
+In our estimators, we will consider that there is always exactly $\alpha$ percent of failing oracles.
 
 - Security issues: An oracle can get hacked
 - Bug
