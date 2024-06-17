@@ -1,10 +1,10 @@
 #[starknet::interface]
 trait IOracleConsensus<TContractState> {
-    fn update_prediction(ref self: TContractState, prediction : u128);
+    fn update_prediction(ref self: TContractState, prediction : u256);
     
     fn consensus_active(self: @TContractState) -> bool;
-    fn get_consensus_value(self: @TContractState) -> u128;
-    fn get_consensus_credibility(self: @TContractState) -> u128;
+    fn get_consensus_value(self: @TContractState) -> u256;
+    fn get_consensus_credibility(self: @TContractState) -> u256;
 
     // fn replace_oracle
 }
@@ -18,7 +18,6 @@ mod oracle_consensus {
     use starknet::syscalls::storage_write_syscall;
     use starknet::get_caller_address;
 
-
     use alexandria_math::wad_ray_math::{
         ray_div, ray_mul, wad_div, wad_mul, ray_to_wad, wad_to_ray, ray, wad, half_ray, half_wad
     };
@@ -28,7 +27,7 @@ mod oracle_consensus {
     #[derive(Drop, Serde, starknet::Store)]
     struct Oracle {
         address : ContractAddress,
-        value: u128,
+        value: u256, // wad convention
         enabled: bool, // have a value ?
         reliable: bool // pass the consensus ?
     }
@@ -46,8 +45,8 @@ mod oracle_consensus {
         n_active_oracles : usize,
         oracles: LegacyMap<usize, Oracle>,
  
-        consensus_value: u128,
-        consensus_credibility : u128
+        consensus_value: u256, // wad convention
+        consensus_credibility : u256 // wad convention
     }
 
     fn fill_admins(ref self: ContractState, array : Span<ContractAddress>) {
@@ -75,7 +74,7 @@ mod oracle_consensus {
             
             let oracle = Oracle {
                 address : *array.at(i),
-                value : 0_u128,
+                value : 0_u256,
                 enabled : false,
                 reliable : true
             };
@@ -107,11 +106,11 @@ mod oracle_consensus {
         self.required_majority.write(required_majority);
         self.n_failing_oracles.write(n_failing_oracles);
         
-        self.consensus_value.write(0_u128);
-        self.consensus_credibility.write(0_u128);
+        self.consensus_value.write(0_u256);
+        self.consensus_credibility.write(0_u256);
     }
 
-    fn oracles_values(ref self: ContractState) -> Array<Option<u128>> {
+    fn oracles_values(ref self: ContractState) -> Array<Option<u256>> {
         assert(self.consensus_active(), 'consensus not active');
 
         let mut result = ArrayTrait::new();
@@ -136,7 +135,7 @@ mod oracle_consensus {
     }
     
 
-    fn update_consensus(ref self: ContractState, user : ContractAddress, prediction : u128) {
+    fn update_consensus(ref self: ContractState, user : ContractAddress, prediction : u256) {
         // TODO
     }
 
@@ -157,7 +156,7 @@ mod oracle_consensus {
 
     #[abi(embed_v0)]
     impl OracleConsensusImpl of super::IOracleConsensus<ContractState> {
-        fn update_prediction(ref self: ContractState, prediction : u128) {
+        fn update_prediction(ref self: ContractState, prediction : u256) {
             let user = get_caller_address();
             assert(is_admin(@self, user), 'not admin');
             update_consensus(ref self, user, prediction);
@@ -167,12 +166,12 @@ mod oracle_consensus {
             self.n_active_oracles.read() == self.n_oracles.read()
         }
         
-        fn get_consensus_value(self: @ContractState) -> u128 {
+        fn get_consensus_value(self: @ContractState) -> u256 {
             self.consensus_value.read()
         }
 
         // return 0 until all the oracles have voted once
-        fn get_consensus_credibility(self: @ContractState) -> u128 {
+        fn get_consensus_credibility(self: @ContractState) -> u256 {
             self.consensus_value.read()
         }
     }

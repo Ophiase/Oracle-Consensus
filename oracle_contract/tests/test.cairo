@@ -7,25 +7,29 @@
 // use super::IContractBDispatcher;
 // use super::IContractBDispatcherTrait;
 
+use alexandria_math::wad_ray_math::{
+    ray_div, ray_mul, wad_div, wad_mul, 
+    ray_to_wad, wad_to_ray, ray, wad, 
+    half_ray, half_wad
+};
+use alexandria_math::{pow};
+
 use oracle_consensus::math::data_science::{addition};
 
 #[test]
 #[available_gas(30000000)]
-fn test_module() {
-    println!("timide");
-
-    let x = 3_u128;
-    let y = 10_u128;
-
+fn test_import() {
+    let x = 3 * wad();
+    let y = 10 * wad();
+    
     let result = addition(x, y);
-
-    assert(result == 13_u128, 'nooo');
-    // assert(false, 'naa');
+    assert(result == 13 * wad(), 'error add');
+    assert(wad_mul(x, y) == 30 * wad(), 'error mult');
 }
 
 #[test]
 #[available_gas(30000000)]
-fn test_something() {
+fn test_constructor() {
 //         // Deploy ContractA
 //         let mut calldata = ArrayTrait::new();
 //         calldata.append(address_b.into());
