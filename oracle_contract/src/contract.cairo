@@ -110,7 +110,7 @@ mod oracle_consensus {
         self.consensus_credibility.write(0_u256);
     }
 
-    fn oracles_values(ref self: ContractState) -> Array<Option<u256>> {
+    fn oracles_optional_values(ref self: ContractState) -> Array<Option<u256>> {
         assert(self.consensus_active(), 'consensus not active');
 
         let mut result = ArrayTrait::new();
@@ -126,6 +126,28 @@ mod oracle_consensus {
                 result.append(Option::Some(oracle.value));
             } else {
                 result.append(Option::None);
+            }
+            
+            i += 1;
+        };
+
+        result
+    }
+
+    fn oracles_values(ref self: ContractState) -> Array<u256> {
+        assert(self.consensus_active(), 'consensus not active');
+
+        let mut result = ArrayTrait::new();
+     
+        let mut i = 0;
+        loop {
+            if i == self.n_oracles.read() {
+                break();
+            }
+
+            let oracle = self.oracles.read(i);
+            if oracle.reliable {
+                result.append(oracle.value);
             }
             
             i += 1;

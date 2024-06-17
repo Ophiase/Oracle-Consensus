@@ -1,11 +1,8 @@
-// use starknet::syscalls::deploy_syscall;
-// use starknet::ContractAddress;
+use starknet::syscalls::deploy_syscall;
+use starknet::ContractAddress;
 // use super::ContractA;
 // use super::IContractADispatcher;
 // use super::IContractADispatcherTrait;
-// use super::ContractB;
-// use super::IContractBDispatcher;
-// use super::IContractBDispatcherTrait;
 
 use alexandria_math::wad_ray_math::{
     ray_div, ray_mul, wad_div, wad_mul, 
@@ -28,46 +25,33 @@ fn test_import() {
     assert(wad_mul(x, y) == 30 * wad(), 'error mult');
 }
 
-fn show_array(array: Span<u32>) {
-    let mut i = 0;
-    // let mut res = String::from("");
-    loop {
-        if i == array.len() {
-            // println!("{}", res);
-            println!("");
-            break();
-        }
+// fn show_array(array: Span<u256>) {
+//     let mut i = 0;
+//     // let mut res = String::from("");
+//     loop {
+//         if i == array.len() {
+//             // println!("{}", res);
+//             println!("");
+//             break();
+//         }
 
-        // res = res + String::from(array.at(i));
-        let value = *array.at(i);
-        print!("{}, ", value);
+//         // res = res + String::from(array.at(i));
+//         let value = *array.at(i);
+//         print!("{}, ", value);
 
-        i += 1;
-    };
-}
+//         i += 1;
+//     };
+// }
 
 #[test]
 #[available_gas(30000000)]
 fn test_median() {
     // reminder pow(10,18) = 1 wad
 
-    // let mut array : Array<Option<u256>> = ArrayTrait::new();
-    // array.append(Option::Some(1 * pow(10, 17)));
-    // array.append(Option::Some(10 * pow(10, 17)));
-    // array.append(Option::Some(35 * pow(10, 16)));
-    // array.append(Option::Some(3 * pow(10, 17)));
-    // array.append(Option::Some(7 * pow(10, 17)));
-    // array.append(Option::Some(5 * pow(10, 17)));
-    // array.append(Option::Some(2 * pow(10, 17)));
-    
-
-    // let sorted = QuickSort::sort(array);
-    // println!(sorted);
-
-    let data = array![10_u32, 100, 35, 30, 70, 50, 20].span();
+    let data = array![10_u256, 100, 35, 30, 70, 50, 20].span();
 
     let expected_median_idx = data.len() / 2;
-    let expected_median_value = 35_u32;
+    let expected_median_value = 35_u256;
 
     let sorted = MergeSort::sort(data);
 
@@ -77,11 +61,8 @@ fn test_median() {
         *sorted.at(expected_median_idx) == expected_median_value, 
         'error');
 
-    show_array(data);
+    // show_array(data);
     // show_array(sorted);
-
-    // println!("{}", data);
-    // println!("{}", sorted);
 }
 
 #[test]

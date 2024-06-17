@@ -65,6 +65,7 @@ dependencies = [
 name = "oracle_consensus"
 version = "0.1.0"
 dependencies = [
+ "alexandria_data_structures",
  "alexandria_math",
  "alexandria_sorting",
  "snforge_std",
