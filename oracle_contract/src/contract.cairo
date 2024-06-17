@@ -46,9 +46,11 @@ mod oracle_consensus {
         
         n_failing_oracles : usize,
         n_oracles : usize,
-        n_active_oracles : usize,
         oracles: LegacyMap<usize, Oracle>,
  
+        n_active_oracles : usize,
+        consensus_active : bool,
+
         consensus_value: u256, // wad convention
         consensus_credibility : u256 // wad convention
     }
@@ -114,9 +116,8 @@ mod oracle_consensus {
         self.consensus_credibility.write(0_u256);
     }
 
+    // require that all oracle have already commited once
     fn oracles_optional_values(self: @ContractState) -> Array<Option<u256>> {
-        assert(self.consensus_active(), 'consensus not active');
-
         let mut result = ArrayTrait::new();
      
         let mut i = 0;
@@ -138,9 +139,8 @@ mod oracle_consensus {
         result
     }
 
-    fn oracles_values(self: @ContractState) -> Array<u256> {
-        assert(self.consensus_active(), 'consensus not active');
-
+    // require that all oracle have already commited once
+    fn oracles_reliable_values(self: @ContractState) -> Array<u256> {
         let mut result = ArrayTrait::new();
      
         let mut i = 0;
@@ -159,40 +159,73 @@ mod oracle_consensus {
 
         result
     }
-    
 
-    fn update_consensus(ref self: ContractState, user : ContractAddress, prediction : u256) {
-        // TODO
+    fn update_a_single_oracle(ref self: ContractState, oracle_index : @usize, prediction : @u256) {
+        let mut oracle = self.oracles.read(*oracle_index);
         
-        let oracles_values = oracles_values(@self);
-        // TODO : add prediction to oracles_values
+        if !oracle.enabled {
+            self.n_active_oracles.write(self.n_active_oracles.read() + 1);
+        }
+
+        oracle.value = *prediction;
+        oracle.enabled = true;
+        
+        self.oracles.write(*oracle_index, oracle);
+    }
+
+    fn update_consensus(ref self: ContractState, oracle_index : @usize, prediction : @u256) {
+        update_a_single_oracle(ref self, oracle_index, prediction);
+
+        if self.n_oracles.read() != self.n_active_oracles.read() {
+            return();
+        }
+
+        let oracles_values = oracles_reliable_values(@self);
 
         // First estimatation
         let median_idx = median(@oracles_values);
         let median_value = *oracles_values.at(median_idx);
         
         // Compute first spread
-        let spread_value = spread(@oracles_values, @median_value);
+        let spread_values = spread(@oracles_values, @median_value);
 
         // filter highest spread
+        // let filtered_oracles = 
 
         // Second estimation
 
         // Compute total spread
 
         // update oracles_values
+
+        self.consensus_active.write(true);
     }
 
-    fn is_admin(self: @ContractState, user : ContractAddress) -> bool {
+    fn is_admin(self: @ContractState, user : @ContractAddress) -> bool {
         let mut i = 0;
         loop {
             if i == self.n_admins.read() {
                 break(false);
             }
 
-            if self.admins.read(i) == user {
+            if self.admins.read(i) == *user {
                 break(true);
             } 
+            
+            i += 1;
+        }
+    }
+
+    fn find_oracle_index (self: @ContractState, oracle : @ContractAddress) -> Option<usize> {
+        let mut i = 0;
+        loop {
+            if i == self.n_admins.read() {
+                break(Option::None);
+            }
+
+            if self.oracles.read(i).address == *oracle {
+                break(Option::Some(i));
+            }
             
             i += 1;
         }
@@ -201,13 +234,15 @@ mod oracle_consensus {
     #[abi(embed_v0)]
     impl OracleConsensusImpl of super::IOracleConsensus<ContractState> {
         fn update_prediction(ref self: ContractState, prediction : u256) {
-            let user = get_caller_address();
-            assert(is_admin(@self, user), 'not admin');
-            update_consensus(ref self, user, prediction);
+            match find_oracle_index(@self, @get_caller_address()) {
+                Option::None => assert(false, 'not an oracle'),
+                Option::Some(oracle_index) => update_consensus(ref self, @oracle_index, @prediction)
+            }
+
         }
 
         fn consensus_active(self: @ContractState) -> bool {
-            self.n_active_oracles.read() == self.n_oracles.read()
+            self.consensus_active.read()
         }
         
         fn get_consensus_value(self: @ContractState) -> u256 {
