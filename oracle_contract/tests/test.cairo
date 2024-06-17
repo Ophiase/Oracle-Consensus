@@ -28,19 +28,23 @@ fn test_import() {
     assert(wad_mul(x, y) == 30 * wad(), 'error mult');
 }
 
-// fn show_array(array: Span<u256>) {
-//     let i = 0;
-//     let mut res = String::from("");
-//     loop {
-//         if i == array.len() {
-//             println!("{}", res);
-//         }
+fn show_array(array: Span<u32>) {
+    let mut i = 0;
+    // let mut res = String::from("");
+    loop {
+        if i == array.len() {
+            // println!("{}", res);
+            println!("");
+            break();
+        }
 
-//         res = res + String::from(array.at(i));
+        // res = res + String::from(array.at(i));
+        let value = *array.at(i);
+        print!("{}, ", value);
 
-//         i += 1;
-//     }
-// }
+        i += 1;
+    };
+}
 
 #[test]
 #[available_gas(30000000)]
@@ -60,16 +64,21 @@ fn test_median() {
     // let sorted = QuickSort::sort(array);
     // println!(sorted);
 
-    let data = array![10_u32, 20, 30, 30, 35, 50, 70, 10].span();
+    let data = array![10_u32, 100, 35, 30, 70, 50, 20].span();
 
-    let expected_median_idx = 4;
+    let expected_median_idx = data.len() / 2;
     let expected_median_value = 35_u32;
 
     let sorted = MergeSort::sort(data);
 
+    println!("{}", *sorted.at(expected_median_idx));
+
     assert(
         *sorted.at(expected_median_idx) == expected_median_value, 
         'error');
+
+    show_array(data);
+    // show_array(sorted);
 
     // println!("{}", data);
     // println!("{}", sorted);
