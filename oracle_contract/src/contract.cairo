@@ -1,3 +1,5 @@
+// Warning : only 1d is currently implemented
+
 #[starknet::interface]
 trait IOracleConsensus<TContractState> {
     fn update_prediction(ref self: TContractState, prediction : u256);
@@ -17,6 +19,8 @@ mod oracle_consensus {
     use starknet::syscalls::storage_read_syscall;
     use starknet::syscalls::storage_write_syscall;
     use starknet::get_caller_address;
+
+    use oracle_consensus::math::data_science::{median, spread};
 
     use alexandria_math::wad_ray_math::{
         ray_div, ray_mul, wad_div, wad_mul, ray_to_wad, wad_to_ray, ray, wad, half_ray, half_wad
@@ -110,7 +114,7 @@ mod oracle_consensus {
         self.consensus_credibility.write(0_u256);
     }
 
-    fn oracles_optional_values(ref self: ContractState) -> Array<Option<u256>> {
+    fn oracles_optional_values(self: @ContractState) -> Array<Option<u256>> {
         assert(self.consensus_active(), 'consensus not active');
 
         let mut result = ArrayTrait::new();
@@ -134,7 +138,7 @@ mod oracle_consensus {
         result
     }
 
-    fn oracles_values(ref self: ContractState) -> Array<u256> {
+    fn oracles_values(self: @ContractState) -> Array<u256> {
         assert(self.consensus_active(), 'consensus not active');
 
         let mut result = ArrayTrait::new();
@@ -159,6 +163,24 @@ mod oracle_consensus {
 
     fn update_consensus(ref self: ContractState, user : ContractAddress, prediction : u256) {
         // TODO
+        
+        let oracles_values = oracles_values(@self);
+        // TODO : add prediction to oracles_values
+
+        // First estimatation
+        let median_idx = median(@oracles_values);
+        let median_value = *oracles_values.at(median_idx);
+        
+        // Compute first spread
+        let spread_value = spread(@oracles_values, @median_value);
+
+        // filter highest spread
+
+        // Second estimation
+
+        // Compute total spread
+
+        // update oracles_values
     }
 
     fn is_admin(self: @ContractState, user : ContractAddress) -> bool {
