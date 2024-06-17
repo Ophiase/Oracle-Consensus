@@ -17,6 +17,10 @@ In this project, we consider $N$ oracles' predictions of the same phenomenon: $(
 We want to approximate the value of $e$ and estimate the credibility of this estimation. \
 For basic law distributions, the visual intution is to characterize the $e$ value as the mode / center of the spike. 
 
+The kind of models that fit in our modelization can be simplified into fuzzy logic : \
+A `stress level` valued in $]0;1[$ would make as much sense in `{low, mid-low, moderate, mid-high, high}` \
+Therefore, the accuracy of the consensus matters more than the precision of its value.
+
 ### Example
 
 Let's say we want to create smart contracts based on the psychology of investors in Bitcoin.
