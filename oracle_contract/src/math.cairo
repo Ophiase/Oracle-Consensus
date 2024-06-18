@@ -46,10 +46,8 @@ mod data_science {
         result
     }
 
-    // fn median_over_optional(values : Array<Option<u256>>) -> usize {
-    //     let sub_array = Default::default();
-    //     let sorted = MergeSort::sort(sub_array.span());
-    //     0_usize
+    // pub fn highest_filtering(values : @Array<u256>) -> Array<u256> {
+
     // }
 }
 

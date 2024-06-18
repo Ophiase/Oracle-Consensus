@@ -12,7 +12,7 @@ use alexandria_math::wad_ray_math::{
 use alexandria_math::{pow};
 use alexandria_sorting::{QuickSort, MergeSort};
     
-use oracle_consensus::math::data_science::{addition};
+use oracle_consensus::math::data_science::{median};
 
 #[test]
 #[available_gas(30000000)]
@@ -20,7 +20,7 @@ fn test_import() {
     let x = 3 * wad();
     let y = 10 * wad();
     
-    let result = addition(x, y);
+    let result = x+y;
     assert(result == 13 * wad(), 'error add');
     assert(wad_mul(x, y) == 30 * wad(), 'error mult');
 }

@@ -1,5 +1,3 @@
-// Warning : only 1d is currently implemented
-
 #[starknet::interface]
 trait IOracleConsensus<TContractState> {
     fn update_prediction(ref self: TContractState, prediction : u256);
@@ -189,8 +187,9 @@ mod oracle_consensus {
         // Compute first spread
         let spread_values = spread(@oracles_values, @median_value);
 
-        // filter highest spread
-        // let filtered_oracles = 
+        // filter the highest spread
+        
+        // let filtered_oracles= 
 
         // Second estimation
 
