@@ -10,7 +10,7 @@ trait IOracleConsensus<TContractState> {
     fn get_second_pass_consensus_reliability(self: @TContractState) -> u256;
 
 
-    fn update_proposition(ref self: TContractState, old_oracle : usize , new_oracle : ContractAddress);
+    fn update_proposition(ref self: TContractState, proposition : Option<(usize, ContractAddress)>);
     fn vote_for_a_proposition(ref self: TContractState, which_admin : usize, support_his_proposition : bool);
     
     fn get_propositions(self: @TContractState) -> Array<(usize, ContractAddress)>;
@@ -265,7 +265,7 @@ mod oracle_consensus {
     fn find_oracle_index (self: @ContractState, oracle : @ContractAddress) -> Option<usize> {
         let mut i = 0;
         loop {
-            if i == self.n_admins.read() {
+            if i == self.n_oracles.read() {
                 break(Option::None);
             }
 
@@ -277,11 +277,26 @@ mod oracle_consensus {
         }
     }
 
+    fn find_admin_index (self: @ContractState, admin : @ContractAddress) -> Option<usize> {
+        let mut i = 0;
+        loop {
+            if i == self.n_admins.read() {
+                break(Option::None);
+            }
+
+            if self.admins.read(i) == *admin {
+                break(Option::Some(i));
+            }
+            
+            i += 1;
+        }
+    }
+
     // ------------------------------------------------------------------------------
     // ADMIN VOTES
     // ------------------------------------------------------------------------------
 
-
+    
 
     // ------------------------------------------------------------------------------
     // OTHER
@@ -343,12 +358,31 @@ mod oracle_consensus {
             self.consensus_reliability_second_pass.read()
         }
         
-        fn update_proposition(ref self: ContractState, old_oracle : usize , new_oracle : ContractAddress) {
-            // TODO
+        fn update_proposition(ref self: ContractState, proposition : Option<(usize, ContractAddress)>) {
+            let admin_index = find_admin_index(@self, @get_caller_address());
+            assert(!admin_index.is_none(), 'not an admin');
+            let admin_index = admin_index.unwrap();
+
+            match proposition {
+                Option::None => self.replacement_propositions.write(admin_index, proposition),
+                Option::Some((old_oracle_index, new_oracle_address)) => {
+                    assert(
+                        (0 <= old_oracle_index) && (old_oracle_index < self.n_oracles.read()), 
+                        'wrong old oracle idx');
+
+                    // TODO : check new_oracle_address exists
+
+                    // TODO : reset the votes
+                    // TODO : self.replacement_propositions.write(proposition);
+                }
+            };
+            
         }
 
         fn vote_for_a_proposition(ref self: ContractState, which_admin : usize, support_his_proposition : bool) {
             // TODO
+
+            // self.vote_matrix.write()
         }
 
         fn get_propositions(self: @ContractState) -> Array<(usize, ContractAddress)> {
