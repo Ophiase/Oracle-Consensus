@@ -188,7 +188,7 @@ mod oracle_consensus {
         let median_value = *oracles_values.at(median_idx);
         
         // Compute first spread
-        let spread_values = spread(@oracles_values, @median_value);
+        let _spread_values = spread(@oracles_values, @median_value);
 
         // filter the highest spread
         // let filtered_oracles = 

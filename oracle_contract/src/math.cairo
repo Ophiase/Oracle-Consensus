@@ -51,17 +51,18 @@ mod data_science {
 
     // pub fn compute_rank(array : @Array<u256>) -> Array<usize> {
     // }
+ 
 
+    // pub unoptimized_rank_compute(values: @Array<u256>) -> Array<usize, u256> {
+    //     let indexed_values = add_index_to_array(values);
+    //     let buffer = ArrayTrait::<usize, u256>::new();
 
-    // pub unoptimized_rank_compute(values: @Array<u256>) -> Array<usize> {
-    //     let sorted = Merge::sort(values.span());
+    //     // let mut i = 0;
+    //     // loop {
+            
+    //     // }
 
-    //     let mut i=0;
-    //     loop {
-
-    //     }
-
-    //     sorted
+    //     indexed_values
     // }
 }
 
