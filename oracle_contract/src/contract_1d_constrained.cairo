@@ -9,7 +9,7 @@ trait IOracleConsensus<TContractState> {
     fn get_first_pass_consensus_reliability(self: @TContractState) -> u256;
     fn get_second_pass_consensus_reliability(self: @TContractState) -> u256;
 
-    
+
     fn update_proposition(ref self: TContractState, old_oracle : usize , new_oracle : ContractAddress);
     fn vote_for_a_proposition(ref self: TContractState, which_admin : usize, support_his_proposition : bool);
     
@@ -59,6 +59,9 @@ mod oracle_consensus {
  
         n_active_oracles : usize,
         consensus_active : bool,
+
+        vote_matrix : LegacyMap<(usize, usize), bool>,
+        replacement_propositions : LegacyMap<usize, Option<(usize, ContractAddress)>>,
 
         consensus_value: u256, // wad convention
         consensus_reliability_second_pass : u256, // wad convention
@@ -275,7 +278,7 @@ mod oracle_consensus {
     }
 
     // ------------------------------------------------------------------------------
-    // ORALCE CONSENSUS
+    // ADMIN VOTES
     // ------------------------------------------------------------------------------
 
 
