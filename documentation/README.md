@@ -1,3 +1,16 @@
+# Mathematical Documentation
+
+## Summary
+
+- [Global Modeling](#global-modeling)
+    - [Statistical Model](#statistical-model)
+    - [Example](#example)
+- [Unimodal Modeling](#unimodal-modeling)
+- [Multimodal Modeling](#multimodal-modeling)
+- [Algorithms](#algorithms)
+    - [Consensus](#consensus)
+    - [Replacement Vote Implementation](#replacement-vote-implementation)
+
 
 ## Global Modeling
 
@@ -75,9 +88,37 @@ Consequence : we want to be able to replace only the worst oracle relatively to 
 
 ## Algorithms
 
+### Consensus
+
 In the following, we'll consider a smart contract that establish a consensus on $e$ value. \
 Each oracle we'll be represented by an address. \
 The contract will keep in memory an accuracy score for each address. 
 
 It will be required to be able to quantify the accuracy of an $e$ value.
+
+### Replacement Vote Implementation
+
+Let $(a_1, \dots, a_A)$ be the admins. \
+Let $(o_1, \dots, o_N)$ be the oracles.
+
+Let $(r_1, \dots, r_A)$ be the replacement proposition where the $r_i$ are ``Option<(usize, ContractAddress)>``.
+
+At each time the smart contract keep a boolean valued vote matrix of dimension $A \times A$.
+
+By default :
+- Vote matrix is equal to : $(false)_{i,j \in A \times A}$
+- Every replacement propositions are nulles.
+
+Admins can vote and discard their vote for an admin proposition.
+
+When :
+- Admin $x$ get enough votes
+- His replacement proposition is valid
+    - ``usize`` oracle index corresponds to a failing oracle
+    - ``ContractAddress`` is a valid address
+The oracle is replaced.
+
+When an admin change its proposition, he loose all its votes. \
+When an oracle is replaced, the vote matrix is reinitialized to its default value$
+
 

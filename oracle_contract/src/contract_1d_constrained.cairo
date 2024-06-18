@@ -7,7 +7,12 @@ trait IOracleConsensus<TContractState> {
     fn get_first_pass_consensus_reliability(self: @TContractState) -> u256;
     fn get_second_pass_consensus_reliability(self: @TContractState) -> u256;
 
-    // fn replace_oracle
+    
+    // fn update_proposition();
+    // fn vote_for_a_proposition();
+    //
+    // fn get_propositions();
+    // fn get_a_specific_proposition
 }
 
 #[starknet::contract]
@@ -55,6 +60,8 @@ mod oracle_consensus {
         consensus_reliability_second_pass : u256, // wad convention
         consensus_reliability_first_pass : u256 // wad convention
     }
+
+    // ==============================================================================
 
     fn fill_admins(ref self: ContractState, array : Span<ContractAddress>) {
         let mut i = 0;
@@ -117,6 +124,10 @@ mod oracle_consensus {
         self.consensus_reliability_first_pass.write(0_u256);
         self.consensus_reliability_second_pass.write(0_u256);
     }
+
+    // ------------------------------------------------------------------------------
+    // ORALCE CONSENSUS
+    // ------------------------------------------------------------------------------
 
     // require that all oracle have already commited once
     fn oracles_optional_values(self: @ContractState) -> Array<Option<u256>> {
@@ -195,9 +206,6 @@ mod oracle_consensus {
         };
     }
 
-    fn interval_check(value : @u256) {
-            assert((0_u256 <= *value) && (*value <= 1_u256), 'interval error');
-    }
 
     fn update_consensus(ref self: ContractState, oracle_index : @usize, prediction : @u256) {
         update_a_single_oracle(ref self, oracle_index, prediction);
@@ -246,20 +254,6 @@ mod oracle_consensus {
         self.consensus_active.write(true);
     }
 
-    fn is_admin(self: @ContractState, user : @ContractAddress) -> bool {
-        let mut i = 0;
-        loop {
-            if i == self.n_admins.read() {
-                break(false);
-            }
-
-            if self.admins.read(i) == *user {
-                break(true);
-            } 
-            
-            i += 1;
-        }
-    }
 
     fn find_oracle_index (self: @ContractState, oracle : @ContractAddress) -> Option<usize> {
         let mut i = 0;
@@ -275,6 +269,42 @@ mod oracle_consensus {
             i += 1;
         }
     }
+
+    // ------------------------------------------------------------------------------
+    // ORALCE CONSENSUS
+    // ------------------------------------------------------------------------------
+
+
+
+    // ------------------------------------------------------------------------------
+    // OTHER
+    // ------------------------------------------------------------------------------
+
+    fn is_admin(self: @ContractState, user : @ContractAddress) -> bool {
+        let mut i = 0;
+        loop {
+            if i == self.n_admins.read() {
+                break(false);
+            }
+
+            if self.admins.read(i) == *user {
+                break(true);
+            } 
+            
+            i += 1;
+        }
+    }
+
+    fn interval_check(value : @u256) {
+        assert((0_u256 <= *value) && (*value <= 1_u256), 'interval error');
+    }
+
+
+    // ==============================================================================
+    // PUBLIC
+    // ==============================================================================
+
+
 
     #[abi(embed_v0)]
     impl OracleConsensusImpl of super::IOracleConsensus<ContractState> {
