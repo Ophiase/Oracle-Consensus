@@ -51,6 +51,8 @@ It is assumed that oracles from different societies can use different algorithms
 
 ## Unimodal Modeling
 
+### Constrained over $]0, 1[^M$
+
 A first assumption we can make to simplify the problem is to consider that not matter the society and the algorithm, \
 the denormalized prediction $f(X)$ is a gaussian law centered in $e$ :
 - $f$ is the denormalized function : $]0, 1[ \to \mathbb{R}$
@@ -67,6 +69,14 @@ Experiments are done in ``oracle_contract/drafts/beta_kumaraswamy_algorithm_demo
 
 Those laws seem more to fit the basic intution we have on the distribution of predictions. \
 The essence will now be modelized by the mode of the distribution.
+
+### Unconstrained, over $R^M$
+
+For regular oracles that predicts values over $R^M$ (eg: price of a barrel of oil, BTC/USD, $\dots$) the gaussian noise modelisation works better.
+
+Essence is then the $\mu$ parameter of the distribution, and reliability a function of $\sigma$.
+
+Thus, the estimator is :
 
 ## Multimodal Modeling
 

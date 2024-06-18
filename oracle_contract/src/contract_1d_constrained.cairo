@@ -1,3 +1,5 @@
+use starknet::ContractAddress;
+
 #[starknet::interface]
 trait IOracleConsensus<TContractState> {
     fn update_prediction(ref self: TContractState, prediction : u256);
@@ -8,21 +10,23 @@ trait IOracleConsensus<TContractState> {
     fn get_second_pass_consensus_reliability(self: @TContractState) -> u256;
 
     
-    // fn update_proposition();
-    // fn vote_for_a_proposition();
-    //
-    // fn get_propositions();
-    // fn get_a_specific_proposition
+    fn update_proposition(ref self: TContractState, old_oracle : usize , new_oracle : ContractAddress);
+    fn vote_for_a_proposition(ref self: TContractState, which_admin : usize, support_his_proposition : bool);
+    
+    fn get_propositions(self: @TContractState) -> Array<(usize, ContractAddress)>;
+    fn get_a_specific_proposition(self: @TContractState, which_admin : usize) -> (usize, ContractAddress);
 }
 
 #[starknet::contract]
 mod oracle_consensus {
+    use starknet::ContractAddress;
     // use core::option::Option::{None, Some};
     use core::option::OptionTrait;
-    use starknet::ContractAddress;
     use starknet::syscalls::storage_read_syscall;
     use starknet::syscalls::storage_write_syscall;
     use starknet::get_caller_address;
+
+    use starknet::contract_address::{Felt252TryIntoContractAddress, ContractAddressIntoFelt252};
 
     use oracle_consensus::math::data_science::{median, spread, average};
     use oracle_consensus::sort::IndexedMergeSort;
@@ -336,5 +340,23 @@ mod oracle_consensus {
             self.consensus_reliability_second_pass.read()
         }
         
+        fn update_proposition(ref self: ContractState, old_oracle : usize , new_oracle : ContractAddress) {
+            // TODO
+        }
+
+        fn vote_for_a_proposition(ref self: ContractState, which_admin : usize, support_his_proposition : bool) {
+            // TODO
+        }
+
+        fn get_propositions(self: @ContractState) -> Array<(usize, ContractAddress)> {
+            // TODO
+            array![ (0_usize, 0.try_into().unwrap()) ]
+        }
+        
+        fn get_a_specific_proposition(self: @ContractState, which_admin : usize) -> (usize, ContractAddress) {
+            // TODO
+            (0_usize, 0.try_into().unwrap())
+        }
+
     }
 }
