@@ -44,6 +44,12 @@ mod oracle_consensus {
         enabled: bool, // have a value ?
         reliable: bool // pass the consensus ?
     }
+
+    #[derive(Drop, Serde, starknet::Store)]
+    struct VoteCoordinate {
+        vote_emitter : usize,
+        vote_receiver: usize
+    }
     
     #[storage]
     struct Storage {
@@ -60,7 +66,7 @@ mod oracle_consensus {
         n_active_oracles : usize,
         consensus_active : bool,
 
-        vote_matrix : LegacyMap<(usize, usize), bool>,
+        vote_matrix : LegacyMap<VoteCoordinate, bool>,
         replacement_propositions : LegacyMap<usize, Option<(usize, ContractAddress)>>,
 
         consensus_value: u256, // wad convention
@@ -365,15 +371,34 @@ mod oracle_consensus {
 
             match proposition {
                 Option::None => self.replacement_propositions.write(admin_index, proposition),
-                Option::Some((old_oracle_index, new_oracle_address)) => {
+                Option::Some((old_oracle_index, _new_oracle_address)) => {
                     assert(
                         (0 <= old_oracle_index) && (old_oracle_index < self.n_oracles.read()), 
-                        'wrong old oracle idx');
+                        'wrong old oracle index');
 
                     // TODO : check new_oracle_address exists
 
-                    // TODO : reset the votes
-                    // TODO : self.replacement_propositions.write(proposition);
+                    // reset the votes
+                    let mut i = 0;
+                    loop {
+                        if i == self.n_admins.read() {
+                            break();
+                        }
+
+                        self.vote_matrix.write(VoteCoordinate{
+                            vote_emitter: i,
+                            vote_receiver: admin_index
+                        }, false);
+
+                        i += 1;
+                    };
+
+                    self.vote_matrix.write(VoteCoordinate{
+                        vote_emitter: admin_index, vote_receiver: admin_index
+                    }, true);
+                    
+                    // TODO:
+                    // self.replacement_propositions.write(proposition);
                 }
             };
             
