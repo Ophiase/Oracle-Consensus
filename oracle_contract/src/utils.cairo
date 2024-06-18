@@ -32,3 +32,13 @@ fn show_tuple_array<T, +Copy<T>, +Drop<T>, +core::fmt::Display<T>>(
         i += 1;
     };
 }
+
+fn fst<U, +Copy<U>, +Drop<U>, V, +Copy<V>, +Drop<V>>(x : (U, V)) -> U {
+    let (u, _v) = x;
+    u
+}
+
+fn snd<U, +Copy<U>, +Drop<U>, V, +Copy<V>, +Drop<V>>(x : (U, V)) -> V {
+    let (_u, v) = x;
+    v
+}

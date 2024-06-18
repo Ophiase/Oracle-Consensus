@@ -12,14 +12,15 @@ trait IOracleConsensus<TContractState> {
 
 #[starknet::contract]
 mod oracle_consensus {
-    use core::option::OptionTrait;
     // use core::option::Option::{None, Some};
+    use core::option::OptionTrait;
     use starknet::ContractAddress;
     use starknet::syscalls::storage_read_syscall;
     use starknet::syscalls::storage_write_syscall;
     use starknet::get_caller_address;
 
     use oracle_consensus::math::data_science::{median, spread};
+    use oracle_consensus::sort::IndexedMergeSort;
 
     use alexandria_math::wad_ray_math::{
         ray_div, ray_mul, wad_div, wad_mul, ray_to_wad, wad_to_ray, ray, wad, half_ray, half_wad
@@ -174,6 +175,26 @@ mod oracle_consensus {
         self.oracles.write(*oracle_index, oracle);
     }
 
+    fn update_oracles_reliability(ref self: ContractState, scores : @Array<(usize, u256)>) {
+        let treshold = self.n_oracles.read() - self.n_failing_oracles.read();
+
+        let mut i = 0;
+        loop {
+            if i == self.n_oracles.read() {
+                break();
+            }
+            
+            let (which_oracle, _foo) = *scores.at(i);
+            
+            let mut oracle = self.oracles.read(which_oracle);
+            oracle.reliable = (i < treshold);
+
+            self.oracles.write(which_oracle, oracle);
+            
+            i += 1;
+        };
+    }
+
     fn update_consensus(ref self: ContractState, oracle_index : @usize, prediction : @u256) {
         update_a_single_oracle(ref self, oracle_index, prediction);
 
@@ -188,14 +209,15 @@ mod oracle_consensus {
         let median_value = *oracles_values.at(median_idx);
         
         // Compute first spread
-        let _spread_values = spread(@oracles_values, @median_value);
+        let spread_values = spread(@oracles_values, @median_value);
 
-        // filter the highest spread
-        // let filtered_oracles = 
+        let ordered_oracles = IndexedMergeSort::sort(@spread_values);
+        update_oracles_reliability(ref self, @ordered_oracles);
 
         // Second estimation
 
         // Compute total spread
+
 
         // update oracles_values
 
