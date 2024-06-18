@@ -1,8 +1,5 @@
 use starknet::syscalls::deploy_syscall;
 use starknet::ContractAddress;
-// use super::ContractA;
-// use super::IContractADispatcher;
-// use super::IContractADispatcherTrait;
 
 use alexandria_math::wad_ray_math::{
     ray_div, ray_mul, wad_div, wad_mul, 
@@ -25,24 +22,6 @@ fn test_import() {
     assert(wad_mul(x, y) == 30 * wad(), 'error mult');
 }
 
-// fn show_array(array: Span<u256>) {
-//     let mut i = 0;
-//     // let mut res = String::from("");
-//     loop {
-//         if i == array.len() {
-//             // println!("{}", res);
-//             println!("");
-//             break();
-//         }
-
-//         // res = res + String::from(array.at(i));
-//         let value = *array.at(i);
-//         print!("{}, ", value);
-
-//         i += 1;
-//     };
-// }
-
 #[test]
 #[available_gas(30000000)]
 fn test_median() {
@@ -54,6 +33,25 @@ fn test_median() {
     let expected_median_value = 35_u256;
 
     let sorted = MergeSort::sort(data);
+
+    println!("{}", *sorted.at(expected_median_idx));
+
+    assert(
+        *sorted.at(expected_median_idx) == expected_median_value, 
+        'error');
+
+    // show_array(data);
+    // show_array(sorted);
+}
+
+#[test]
+#[available_gas(30000000)]
+fn test_index_sort() {
+    // reminder pow(10,18) = 1 wad
+
+    let data = array![10_u256, 100, 35, 30, 70, 50, 20].span();
+
+    let sorted = oracle_consensus::sort::MergeSort::sort(data);
 
     println!("{}", *sorted.at(expected_median_idx));
 

@@ -4,7 +4,8 @@ trait IOracleConsensus<TContractState> {
     
     fn consensus_active(self: @TContractState) -> bool;
     fn get_consensus_value(self: @TContractState) -> u256;
-    fn get_consensus_credibility(self: @TContractState) -> u256;
+    fn get_first_pass_consensus_reliability(self: @TContractState) -> u256;
+    fn get_second_pass_consensus_reliability(self: @TContractState) -> u256;
 
     // fn replace_oracle
 }
@@ -50,7 +51,8 @@ mod oracle_consensus {
         consensus_active : bool,
 
         consensus_value: u256, // wad convention
-        consensus_credibility : u256 // wad convention
+        consensus_reliability_second_pass : u256, // wad convention
+        consensus_reliability_first_pass : u256 // wad convention
     }
 
     fn fill_admins(ref self: ContractState, array : Span<ContractAddress>) {
@@ -111,7 +113,8 @@ mod oracle_consensus {
         self.n_failing_oracles.write(n_failing_oracles);
         
         self.consensus_value.write(0_u256);
-        self.consensus_credibility.write(0_u256);
+        self.consensus_reliability_first_pass.write(0_u256);
+        self.consensus_reliability_second_pass.write(0_u256);
     }
 
     // require that all oracle have already commited once
@@ -188,8 +191,7 @@ mod oracle_consensus {
         let spread_values = spread(@oracles_values, @median_value);
 
         // filter the highest spread
-        
-        // let filtered_oracles= 
+        // let filtered_oracles = 
 
         // Second estimation
 
@@ -249,8 +251,14 @@ mod oracle_consensus {
         }
 
         // return 0 until all the oracles have voted once
-        fn get_consensus_credibility(self: @ContractState) -> u256 {
-            self.consensus_value.read()
+        fn get_first_pass_consensus_reliability(self: @ContractState) -> u256 {
+            self.consensus_reliability_first_pass.read()
         }
+
+        // return 0 until all the oracles have voted once
+        fn get_second_pass_consensus_reliability(self: @ContractState) -> u256 {
+            self.consensus_reliability_second_pass.read()
+        }
+        
     }
 }

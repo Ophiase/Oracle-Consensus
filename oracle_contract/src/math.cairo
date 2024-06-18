@@ -46,8 +46,22 @@ mod data_science {
         result
     }
 
-    // pub fn highest_filtering(values : @Array<u256>) -> Array<u256> {
+    // pub fn highest_filtering(filtering_values : @Array<u256>, values : @Array<u256>) -> Array<u256> {        
+    // }
 
+    // pub fn compute_rank(array : @Array<u256>) -> Array<usize> {
+    // }
+
+
+    // pub unoptimized_rank_compute(values: @Array<u256>) -> Array<usize> {
+    //     let sorted = Merge::sort(values.span());
+
+    //     let mut i=0;
+    //     loop {
+
+    //     }
+
+    //     sorted
     // }
 }
 
