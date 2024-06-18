@@ -20,10 +20,14 @@ mod data_science {
         }
     }
 
-    pub fn median(values : @Array<u256>) -> usize {
+    pub fn median_index(values : @Array<u256>) -> usize {
         let sorted = MergeSort::sort(values.span());
         let expected_median_idx = values.len() / 2;
         find_index(sorted.at(expected_median_idx), values)
+    }
+
+    pub fn median(values : @Array<u256>) -> u256 {
+        *values.at(median_index(values))
     }
 
     pub fn deviation(a : @u256, b : @u256) -> u256 {
@@ -46,23 +50,20 @@ mod data_science {
         result
     }
 
-    // pub fn highest_filtering(filtering_values : @Array<u256>, values : @Array<u256>) -> Array<u256> {        
-    // }
+    pub fn average(values : @Array<u256>) -> u256 {
+        let mut result = 0_u256;
+        let mut i = 0;
+        loop {
+            if i == values.len() {
+                break();
+            }
 
-    // pub fn compute_rank(array : @Array<u256>) -> Array<usize> {
-    // }
- 
+            result += *values.at(i);
 
-    // pub unoptimized_rank_compute(values: @Array<u256>) -> Array<usize, u256> {
-    //     let indexed_values = add_index_to_array(values);
-    //     let buffer = ArrayTrait::<usize, u256>::new();
+            i += 1;
+        };
 
-    //     // let mut i = 0;
-    //     // loop {
-            
-    //     // }
-
-    //     indexed_values
-    // }
+        result / values.len().into()
+    }
 }
 

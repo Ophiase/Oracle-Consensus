@@ -19,7 +19,7 @@ mod oracle_consensus {
     use starknet::syscalls::storage_write_syscall;
     use starknet::get_caller_address;
 
-    use oracle_consensus::math::data_science::{median, spread};
+    use oracle_consensus::math::data_science::{median, spread, average};
     use oracle_consensus::sort::IndexedMergeSort;
 
     use alexandria_math::wad_ray_math::{
@@ -195,6 +195,10 @@ mod oracle_consensus {
         };
     }
 
+    fn interval_check(value : @u256) {
+            assert((0_u256 <= *value) && (*value <= 1_u256), 'interval error');
+    }
+
     fn update_consensus(ref self: ContractState, oracle_index : @usize, prediction : @u256) {
         update_a_single_oracle(ref self, oracle_index, prediction);
 
@@ -202,24 +206,42 @@ mod oracle_consensus {
             return();
         }
 
+
+        // ----------------------------
+        // FIRST PASS
+        // ----------------------------
+
         let oracles_values = oracles_reliable_values(@self);
 
-        // First estimatation
-        let median_idx = median(@oracles_values);
-        let median_value = *oracles_values.at(median_idx);
+        // ESSENCE
+
+        let essence_first_pass = median(@oracles_values);
         
-        // Compute first spread
-        let spread_values = spread(@oracles_values, @median_value);
+        // SPREAD
+
+        let spread_values = spread(@oracles_values, @essence_first_pass);
+        let reliability_first_pass = 1 - (average(@spread_values) * 2);
+        interval_check(@reliability_first_pass);
+        self.consensus_reliability_first_pass.write(reliability_first_pass);
 
         let ordered_oracles = IndexedMergeSort::sort(@spread_values);
         update_oracles_reliability(ref self, @ordered_oracles);
 
-        // Second estimation
+        // ----------------------------
+        // SECOND PASS
+        // ----------------------------
 
-        // Compute total spread
+        let reliable_values = oracles_reliable_values(@self);
+        
+        // ESSENCE
 
+        let essence = median(@reliable_values);
+        self.consensus_value.write(essence);
 
-        // update oracles_values
+        // SPREAD
+
+        let spread_second_pass = average(@spread(@reliable_values, @essence));
+        self.consensus_reliability_second_pass.write(spread_second_pass);
 
         self.consensus_active.write(true);
     }
@@ -257,6 +279,8 @@ mod oracle_consensus {
     #[abi(embed_v0)]
     impl OracleConsensusImpl of super::IOracleConsensus<ContractState> {
         fn update_prediction(ref self: ContractState, prediction : u256) {
+            interval_check(@prediction);
+
             match find_oracle_index(@self, @get_caller_address()) {
                 Option::None => assert(false, 'not an oracle'),
                 Option::Some(oracle_index) => update_consensus(ref self, @oracle_index, @prediction)
