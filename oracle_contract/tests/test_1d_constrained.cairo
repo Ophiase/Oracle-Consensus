@@ -11,7 +11,8 @@ use alexandria_sorting::{QuickSort, MergeSort};
     
 use oracle_consensus::math::data_science::{median, sqrt};
 use oracle_consensus::utils::{
-    show_array, show_address_array
+    show_array, show_address_array,
+    show_replacement_propositions
 };
 use oracle_consensus::contract_1d_constrained::{
     OracleConsensus1DC,
@@ -25,30 +26,31 @@ fn util_felt_addr(addr_felt: felt252) -> ContractAddress {
     addr_felt.try_into().unwrap()
 }
 
-// fn add_span_to_calldata(array : Span<felt252>, ref mut calldata : Array<felt252>) {
-// }
-
 fn deploy_contract() -> IOracleConsensus1DCDispatcher {
+    // let calldata = Calldata.compile("constructor", {
+    //     admins: array!['Akashi', 'Ozu', 'Higuchi'].span(),
+    //     enable_oracle_replacement: true,
+    //     required_majority: 2,
+    //     n_failing_oracles: 2,
+    //     oracles: array![
+    //         'oracle_00', 'oracle_01', 'oracle_02', 
+    //         'oracle_03', 'oracle_04', 'oracle_05', 
+    //         'oracle_06'].span()
+    // });
+
     let mut calldata = array![
-        // ADMINS
+        // admins
         3,
-        'Akashi',
-        'Ozu',
-        'Higuchi',
+        'Akashi','Ozu', 'Higuchi',
 
         1, // enable_oracle_replacement
         2, // required_majority
-        2, // n_failing oracles
+        2, // n_failing_oracles
 
         // ORACLES
         7,
-        'oracle_00',
-        'oracle_01',
-        'oracle_02',
-        'oracle_03',
-        'oracle_04',
-        'oracle_05',
-        'oracle_06',
+        'oracle_00', 'oracle_01', 'oracle_02', 'oracle_03',
+        'oracle_04', 'oracle_05', 'oracle_06',
     ];
     
     let (address0, _) = deploy_syscall(
@@ -68,6 +70,23 @@ fn deploy_contract() -> IOracleConsensus1DCDispatcher {
 fn test_constructor() {
     let dispatcher = deploy_contract();
 
-    let admins = dispatcher.get_admin_list();
-    show_address_array(admins);
+    println!("Init");
+    println!("----------------------");
+    show_address_array(dispatcher.get_admin_list());
+    show_address_array(dispatcher.get_oracle_list());
+    show_replacement_propositions(dispatcher.get_replacement_propositions());
+    println!("----------------------");
+
+    assert!(dispatcher.consensus_active() == false, "error");
+    assert!(dispatcher.get_consensus_value() == 0, "error");
+    assert!(dispatcher.get_first_pass_consensus_reliability() == 0, "error");
+    assert!(dispatcher.get_second_pass_consensus_reliability() == 0, "error");
+
+    // -------------------
+    // CHECK votes
+
+    // --------------------
+    // CHECK replacement
+
+
 }

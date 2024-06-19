@@ -9,8 +9,7 @@ trait IOracleConsensus1DC<TContractState> {
     fn get_first_pass_consensus_reliability(self: @TContractState) -> u256;
     fn get_second_pass_consensus_reliability(self: @TContractState) -> u256;
 
-    // TODO:
-    // fn get_oracle_list(self: @TContractState) -> Array<ContractAddress>;
+    fn get_oracle_list(self: @TContractState) -> Array<ContractAddress>;
     fn get_admin_list(self: @TContractState) -> Array<ContractAddress>;
 
     fn update_proposition(ref self: TContractState, proposition : Option<(usize, ContractAddress)>);
@@ -358,7 +357,6 @@ mod OracleConsensus1DC {
         if self.required_majority.read() > n_votes { return; }
 
         // APPLY
-
         let proposition = self.replacement_propositions.read(which_proposition).unwrap();
         let mut oracle = self.oracles.read(fst(proposition));
         oracle.address = snd(proposition);
@@ -469,6 +467,8 @@ mod OracleConsensus1DC {
             
         }
 
+        // if a proposition get enough vote, but the oracle is not replaceable yet
+        // it will be necessary to vote again for the proposition when the oracle will be replaceable
         fn vote_for_a_proposition(ref self: ContractState, which_admin : usize, support_his_proposition : bool) {
             assert!(self.enable_oracle_replacement.read(), "replacement disabled");
 
@@ -492,6 +492,20 @@ mod OracleConsensus1DC {
             loop {
                 if i == n_admins { break(); }
                 result.append(self.admins.read(i));
+                i += 1;
+            };
+            
+            result
+        }
+
+        fn get_oracle_list(self: @ContractState) -> Array<ContractAddress> {
+            let mut result = ArrayTrait::new();
+            let n_oracles = self.n_oracles.read();
+
+            let mut i = 0;
+            loop {
+                if i == n_oracles { break(); }
+                result.append(self.oracles.read(i).address);
                 i += 1;
             };
             

@@ -64,6 +64,31 @@ pub fn show_address_array(array: Array<ContractAddress>) {
     };
 }
 
+pub fn show_replacement_propositions(array : Array<Option::<(usize, ContractAddress)>>) {
+    let mut i = 0;
+    print!("[");
+    loop {
+        if i == array.len() {
+            println!("]");
+            break();
+        }
+
+        match *array.at(i) {
+            Option::None => print!("{} = [None], ", i),
+            Option::Some((old_oracle, new_oracle)) => {
+                // https://www.stark-utils.xyz/converter
+                let address : felt252 = ( new_oracle ).try_into().unwrap();
+                let mut x: ByteArray = "";
+                x.append_word(address, n_bytes(address));
+                
+                print!("{} = [{} -> {}], ", i, old_oracle, x)
+            }
+        };
+
+        i += 1;
+    };
+}
+
 pub fn show_tuple_array<T, +Copy<T>, +Drop<T>, +core::fmt::Display<T>>(
     array: Array<(usize, T)>) {
     
@@ -92,7 +117,6 @@ pub fn snd<U, +Copy<U>, +Drop<U>, V, +Copy<V>, +Drop<V>>(x : (U, V)) -> V {
     v
 }
 
-// TODO
 pub fn wad_to_string(value: u256, n_digits: usize) -> ByteArray {
     let integer_part = value / pow(10, 18);
     let decimal_part = value - (integer_part * pow(10, 18));
