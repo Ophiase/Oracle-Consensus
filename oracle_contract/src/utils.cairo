@@ -33,6 +33,18 @@ pub fn show_wad_array(array: Array<u256>) {
     };
 }
 
+const BYTE : u256 = 256;
+
+fn n_bytes(value : felt252) -> u32 {
+    let mut power = 0;
+    let mut x : u256 = value.into();
+    loop {
+        if x == 0 { break(power); }
+        x = x / BYTE; // is there a bitshift in cairo?
+        power += 1;
+    }
+}
+
 pub fn show_address_array(array: Array<ContractAddress>) {
     let mut i = 0;
     print!("[");
@@ -42,8 +54,11 @@ pub fn show_address_array(array: Array<ContractAddress>) {
             break();
         }
 
+        // https://www.stark-utils.xyz/converter
         let address : felt252 = ( *array.at(i) ).try_into().unwrap();
-        print!("{}, ", address);
+        let mut x: ByteArray = "";
+        x.append_word(address, n_bytes(address));
+        print!("{}, ", x);
 
         i += 1;
     };

@@ -7,7 +7,36 @@ mod data_science {
 
     // ==============================================================================
 
-    // use Span<u256> as WadVector;
+    type WadVector = Span<u256>;
+
+   // Transpose an Array of vectors
+    pub fn nd_array_split(array : @Array<WadVector>) -> Array<Array<u256>> {
+        let dimension = (*array.at(0)).len();
+        let n_vectors = array.len();
+
+        let mut result = ArrayTrait::new();
+        let mut i = 0;
+        loop {
+            if i == dimension { break(); }
+            
+            let mut ith_components = ArrayTrait::new();
+            let mut j = 0; 
+            loop {
+                if j == n_vectors { break(); }
+                
+                let which_vector = *array.at(j);
+                ith_components.append(*which_vector.at(i));
+
+                j += 1;
+            };
+
+            result.append(ith_components);
+
+            i += 1;
+        };
+
+        result
+    }
 
     fn find_index(value : @u256, array : @Array<u256>) -> usize {
         let mut i = 0;
@@ -32,6 +61,20 @@ mod data_science {
 
     pub fn median(values : @Array<u256>) -> u256 {
         *values.at(median_index(values))
+    }
+
+    // component wise implementation
+    // there is no natural order on R^M
+    pub fn nd_median(values : @Array<WadVector>) -> WadVector {
+        let arrays = nd_array_split(values);
+        let mut result = ArrayTrait::new();
+        let mut i = 0;
+        loop { if i == arrays.len() { break(); }
+            result.append( median(arrays.at(i)) );
+            i += 1; 
+        };
+
+        result.span()
     }
 
     pub fn deviation(a : @u256, b : @u256) -> u256 {

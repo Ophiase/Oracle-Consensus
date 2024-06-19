@@ -121,6 +121,7 @@ In the following, we'll consider a smart contract that establish a consensus on 
         - average squared distance to the median | constrained case
         - average squared distance to the mean | unconstrained case
 
+Remark: there is no natural order over $\mathbb{R}^M$, therefore, we consider on higher dimension the component wise version.
 
 ### Replacement Vote Implementation
 
