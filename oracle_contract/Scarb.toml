@@ -8,6 +8,7 @@ version = "0.1.0"
 alexandria_math = { git = "https://github.com/keep-starknet-strange/alexandria.git" }
 alexandria_sorting = { git = "https://github.com/keep-starknet-strange/alexandria.git" }
 alexandria_data_structures = { git = "https://github.com/keep-starknet-strange/alexandria.git" }
+# zkfloat = { git = "https://github.com/0x3327/starknet-zkfloat.git" }
 # cubit = { git = "https://github.com/influenceth/cubit.git" }
 
 snforge_std = { git = "https://github.com/foundry-rs/starknet-foundry", tag = "v0.12.0" }
@@ -16,3 +17,4 @@ starknet = ">=2.3.1"
 [[target.starknet-contract]]
 casm = true
 sierra = true
+# allowed-libfuncs-list.name = "experimental"
