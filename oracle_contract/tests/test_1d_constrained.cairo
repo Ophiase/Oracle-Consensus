@@ -86,19 +86,6 @@ fn fill_oracle_predictions(dispatcher : IOracleConsensus1DCDispatcher, predictio
     }
 }
 
-use oracle_consensus::signed_wad_ray::{I128Div};
-
-#[test]
-fn test_i128() {
-
-    let x : i128 = -90;
-    let y : i128 = -9;
-    let z : i128 = x / y;
-
-    let x : i128 = -1 * oracle_consensus::signed_wad_ray::wad();
-    println!("{}", z);
-}
-
 #[test]
 #[available_gas(30000000)]
 fn test_basic_execution() {
