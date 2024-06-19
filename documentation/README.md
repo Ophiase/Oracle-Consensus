@@ -100,11 +100,27 @@ Consequence : we want to be able to replace only the worst oracle relatively to 
 
 ### Consensus
 
-In the following, we'll consider a smart contract that establish a consensus on $e$ value. \
-Each oracle we'll be represented by an address. \
-The contract will keep in memory an accuracy score for each address. 
+In the following, we'll consider a smart contract that establish a consensus on $e$ value and the accuracy of this consensus. \
 
-It will be required to be able to quantify the accuracy of an $e$ value.
+- Safe check : all the oracles have commited once
+- First Pass
+    - compute the essence estimator on all the oracles
+        - median | constrained case
+        - median | uconstrained case
+    - compute the individual oracles_scores
+        - squared distance to the median | constrained case
+        - squared distance to the median | unconstrained case
+    - compute the reliability estimator on all the oracles
+        - average squared distance to the median | constrained case
+        - average squared distance to the median | unconstrained case
+- Second Pass
+    - compute the essence estimator on the $(1-\alpha)$ percent of the best oracles
+        - median | constrained case
+        - mean | uconstrained case
+    - compute the reliability estimator on the $(1-\alpha)$ percent of the best oracles
+        - average squared distance to the median | constrained case
+        - average squared distance to the mean | unconstrained case
+
 
 ### Replacement Vote Implementation
 

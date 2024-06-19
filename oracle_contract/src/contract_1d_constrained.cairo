@@ -9,12 +9,13 @@ trait IOracleConsensus<TContractState> {
     fn get_first_pass_consensus_reliability(self: @TContractState) -> u256;
     fn get_second_pass_consensus_reliability(self: @TContractState) -> u256;
 
+    fn get_admin_list(self: @TContractState) -> Array<ContractAddress>;
 
     fn update_proposition(ref self: TContractState, proposition : Option<(usize, ContractAddress)>);
     fn vote_for_a_proposition(ref self: TContractState, which_admin : usize, support_his_proposition : bool);
     
-    fn get_propositions(self: @TContractState) -> Array<(usize, ContractAddress)>;
-    fn get_a_specific_proposition(self: @TContractState, which_admin : usize) -> (usize, ContractAddress);
+    fn get_replacement_propositions(self: @TContractState) -> Array<Option<(usize, ContractAddress)>>;
+    fn get_a_specific_proposition(self: @TContractState, which_admin : usize) -> Option<(usize, ContractAddress)>;
 }
 
 #[starknet::contract]
@@ -414,14 +415,36 @@ mod oracle_consensus {
             }, support_his_proposition)
         }
 
-        fn get_propositions(self: @ContractState) -> Array<(usize, ContractAddress)> {
-            // TODO
-            array![ (0_usize, 0.try_into().unwrap()) ]
+        fn get_admin_list(self: @ContractState) -> Array<ContractAddress> {
+            let mut result = ArrayTrait::new();
+            let n_admins = self.n_admins.read();
+
+            let mut i = 0;
+            loop {
+                if i == n_admins { break(); }
+                result.append(self.admins.read(i));
+                i += 1;
+            };
+            
+            result
+        }
+
+        fn get_replacement_propositions(self: @ContractState) -> Array<Option<(usize, ContractAddress)>> {
+            let mut result = ArrayTrait::new();
+            let n_admins = self.n_admins.read();
+
+            let mut i = 0;
+            loop {
+                if i == n_admins { break(); }
+                result.append(self.replacement_propositions.read(i));
+                i += 1;
+            };
+            
+            result
         }
         
-        fn get_a_specific_proposition(self: @ContractState, which_admin : usize) -> (usize, ContractAddress) {
-            // TODO
-            (0_usize, 0.try_into().unwrap())
+        fn get_a_specific_proposition(self: @ContractState, which_admin : usize) -> Option<(usize, ContractAddress)> {
+            self.replacement_propositions.read(which_admin)
         }
 
     }
