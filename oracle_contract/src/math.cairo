@@ -65,5 +65,28 @@ mod data_science {
 
         result / values.len().into()
     }
+
+    const MAX_SQRT_ITERATIONS : usize = 50;
+    pub fn sqrt(value : u256) -> u256 {
+        if (value == 0) {
+            return 0;
+        }
+
+        let mut g = value / 2;
+        let mut g2 = g + wad();
+
+        let mut i = 0;
+        loop {
+            if g == g2 || i == MAX_SQRT_ITERATIONS {
+                break(g);
+            }
+
+            let n = wad_div(value, g);
+            g2 = g;
+            g = (g + n) / 2;
+
+            i += 1;
+        }
+    }
 }
 
