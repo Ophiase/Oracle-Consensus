@@ -1,4 +1,4 @@
-// ! Indexed Merge Sort based on alexandria implementation : https://github.com/keep-starknet-strange/alexandria/tree/main/packages/sorting
+// Indexed Merge Sort based on alexandria implementation : https://github.com/keep-starknet-strange/alexandria/tree/main/packages/sorting
 
 // Merge Sort
 // # Arguments
