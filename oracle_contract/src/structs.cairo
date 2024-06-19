@@ -7,7 +7,7 @@ use oracle_consensus::utils::{
 #[derive(Drop, Serde, starknet::Store, Copy)]
 pub struct Oracle {
     address : ContractAddress,
-    value: u256, // wad convention
+    value: i128, // wad convention
     enabled: bool, // have a value ?
     reliable: bool // pass the consensus ?
 }

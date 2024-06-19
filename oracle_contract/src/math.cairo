@@ -1,5 +1,6 @@
 
-use alexandria_math::wad_ray_math::{
+use oracle_consensus::signed_wad_ray::{
+    I128Div, I128Display, I128SignedBasics, unsigned_to_signed,
     ray_div, ray_mul, wad_div, wad_mul, ray_to_wad, wad_to_ray, ray, wad, half_ray, half_wad
 };
 use alexandria_math::{pow};    
@@ -7,10 +8,10 @@ use alexandria_sorting::{QuickSort, MergeSort};
 
 // ==============================================================================
 
-type WadVector = Span<u256>;
+type WadVector = Span<i128>;
 
 // Transpose an Array of vectors
-pub fn nd_array_split(array : @Array<WadVector>) -> Array<Array<u256>> {
+pub fn nd_array_split(array : @Array<WadVector>) -> Array<Array<i128>> {
     let dimension = (*array.at(0)).len();
     let n_vectors = array.len();
 
@@ -38,7 +39,7 @@ pub fn nd_array_split(array : @Array<WadVector>) -> Array<Array<u256>> {
     result
 }
 
-fn find_index(value : @u256, array : @Array<u256>) -> usize {
+fn find_index(value : @i128, array : @Array<i128>) -> usize {
     let mut i = 0;
     loop {
         if i == array.len() {
@@ -53,13 +54,13 @@ fn find_index(value : @u256, array : @Array<u256>) -> usize {
     }
 }
 
-pub fn median_index(values : @Array<u256>) -> usize {
+pub fn median_index(values : @Array<i128>) -> usize {
     let sorted = MergeSort::sort(values.span());
     let expected_median_idx = values.len() / 2;
     find_index(sorted.at(expected_median_idx), values)
 }
 
-pub fn median(values : @Array<u256>) -> u256 {
+pub fn median(values : @Array<i128>) -> i128 {
     *values.at(median_index(values))
 }
 
@@ -78,20 +79,19 @@ pub fn nd_median(values : @Array<WadVector>) -> WadVector {
 }
 
 const PREVENT_OVERFLOW : bool = true;
-const OVERFLOW_REDUCTION : u256 = 10000000000000; // 1e14
+const OVERFLOW_REDUCTION : i128 = 10000000000000; // 1e14
 
-pub fn quadratic_deviation(a : @u256, b : @u256) -> u256 {
-    if PREVENT_OVERFLOW {
-        println!("now");
-        let c = (*a - *b);// / OVERFLOW_REDUCTION;
-        println!("{}", c);
-        (c * c) //* OVERFLOW_REDUCTION * OVERFLOW_REDUCTION
-    } else {
-        (*a - *b) * (*a - *b)
-    }
+pub fn quadratic_deviation(a : @i128, b : @i128) -> i128 {
+    // if PREVENT_OVERFLOW {
+    //     let c = (*a - *b);// / OVERFLOW_REDUCTION;
+    //     (c * c) //* OVERFLOW_REDUCTION * OVERFLOW_REDUCTION
+    // } else {
+    // }
+    
+    (*a - *b) * (*a - *b)
 }
 
-pub fn nd_quadratic_deviation(a : @WadVector, b : @WadVector) -> u256 {
+pub fn nd_quadratic_deviation(a : @WadVector, b : @WadVector) -> i128 {
     let dim = (*a).len();
 
     let mut result = 0;
@@ -105,7 +105,7 @@ pub fn nd_quadratic_deviation(a : @WadVector, b : @WadVector) -> u256 {
 }
 
 // compute the quadratic_risk of each values
-pub fn quadratic_risk(values : @Array<u256>, center : @u256) -> Array<u256> {
+pub fn quadratic_risk(values : @Array<i128>, center : @i128) -> Array<i128> {
     let mut result = ArrayTrait::new();
     let mut i = 0;
     loop {
@@ -123,8 +123,8 @@ pub fn quadratic_risk(values : @Array<u256>, center : @u256) -> Array<u256> {
 }
 
 // compute the quadratic_risk of each values
-pub fn nd_quadratic_risk(values : @Array<WadVector>, center : @WadVector) -> Array<u256> {
-    let mut result = ArrayTrait::<u256>::new();
+pub fn nd_quadratic_risk(values : @Array<WadVector>, center : @WadVector) -> Array<i128> {
+    let mut result = ArrayTrait::<i128>::new();
     let mut i = 0;
     loop {
         if i == values.len() {
@@ -138,8 +138,8 @@ pub fn nd_quadratic_risk(values : @Array<WadVector>, center : @WadVector) -> Arr
     result
 }
 
-pub fn average(values : @Array<u256>) -> u256 {
-    let mut result = 0_u256;
+pub fn average(values : @Array<i128>) -> i128 {
+    let mut result = 0_i128;
     let mut i = 0;
     loop {
         if i == values.len() {
@@ -167,7 +167,7 @@ pub fn nd_average(values : @Array<WadVector>) -> WadVector {
 }
 
 const MAX_SQRT_ITERATIONS : usize = 50;
-pub fn sqrt(value : u256) -> u256 {
+pub fn sqrt(value : i128) -> i128 {
     if (value == 0) {
         return 0;
     }
@@ -189,8 +189,8 @@ pub fn sqrt(value : u256) -> u256 {
     }
 }
 
-fn interval_check(value : @u256) {
-    assert((0_u256 <= *value) && (*value <= wad()), 'interval error');
+fn interval_check(value : @i128) {
+    assert((0_i128 <= *value) && (*value <= wad()), 'interval error');
 }
 
 fn nd_interval_check(value : @WadVector) {
@@ -200,7 +200,7 @@ fn nd_interval_check(value : @WadVector) {
 
         let v = *(*value).at(i);
         assert(
-            ( 0_u256 <= v ) && ( v <= wad() ), 
+            ( 0_i128 <= v ) && ( v <= wad() ), 
             'interval error');
 
         i += 1;

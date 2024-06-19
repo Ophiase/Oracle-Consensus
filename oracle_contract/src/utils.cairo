@@ -2,6 +2,10 @@ use alexandria_math::pow;
 use starknet::ContractAddress;
 use oracle_consensus::contract_1d_constrained;
 use oracle_consensus::structs::Oracle;
+use oracle_consensus::signed_wad_ray::{
+    I128Div, I128Display, I128SignedBasics, unsigned_to_signed,
+    ray_div, ray_mul, wad_div, wad_mul, ray_to_wad, wad_to_ray, ray, wad, half_ray, half_wad
+};
 
 pub fn show_array<T, +Copy<T>, +Drop<T>, +core::fmt::Display<T>>(
     array: Array<T>) {
@@ -52,7 +56,7 @@ pub fn show_oracle_array(
     };
 }
 
-pub fn show_wad_array(array: Array<u256>) {
+pub fn show_wad_array(array: Array<i128>) {
     let mut i = 0;
     print!("[");
     loop {
@@ -157,10 +161,13 @@ pub fn snd<U, +Copy<U>, +Drop<U>, V, +Copy<V>, +Drop<V>>(x : (U, V)) -> V {
     v
 }
 
-pub fn wad_to_string(value: u256, n_digits: usize) -> ByteArray {
-    let integer_part = value / pow(10, 18);
-    let decimal_part = value - (integer_part * pow(10, 18));
+pub fn wad_to_string(value: i128, n_digits: usize) -> ByteArray {
+    let uvalue = value.as_unsigned();
+    let sign : ByteArray = if value.is_positive() { "" } else { "-" };
+
+    let integer_part = uvalue / pow(10, 18);
+    let decimal_part = uvalue - (integer_part * pow(10, 18));
     let decimal_part_reduced = decimal_part / pow(10, 18 - n_digits.into());
 
-    format!("{}.{}", integer_part, decimal_part_reduced)
+    format!("{}{}.{}", sign, integer_part, decimal_part_reduced)
 }

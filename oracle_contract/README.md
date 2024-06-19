@@ -39,7 +39,7 @@ starkli ...
 
 ## Misc
 
-To manage floats, we use the wad convention on ``u256``.
+To manage floats, we use the wad convention on ``i128``.
 
 Currently, the implementations are uncrypted and can be called by anyone.
 A payment system will be added in the future.

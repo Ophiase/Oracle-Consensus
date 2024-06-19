@@ -2,12 +2,12 @@ use starknet::ContractAddress;
 
 #[starknet::interface]
 trait IOracleConsensus1DC<TContractState> {
-    fn update_prediction(ref self: TContractState, prediction : u256);
+    fn update_prediction(ref self: TContractState, prediction : i128);
     
     fn consensus_active(self: @TContractState) -> bool;
-    fn get_consensus_value(self: @TContractState) -> u256;
-    fn get_first_pass_consensus_reliability(self: @TContractState) -> u256;
-    fn get_second_pass_consensus_reliability(self: @TContractState) -> u256;
+    fn get_consensus_value(self: @TContractState) -> i128;
+    fn get_first_pass_consensus_reliability(self: @TContractState) -> i128;
+    fn get_second_pass_consensus_reliability(self: @TContractState) -> i128;
 
     fn get_admin_list(self: @TContractState) -> Array<ContractAddress>;
     fn get_oracle_list(self: @TContractState) -> Array<ContractAddress>;
@@ -65,9 +65,9 @@ mod OracleConsensus1DC {
         vote_matrix : LegacyMap<VoteCoordinate, bool>,
         replacement_propositions : LegacyMap<usize, Option<(usize, ContractAddress)>>,
 
-        consensus_value: u256, // wad convention
-        consensus_reliability_second_pass : u256, // wad convention
-        consensus_reliability_first_pass : u256 // wad convention
+        consensus_value: i128, // wad convention
+        consensus_reliability_second_pass : i128, // wad convention
+        consensus_reliability_first_pass : i128 // wad convention
     }
 
     // ==============================================================================
@@ -97,7 +97,7 @@ mod OracleConsensus1DC {
             
             let oracle = Oracle {
                 address : *array.at(i),
-                value : 0_u256,
+                value : 0_i128,
                 enabled : false,
                 reliable : true
             };
@@ -160,9 +160,9 @@ mod OracleConsensus1DC {
         self.required_majority.write(required_majority);
         self.n_failing_oracles.write(n_failing_oracles);
         
-        self.consensus_value.write(0_u256);
-        self.consensus_reliability_first_pass.write(0_u256);
-        self.consensus_reliability_second_pass.write(0_u256);
+        self.consensus_value.write(0_i128);
+        self.consensus_reliability_first_pass.write(0_i128);
+        self.consensus_reliability_second_pass.write(0_i128);
     }
 
     // ------------------------------------------------------------------------------
@@ -170,7 +170,7 @@ mod OracleConsensus1DC {
     // ------------------------------------------------------------------------------
 
     // require that all oracle have already commited once
-    fn oracles_optional_values(self: @ContractState) -> Array<Option<u256>> {
+    fn oracles_optional_values(self: @ContractState) -> Array<Option<i128>> {
         let mut result = ArrayTrait::new();
      
         let mut i = 0;
@@ -193,7 +193,7 @@ mod OracleConsensus1DC {
     }
 
     // require that all oracle have already commited once
-    fn compute_oracle_values(self: @ContractState, only_reliable : bool) -> Array<u256> {
+    fn compute_oracle_values(self: @ContractState, only_reliable : bool) -> Array<i128> {
         let mut result = ArrayTrait::new();
      
         let mut i = 0;
@@ -213,7 +213,7 @@ mod OracleConsensus1DC {
         result
     }
 
-    fn update_a_single_oracle(ref self: ContractState, oracle_index : @usize, prediction : @u256) {
+    fn update_a_single_oracle(ref self: ContractState, oracle_index : @usize, prediction : @i128) {
         let mut oracle = self.oracles.read(*oracle_index);
         
         if !oracle.enabled {
@@ -226,7 +226,7 @@ mod OracleConsensus1DC {
         self.oracles.write(*oracle_index, oracle);
     }
 
-    fn update_oracles_reliability(ref self: ContractState, scores : @Array<(usize, u256)>) {
+    fn update_oracles_reliability(ref self: ContractState, scores : @Array<(usize, i128)>) {
         let treshold = self.n_oracles.read() - self.n_failing_oracles.read();
 
         let mut i = 0;
@@ -247,7 +247,7 @@ mod OracleConsensus1DC {
     }
 
 
-    fn update_consensus(ref self: ContractState, oracle_index : @usize, prediction : @u256) {
+    fn update_consensus(ref self: ContractState, oracle_index : @usize, prediction : @i128) {
         update_a_single_oracle(ref self, oracle_index, prediction);
 
         if self.n_oracles.read() != self.n_active_oracles.read() {
@@ -396,7 +396,7 @@ mod OracleConsensus1DC {
 
     #[abi(embed_v0)]
     impl OracleConsensusImpl of super::IOracleConsensus1DC<ContractState> {
-        fn update_prediction(ref self: ContractState, prediction : u256) {
+        fn update_prediction(ref self: ContractState, prediction : i128) {
             interval_check(@prediction);
 
             match find_oracle_index(@self, @get_caller_address()) {
@@ -410,17 +410,17 @@ mod OracleConsensus1DC {
             self.consensus_active.read()
         }
         
-        fn get_consensus_value(self: @ContractState) -> u256 {
+        fn get_consensus_value(self: @ContractState) -> i128 {
             self.consensus_value.read()
         }
 
         // return 0 until all the oracles have voted once
-        fn get_first_pass_consensus_reliability(self: @ContractState) -> u256 {
+        fn get_first_pass_consensus_reliability(self: @ContractState) -> i128 {
             self.consensus_reliability_first_pass.read()
         }
 
         // return 0 until all the oracles have voted once
-        fn get_second_pass_consensus_reliability(self: @ContractState) -> u256 {
+        fn get_second_pass_consensus_reliability(self: @ContractState) -> i128 {
             self.consensus_reliability_second_pass.read()
         }
         

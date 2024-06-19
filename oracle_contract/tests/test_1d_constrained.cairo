@@ -71,7 +71,7 @@ fn deploy_contract() -> IOracleConsensus1DCDispatcher {
 
 // ==============================================================================
 
-fn fill_oracle_predictions(dispatcher : IOracleConsensus1DCDispatcher, predictions : @Array<u256>) {
+fn fill_oracle_predictions(dispatcher : IOracleConsensus1DCDispatcher, predictions : @Array<i128>) {
     let mut i = 0;
 
     let oracles = dispatcher.get_oracle_list();
@@ -89,52 +89,52 @@ fn fill_oracle_predictions(dispatcher : IOracleConsensus1DCDispatcher, predictio
 #[test]
 #[available_gas(30000000)]
 fn test_basic_execution() {
-    // let dispatcher = deploy_contract();
+    let dispatcher = deploy_contract();
 
-    // let _admin_0 = util_felt_addr('Akashi');
-    // let _admin_1 = util_felt_addr('Ozu');
-    // let _admin_2 = util_felt_addr('Higuchi');
+    let _admin_0 = util_felt_addr('Akashi');
+    let _admin_1 = util_felt_addr('Ozu');
+    let _admin_2 = util_felt_addr('Higuchi');
 
-    // starknet::testing::set_contract_address(_admin_0);
+    starknet::testing::set_contract_address(_admin_0);
 
-    // println!("Init");
-    // println!("----------------------");
-    // show_address_array(dispatcher.get_admin_list());
-    // show_address_array(dispatcher.get_oracle_list());
-    // show_replacement_propositions(dispatcher.get_replacement_propositions());
+    println!("Init");
+    println!("----------------------");
+    show_address_array(dispatcher.get_admin_list());
+    show_address_array(dispatcher.get_oracle_list());
+    show_replacement_propositions(dispatcher.get_replacement_propositions());
+    show_oracle_array(dispatcher.get_oracle_value_list(), true, true, true, true);
+    println!("----------------------");
+
+    assert!(dispatcher.consensus_active() == false, "error");
+    assert!(dispatcher.get_consensus_value() == 0, "error");
+    assert!(dispatcher.get_first_pass_consensus_reliability() == 0, "error");
+    assert!(dispatcher.get_second_pass_consensus_reliability() == 0, "error");
+
+    // -------------------
+    // CHECK VOTES
+
+    // auto generated distribution 
+    // in drafts/beta_kumaraswamy_algorithm_demo.ipynb
+    let predictions : Array<i128> = array![
+        283665728520555872, 444978808172189056, 
+        456312246206240704, 577063812648590720, 
+        353406129181719872, 439786381700248704, 
+        422154759299759040, 613738354100202112, 
+        457460183532055616, 999874248921110656, 
+        563834305654715072, 625593778275535872, 
+        606902168251554432, 301967755140784896, 
+        995508477591357056, 406049235292915200, 
+        462012580658951104, 465891674064305792, 
+        670021933609384064, 595183478581031296
+    ];
+
+    fill_oracle_predictions(dispatcher, @predictions);
+    starknet::testing::set_contract_address(_admin_0);
+
     // show_oracle_array(dispatcher.get_oracle_value_list(), true, true, true, true);
-    // println!("----------------------");
 
-    // assert!(dispatcher.consensus_active() == false, "error");
-    // assert!(dispatcher.get_consensus_value() == 0, "error");
-    // assert!(dispatcher.get_first_pass_consensus_reliability() == 0, "error");
-    // assert!(dispatcher.get_second_pass_consensus_reliability() == 0, "error");
+    // println!(dispatcher.get)
 
-    // // -------------------
-    // // CHECK VOTES
-
-    // // auto generated distribution 
-    // // in drafts/beta_kumaraswamy_algorithm_demo.ipynb
-    // let predictions : Array<u256> = array![
-    //     283665728520555872, 444978808172189056, 
-    //     456312246206240704, 577063812648590720, 
-    //     353406129181719872, 439786381700248704, 
-    //     422154759299759040, 613738354100202112, 
-    //     457460183532055616, 999874248921110656, 
-    //     563834305654715072, 625593778275535872, 
-    //     606902168251554432, 301967755140784896, 
-    //     995508477591357056, 406049235292915200, 
-    //     462012580658951104, 465891674064305792, 
-    //     670021933609384064, 595183478581031296
-    // ];
-
-    // fill_oracle_predictions(dispatcher, @predictions);
-    // starknet::testing::set_contract_address(_admin_0);
-
-    // // show_oracle_array(dispatcher.get_oracle_value_list(), true, true, true, true);
-
-    // // println!(dispatcher.get)
-
-    // // --------------------
-    // // CHECK REPLACEMENT
+    // --------------------
+    // CHECK REPLACEMENT
 }
