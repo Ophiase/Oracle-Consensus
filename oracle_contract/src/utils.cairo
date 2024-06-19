@@ -1,6 +1,6 @@
 use alexandria_math::pow;
 
-fn show_array<T, +Copy<T>, +Drop<T>, +core::fmt::Display<T>>(
+pub fn show_array<T, +Copy<T>, +Drop<T>, +core::fmt::Display<T>>(
     array: Array<T>) {
     
     let mut i = 0;
@@ -17,7 +17,7 @@ fn show_array<T, +Copy<T>, +Drop<T>, +core::fmt::Display<T>>(
     };
 }
 
-fn show_wad_array(array: Array<u256>) {
+pub fn show_wad_array(array: Array<u256>) {
     let mut i = 0;
     print!("[");
     loop {
@@ -33,7 +33,7 @@ fn show_wad_array(array: Array<u256>) {
 }
 
 
-fn show_tuple_array<T, +Copy<T>, +Drop<T>, +core::fmt::Display<T>>(
+pub fn show_tuple_array<T, +Copy<T>, +Drop<T>, +core::fmt::Display<T>>(
     array: Array<(usize, T)>) {
     
     let mut i = 0;
@@ -51,18 +51,18 @@ fn show_tuple_array<T, +Copy<T>, +Drop<T>, +core::fmt::Display<T>>(
     };
 }
 
-fn fst<U, +Copy<U>, +Drop<U>, V, +Copy<V>, +Drop<V>>(x : (U, V)) -> U {
+pub fn fst<U, +Copy<U>, +Drop<U>, V, +Copy<V>, +Drop<V>>(x : (U, V)) -> U {
     let (u, _v) = x;
     u
 }
 
-fn snd<U, +Copy<U>, +Drop<U>, V, +Copy<V>, +Drop<V>>(x : (U, V)) -> V {
+pub fn snd<U, +Copy<U>, +Drop<U>, V, +Copy<V>, +Drop<V>>(x : (U, V)) -> V {
     let (_u, v) = x;
     v
 }
 
 // TODO
-fn wad_to_string(value: u256, n_digits: usize) -> ByteArray {
+pub fn wad_to_string(value: u256, n_digits: usize) -> ByteArray {
     let integer_part = value / pow(10, 18);
     let decimal_part = value - (integer_part * pow(10, 18));
     let decimal_part_reduced = decimal_part / pow(10, 18 - n_digits.into());

@@ -31,6 +31,7 @@ mod oracle_consensus {
 
     use oracle_consensus::math::data_science::{median, spread, average};
     use oracle_consensus::sort::IndexedMergeSort;
+    use oracle_consensus::utils::{fst, snd};
 
     use alexandria_math::wad_ray_math::{
         ray_div, ray_mul, wad_div, wad_mul, ray_to_wad, wad_to_ray, ray, wad, half_ray, half_wad
@@ -116,13 +117,13 @@ mod oracle_consensus {
         self.n_oracles.write(array.len());
     }
 
-    fn reinitialize_vote_matrix(ref self: ContractState, n_admins : usize) {
+    fn reinitialize_vote_matrix(ref self: ContractState, n_admins : @usize) {
         let mut i = 0;
         loop {
-            if i == n_admins { break(); }
+            if i == *n_admins { break(); }
             let mut j = 0;
             loop {
-                if j == n_admins { break(); }
+                if j == *n_admins { break(); }
 
                 self.vote_matrix.write(VoteCoordinate{
                     vote_emitter: i,
@@ -136,10 +137,10 @@ mod oracle_consensus {
 
     }
 
-    fn reinitialize_replacement_propositions(ref self: ContractState, n_admins : usize) {
+    fn reinitialize_replacement_propositions(ref self: ContractState, n_admins : @usize) {
         let mut i = 0;
         loop {
-            if i == n_admins { break(); }
+            if i == *n_admins { break(); }
             self.replacement_propositions.write(i, Option::None);
             i += 1;
         };
@@ -158,8 +159,8 @@ mod oracle_consensus {
         fill_admins(ref self, admins);
         fill_oracles(ref self, oracles);
 
-        reinitialize_vote_matrix(ref self, admins.len());
-        reinitialize_replacement_propositions(ref self, admins.len());
+        reinitialize_vote_matrix(ref self, @admins.len());
+        reinitialize_replacement_propositions(ref self, @admins.len());
         
         self.enable_oracle_replacement.write(enable_oracle_replacement);
         self.required_majority.write(required_majority);
@@ -336,16 +337,33 @@ mod oracle_consensus {
 
     fn check_for_replacement(ref self: ContractState, which_proposition : usize) {
         // COUNT THE NUMBER OF VOTES
+        let n_admins = self.n_admins.read();
+        let mut n_votes = 0;
+        let mut i = 0;
+        loop {
+            if i == n_admins { break(); }
+            
+            if self.vote_matrix.read(VoteCoordinate{
+                vote_emitter: i, vote_receiver: which_proposition
+            }) {
+                n_votes += 1;
+            }
+
+            i += 1;
+        };
 
         // CHECK :
-        // let check = self.required_majority > n_votes
+        if self.required_majority.read() > n_votes { return; }
 
         // APPLY
 
-        // replace the oracle
+        let proposition = self.replacement_propositions.read(which_proposition).unwrap();
+        let mut oracle = self.oracles.read(fst(proposition));
+        oracle.address = snd(proposition);
+        self.oracles.write(which_proposition, oracle);
 
-        // reinitialize_replacement_propositions();
-        // reinitialize_vote_matrix();
+        reinitialize_replacement_propositions(ref self, @n_admins);
+        reinitialize_vote_matrix(ref self, @n_admins);
     }
 
     // ------------------------------------------------------------------------------
