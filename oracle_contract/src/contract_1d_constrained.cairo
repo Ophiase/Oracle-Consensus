@@ -116,7 +116,7 @@ mod oracle_consensus {
         self.n_oracles.write(array.len());
     }
 
-    fn fill_vote_matrix(ref self: ContractState, n_admins : usize) {
+    fn reinitialize_vote_matrix(ref self: ContractState, n_admins : usize) {
         let mut i = 0;
         loop {
             if i == n_admins { break(); }
@@ -136,7 +136,7 @@ mod oracle_consensus {
 
     }
 
-    fn fill_replacement_propositions(ref self: ContractState, n_admins : usize) {
+    fn reinitialize_replacement_propositions(ref self: ContractState, n_admins : usize) {
         let mut i = 0;
         loop {
             if i == n_admins { break(); }
@@ -155,12 +155,11 @@ mod oracle_consensus {
         
         oracles: Span<ContractAddress>,
     ) {
-
         fill_admins(ref self, admins);
         fill_oracles(ref self, oracles);
 
-        fill_vote_matrix(ref self, admins.len());
-        fill_replacement_propositions(ref self, admins.len());
+        reinitialize_vote_matrix(ref self, admins.len());
+        reinitialize_replacement_propositions(ref self, admins.len());
         
         self.enable_oracle_replacement.write(enable_oracle_replacement);
         self.required_majority.write(required_majority);
@@ -335,7 +334,19 @@ mod oracle_consensus {
     // ADMIN VOTES
     // ------------------------------------------------------------------------------
 
-    
+    fn check_for_replacement(ref self: ContractState, which_proposition : usize) {
+        // COUNT THE NUMBER OF VOTES
+
+        // CHECK :
+        // let check = self.required_majority > n_votes
+
+        // APPLY
+
+        // replace the oracle
+
+        // reinitialize_replacement_propositions();
+        // reinitialize_vote_matrix();
+    }
 
     // ------------------------------------------------------------------------------
     // OTHER
@@ -398,6 +409,8 @@ mod oracle_consensus {
         }
         
         fn update_proposition(ref self: ContractState, proposition : Option<(usize, ContractAddress)>) {
+            assert!(self.enable_oracle_replacement.read(), "replacement disabled");
+
             let admin_index = find_admin_index(@self, @get_caller_address());
             assert(!admin_index.is_none(), 'not an admin');
             let admin_index = admin_index.unwrap();
@@ -437,14 +450,18 @@ mod oracle_consensus {
         }
 
         fn vote_for_a_proposition(ref self: ContractState, which_admin : usize, support_his_proposition : bool) {
-            let admin_index = find_admin_index(@self, @get_caller_address());
-            assert(!admin_index.is_none(), 'not an admin');
-            let admin_index = admin_index.unwrap();
+            assert!(self.enable_oracle_replacement.read(), "replacement disabled");
+
+            let voter_index = find_admin_index(@self, @get_caller_address());
+            assert(!voter_index.is_none(), 'not an admin');
+            let voter_index = voter_index.unwrap();
 
             self.vote_matrix.write(VoteCoordinate{
-                vote_emitter: admin_index,
+                vote_emitter: voter_index,
                 vote_receiver: which_admin
-            }, support_his_proposition)
+            }, support_his_proposition);
+
+            check_for_replacement(ref self, which_admin);
         }
 
         fn get_admin_list(self: @ContractState) -> Array<ContractAddress> {
@@ -462,6 +479,8 @@ mod oracle_consensus {
         }
 
         fn get_replacement_propositions(self: @ContractState) -> Array<Option<(usize, ContractAddress)>> {
+            assert!(self.enable_oracle_replacement.read(), "replacement disabled");
+
             let mut result = ArrayTrait::new();
             let n_admins = self.n_admins.read();
 
@@ -476,6 +495,7 @@ mod oracle_consensus {
         }
         
         fn get_a_specific_proposition(self: @ContractState, which_admin : usize) -> Option<(usize, ContractAddress)> {
+            assert!(self.enable_oracle_replacement.read(), "replacement disabled");
             self.replacement_propositions.read(which_admin)
         }
 
