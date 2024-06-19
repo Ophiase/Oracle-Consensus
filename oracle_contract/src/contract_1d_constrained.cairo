@@ -115,6 +115,35 @@ mod oracle_consensus {
         self.n_active_oracles.write(0_usize);
         self.n_oracles.write(array.len());
     }
+
+    fn fill_vote_matrix(ref self: ContractState, n_admins : usize) {
+        let mut i = 0;
+        loop {
+            if i == n_admins { break(); }
+            let mut j = 0;
+            loop {
+                if j == n_admins { break(); }
+
+                self.vote_matrix.write(VoteCoordinate{
+                    vote_emitter: i,
+                    vote_receiver: j
+                }, false);
+
+                j += 1;
+            };
+            i += 1;
+        };
+
+    }
+
+    fn fill_replacement_propositions(ref self: ContractState, n_admins : usize) {
+        let mut i = 0;
+        loop {
+            if i == n_admins { break(); }
+            self.replacement_propositions.write(i, Option::None);
+            i += 1;
+        };
+    }
     
     #[constructor]
     fn constructor(ref self: ContractState, 
@@ -129,6 +158,9 @@ mod oracle_consensus {
 
         fill_admins(ref self, admins);
         fill_oracles(ref self, oracles);
+
+        fill_vote_matrix(ref self, admins.len());
+        fill_replacement_propositions(ref self, admins.len());
         
         self.enable_oracle_replacement.write(enable_oracle_replacement);
         self.required_majority.write(required_majority);

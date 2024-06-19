@@ -12,6 +12,24 @@ use alexandria_sorting::{QuickSort, MergeSort};
 use oracle_consensus::math::data_science::{median, sqrt};
 use oracle_consensus::contract_1d_constrained::IOracleConsensus;
 
+// ==============================================================================
+
+fn deploy_contract() -> IProgressTrackerDispatcher {
+    let owner: felt252 = 'Sensei';
+
+    let mut calldata = ArrayTrait::new();
+    calldata.append(owner);
+    
+    let (address0, _) = deploy_syscall(
+        ProgressTracker::TEST_CLASS_HASH.try_into().unwrap(), 0, calldata.span(), false
+    )
+        .unwrap();
+    let contract0 = IProgressTrackerDispatcher { contract_address: address0 };
+    contract0
+}
+
+// ==============================================================================
+
 #[test]
 #[available_gas(30000000)]
 fn test_constructor() {
@@ -31,8 +49,6 @@ fn test_constructor() {
     // let mut calldata = ArrayTrait::new();
     // calldata.append();
 
-
-    
     // let (address, _) = deploy_syscall(
     //     OracleConsensusImpl::TEST_CLASS_HASH.try_into().unwrap(), 0, calldata.span(), false
     // )
