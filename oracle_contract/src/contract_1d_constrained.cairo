@@ -45,7 +45,7 @@ mod oracle_consensus {
         reliable: bool // pass the consensus ?
     }
 
-    #[derive(Drop, Serde, starknet::Store)]
+    #[derive(Drop, Serde, starknet::Store, Hash)]
     struct VoteCoordinate {
         vote_emitter : usize,
         vote_receiver: usize
@@ -397,17 +397,21 @@ mod oracle_consensus {
                         vote_emitter: admin_index, vote_receiver: admin_index
                     }, true);
                     
-                    // TODO:
-                    // self.replacement_propositions.write(proposition);
+                    self.replacement_propositions.write(admin_index, proposition);
                 }
             };
             
         }
 
         fn vote_for_a_proposition(ref self: ContractState, which_admin : usize, support_his_proposition : bool) {
-            // TODO
+            let admin_index = find_admin_index(@self, @get_caller_address());
+            assert(!admin_index.is_none(), 'not an admin');
+            let admin_index = admin_index.unwrap();
 
-            // self.vote_matrix.write()
+            self.vote_matrix.write(VoteCoordinate{
+                vote_emitter: admin_index,
+                vote_receiver: which_admin
+            }, support_his_proposition)
         }
 
         fn get_propositions(self: @ContractState) -> Array<(usize, ContractAddress)> {
