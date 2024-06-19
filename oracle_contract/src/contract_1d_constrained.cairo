@@ -31,7 +31,7 @@ mod OracleConsensus1DC {
 
     use starknet::contract_address::{Felt252TryIntoContractAddress, ContractAddressIntoFelt252};
 
-    use oracle_consensus::math::data_science::{median, spread, average};
+    use oracle_consensus::math::data_science::{median, quadratic_risk, average};
     use oracle_consensus::sort::IndexedMergeSort;
     use oracle_consensus::utils::{fst, snd};
 
@@ -273,14 +273,14 @@ mod OracleConsensus1DC {
 
         let essence_first_pass = median(@oracles_values);
         
-        // SPREAD
+        // quadratic_risk
 
-        let spread_values = spread(@oracles_values, @essence_first_pass);
-        let reliability_first_pass = 1 - (average(@spread_values) * 2);
+        let quadratic_risk_values = quadratic_risk(@oracles_values, @essence_first_pass);
+        let reliability_first_pass = 1 - (average(@quadratic_risk_values) * 2);
         interval_check(@reliability_first_pass);
         self.consensus_reliability_first_pass.write(reliability_first_pass);
 
-        let ordered_oracles = IndexedMergeSort::sort(@spread_values);
+        let ordered_oracles = IndexedMergeSort::sort(@quadratic_risk_values);
         update_oracles_reliability(ref self, @ordered_oracles);
 
         // ----------------------------
@@ -294,10 +294,10 @@ mod OracleConsensus1DC {
         let essence = median(@reliable_values);
         self.consensus_value.write(essence);
 
-        // SPREAD
+        // quadratic_risk
 
-        let spread_second_pass = average(@spread(@reliable_values, @essence));
-        self.consensus_reliability_second_pass.write(spread_second_pass);
+        let quadratic_risk_second_pass = average(@quadratic_risk(@reliable_values, @essence));
+        self.consensus_reliability_second_pass.write(quadratic_risk_second_pass);
 
         self.consensus_active.write(true);
     }

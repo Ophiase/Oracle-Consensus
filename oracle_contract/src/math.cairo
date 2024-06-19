@@ -77,12 +77,25 @@ mod data_science {
         result.span()
     }
 
-    pub fn deviation(a : @u256, b : @u256) -> u256 {
+    pub fn quadratic_deviation(a : @u256, b : @u256) -> u256 {
         (*a - *b) * (*a - *b)
     }
 
-    // compute the spread of each values
-    pub fn spread(values : @Array<u256>, center : @u256) -> Array<u256> {
+    pub fn nd_quadratic_deviation(a : @WadVector, b : @WadVector) -> u256 {
+        let dim = (*a).len();
+
+        let mut result = 0;
+        let mut i = 0;
+        loop { if i == dim { break(); }
+            result += quadratic_deviation((*a).at(i), (*b).at(i));
+            i += 1;
+        };
+
+        result
+    }
+
+    // compute the quadratic_risk of each values
+    pub fn quadratic_risk(values : @Array<u256>, center : @u256) -> Array<u256> {
         let mut result = ArrayTrait::<u256>::new();
         let mut i = 0;
         loop {
@@ -90,7 +103,23 @@ mod data_science {
                 break();
             }
 
-            result.append(deviation(values.at(i), center));
+            result.append(quadratic_deviation(values.at(i), center));
+
+            i += 1;
+        };
+        result
+    }
+
+    // compute the quadratic_risk of each values
+    pub fn nd_quadratic_risk(values : @Array<WadVector>, center : @WadVector) -> Array<u256> {
+        let mut result = ArrayTrait::<u256>::new();
+        let mut i = 0;
+        loop {
+            if i == values.len() {
+                break();
+            }
+
+            result.append(nd_quadratic_deviation(values.at(i), center));
 
             i += 1;
         };
@@ -111,6 +140,18 @@ mod data_science {
         };
 
         result / values.len().into()
+    }
+
+    pub fn nd_average(values : @Array<WadVector>) -> WadVector {
+        let arrays = nd_array_split(values);
+        let mut result = ArrayTrait::new();
+        let mut i = 0;
+        loop { if i == arrays.len() { break(); }
+            result.append( average(arrays.at(i)) );
+            i += 1; 
+        };
+
+        result.span()
     }
 
     const MAX_SQRT_ITERATIONS : usize = 50;
