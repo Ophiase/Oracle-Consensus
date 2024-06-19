@@ -1,5 +1,7 @@
 use alexandria_math::pow;
 use starknet::ContractAddress;
+use oracle_consensus::contract_1d_constrained;
+use oracle_consensus::structs::Oracle;
 
 pub fn show_array<T, +Copy<T>, +Drop<T>, +core::fmt::Display<T>>(
     array: Array<T>) {
@@ -13,6 +15,38 @@ pub fn show_array<T, +Copy<T>, +Drop<T>, +core::fmt::Display<T>>(
         }
 
         print!("{}, ", *array.at(i));
+
+        i += 1;
+    };
+}
+
+pub fn show_oracle_array(
+    array: Array<Oracle>, show_address : bool, show_enabled : bool, show_reliable : bool, jump_line : bool
+    ) {
+    
+    let mut i = 0;
+    // print!("[");
+    loop {
+        if i == array.len() {
+            // println!("]");
+            println!("");
+            break();
+        }
+
+        let oracle = *array.at(i);
+
+        let mut result = wad_to_string(oracle.value, 2);
+        if show_address { result = contractaddress_to_bytearray(oracle.address) + " : " + result; }
+        if show_enabled { result = format!("{}, e:{}", result, oracle.enabled); }
+        if show_reliable { result = format!("{}, r:{}", result, oracle.reliable); }
+
+        result = "(" + result + ")";
+
+        if jump_line && (i % 2 == 1) {
+            println!("{}", result);
+        } else {
+            print!("{}", result);
+        }
 
         i += 1;
     };
@@ -45,6 +79,17 @@ fn n_bytes(value : felt252) -> u32 {
     }
 }
 
+// https://www.stark-utils.xyz/converter
+fn felt252_to_bytearray(value : felt252) -> ByteArray {
+    let mut x: ByteArray = "";
+    x.append_word(value, n_bytes(value));
+    x
+}
+
+fn contractaddress_to_bytearray(value : ContractAddress) -> ByteArray {
+    felt252_to_bytearray(value.try_into().unwrap())
+}
+
 pub fn show_address_array(array: Array<ContractAddress>) {
     let mut i = 0;
     print!("[");
@@ -54,11 +99,7 @@ pub fn show_address_array(array: Array<ContractAddress>) {
             break();
         }
 
-        // https://www.stark-utils.xyz/converter
-        let address : felt252 = ( *array.at(i) ).try_into().unwrap();
-        let mut x: ByteArray = "";
-        x.append_word(address, n_bytes(address));
-        print!("{}, ", x);
+        print!("{}, ", contractaddress_to_bytearray(*array.at(i)));
 
         i += 1;
     };
@@ -76,12 +117,11 @@ pub fn show_replacement_propositions(array : Array<Option::<(usize, ContractAddr
         match *array.at(i) {
             Option::None => print!("{} = [None], ", i),
             Option::Some((old_oracle, new_oracle)) => {
-                // https://www.stark-utils.xyz/converter
-                let address : felt252 = ( new_oracle ).try_into().unwrap();
-                let mut x: ByteArray = "";
-                x.append_word(address, n_bytes(address));
-                
-                print!("{} = [{} -> {}], ", i, old_oracle, x)
+                print!(
+                    "{} = [{} -> {}], ", 
+                    i, old_oracle, 
+                    contractaddress_to_bytearray(new_oracle)
+                )
             }
         };
 

@@ -3,7 +3,7 @@ use oracle_consensus::utils::{
     show_wad_array
     };
 use oracle_consensus::sort::IndexedMergeSort;
-use oracle_consensus::math::data_science::{sqrt};
+use oracle_consensus::math::{sqrt};
 use alexandria_math::wad_ray_math::{
     ray_div, ray_mul, wad_div, wad_mul, ray_to_wad, wad_to_ray, ray, wad, half_ray, half_wad
 };

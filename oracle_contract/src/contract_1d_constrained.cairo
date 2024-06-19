@@ -9,8 +9,11 @@ trait IOracleConsensus1DC<TContractState> {
     fn get_first_pass_consensus_reliability(self: @TContractState) -> u256;
     fn get_second_pass_consensus_reliability(self: @TContractState) -> u256;
 
-    fn get_oracle_list(self: @TContractState) -> Array<ContractAddress>;
     fn get_admin_list(self: @TContractState) -> Array<ContractAddress>;
+    fn get_oracle_list(self: @TContractState) -> Array<ContractAddress>;
+    
+    // only admins can get call this one
+    fn get_oracle_value_list(self: @TContractState) -> Array<OracleConsensus1DC::Oracle>;
 
     fn update_proposition(ref self: TContractState, proposition : Option<(usize, ContractAddress)>);
     fn vote_for_a_proposition(ref self: TContractState, which_admin : usize, support_his_proposition : bool);
@@ -19,40 +22,30 @@ trait IOracleConsensus1DC<TContractState> {
     fn get_a_specific_proposition(self: @TContractState, which_admin : usize) -> Option<(usize, ContractAddress)>;
 }
 
+
 #[starknet::contract]
 mod OracleConsensus1DC {
     use starknet::ContractAddress;
     // use core::option::Option::{None, Some};
     use core::option::OptionTrait;
+    use core::fmt::{Display, Formatter, Error};
     use starknet::syscalls::storage_read_syscall;
     use starknet::syscalls::storage_write_syscall;
     use starknet::get_caller_address;
 
+    use oracle_consensus::structs::{
+        Oracle, VoteCoordinate
+    };
+
     use starknet::contract_address::{Felt252TryIntoContractAddress, ContractAddressIntoFelt252};
 
-    use oracle_consensus::math::data_science::{median, quadratic_risk, average};
+    use oracle_consensus::math::{median, quadratic_risk, average, interval_check};
     use oracle_consensus::sort::IndexedMergeSort;
-    use oracle_consensus::utils::{fst, snd};
-
+    use oracle_consensus::utils::{fst, snd, contractaddress_to_bytearray, wad_to_string};
     use alexandria_math::wad_ray_math::{
         ray_div, ray_mul, wad_div, wad_mul, ray_to_wad, wad_to_ray, ray, wad, half_ray, half_wad
     };
     use alexandria_math::{pow};
-
-
-    #[derive(Drop, Serde, starknet::Store)]
-    struct Oracle {
-        address : ContractAddress,
-        value: u256, // wad convention
-        enabled: bool, // have a value ?
-        reliable: bool // pass the consensus ?
-    }
-
-    #[derive(Drop, Serde, starknet::Store, Hash)]
-    struct VoteCoordinate {
-        vote_emitter : usize,
-        vote_receiver: usize
-    }
     
     #[storage]
     struct Storage {
@@ -200,7 +193,7 @@ mod OracleConsensus1DC {
     }
 
     // require that all oracle have already commited once
-    fn oracles_reliable_values(self: @ContractState) -> Array<u256> {
+    fn compute_oracle_values(self: @ContractState, only_reliable : bool) -> Array<u256> {
         let mut result = ArrayTrait::new();
      
         let mut i = 0;
@@ -210,7 +203,7 @@ mod OracleConsensus1DC {
             }
 
             let oracle = self.oracles.read(i);
-            if oracle.reliable {
+            if oracle.reliable || !only_reliable {
                 result.append(oracle.value);
             }
             
@@ -261,32 +254,43 @@ mod OracleConsensus1DC {
             return();
         }
 
-
+        println!("Updating Consensus !");
+        
         // ----------------------------
         // FIRST PASS
         // ----------------------------
 
-        let oracles_values = oracles_reliable_values(@self);
+        let oracles_values = compute_oracle_values(@self, false);
 
+        println!("Compute Essence !");
+        
         // ESSENCE
 
         let essence_first_pass = median(@oracles_values);
         
         // quadratic_risk
-
+     
+        println!("Compute Quadratic risk !");
+     
         let quadratic_risk_values = quadratic_risk(@oracles_values, @essence_first_pass);
+        println!("a");
         let reliability_first_pass = 1 - (average(@quadratic_risk_values) * 2);
+        println!("b");
         interval_check(@reliability_first_pass);
+        println!("c");
         self.consensus_reliability_first_pass.write(reliability_first_pass);
-
+        println!("d");
         let ordered_oracles = IndexedMergeSort::sort(@quadratic_risk_values);
+        println!("e");
         update_oracles_reliability(ref self, @ordered_oracles);
 
         // ----------------------------
         // SECOND PASS
         // ----------------------------
 
-        let reliable_values = oracles_reliable_values(@self);
+        println!("Second Pass !");
+        
+        let reliable_values = compute_oracle_values(@self, true);
         
         // ESSENCE
 
@@ -300,7 +304,6 @@ mod OracleConsensus1DC {
 
         self.consensus_active.write(true);
     }
-
 
     fn find_oracle_index (self: @ContractState, oracle : @ContractAddress) -> Option<usize> {
         let mut i = 0;
@@ -384,11 +387,6 @@ mod OracleConsensus1DC {
             i += 1;
         }
     }
-
-    fn interval_check(value : @u256) {
-        assert((0_u256 <= *value) && (*value <= 1_u256), 'interval error');
-    }
-
 
     // ==============================================================================
     // PUBLIC
@@ -511,6 +509,23 @@ mod OracleConsensus1DC {
             
             result
         }
+
+        fn get_oracle_value_list(self: @ContractState) -> Array<Oracle> {
+            assert(is_admin(self, @get_caller_address()), 'not admin');
+
+            let mut result = ArrayTrait::new();
+            let n_oracles = self.n_oracles.read();
+
+            let mut i = 0;
+            loop {
+                if i == n_oracles { break(); }
+                result.append(self.oracles.read(i));
+                i += 1;
+            };
+            
+            result
+        }
+
 
         fn get_replacement_propositions(self: @ContractState) -> Array<Option<(usize, ContractAddress)>> {
             assert!(self.enable_oracle_replacement.read(), "replacement disabled");
