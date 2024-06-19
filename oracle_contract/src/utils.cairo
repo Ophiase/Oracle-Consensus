@@ -1,4 +1,5 @@
 use alexandria_math::pow;
+use starknet::ContractAddress;
 
 pub fn show_array<T, +Copy<T>, +Drop<T>, +core::fmt::Display<T>>(
     array: Array<T>) {
@@ -32,6 +33,21 @@ pub fn show_wad_array(array: Array<u256>) {
     };
 }
 
+pub fn show_address_array(array: Array<ContractAddress>) {
+    let mut i = 0;
+    print!("[");
+    loop {
+        if i == array.len() {
+            println!("]");
+            break();
+        }
+
+        let address : felt252 = ( *array.at(i) ).try_into().unwrap();
+        print!("{}, ", address);
+
+        i += 1;
+    };
+}
 
 pub fn show_tuple_array<T, +Copy<T>, +Drop<T>, +core::fmt::Display<T>>(
     array: Array<(usize, T)>) {

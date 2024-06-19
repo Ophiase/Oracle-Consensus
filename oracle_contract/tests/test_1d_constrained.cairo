@@ -10,21 +10,54 @@ use alexandria_math::{pow};
 use alexandria_sorting::{QuickSort, MergeSort};
     
 use oracle_consensus::math::data_science::{median, sqrt};
-use oracle_consensus::contract_1d_constrained::IOracleConsensus;
+use oracle_consensus::utils::{
+    show_array, show_address_array
+};
+use oracle_consensus::contract_1d_constrained::{
+    OracleConsensus1DC,
+    IOracleConsensus1DCDispatcher,
+    IOracleConsensus1DCDispatcherTrait
+};
 
 // ==============================================================================
 
-fn deploy_contract() -> IProgressTrackerDispatcher {
-    let owner: felt252 = 'Sensei';
+fn util_felt_addr(addr_felt: felt252) -> ContractAddress {
+    addr_felt.try_into().unwrap()
+}
 
-    let mut calldata = ArrayTrait::new();
-    calldata.append(owner);
+// fn add_span_to_calldata(array : Span<felt252>, ref mut calldata : Array<felt252>) {
+// }
+
+fn deploy_contract() -> IOracleConsensus1DCDispatcher {
+    let mut calldata = array![
+        // ADMINS
+        3,
+        'Akashi',
+        'Ozu',
+        'Higuchi',
+
+        1, // enable_oracle_replacement
+        2, // required_majority
+        2, // n_failing oracles
+
+        // ORACLES
+        7,
+        'oracle_00',
+        'oracle_01',
+        'oracle_02',
+        'oracle_03',
+        'oracle_04',
+        'oracle_05',
+        'oracle_06',
+    ];
     
     let (address0, _) = deploy_syscall(
-        ProgressTracker::TEST_CLASS_HASH.try_into().unwrap(), 0, calldata.span(), false
+        OracleConsensus1DC::TEST_CLASS_HASH.try_into().unwrap(), 
+        0, calldata.span(), false
     )
         .unwrap();
-    let contract0 = IProgressTrackerDispatcher { contract_address: address0 };
+    let contract0 = IOracleConsensus1DCDispatcher { contract_address: address0 };
+    
     contract0
 }
 
@@ -33,29 +66,8 @@ fn deploy_contract() -> IProgressTrackerDispatcher {
 #[test]
 #[available_gas(30000000)]
 fn test_constructor() {
-    // Constructor
+    let dispatcher = deploy_contract();
 
-    // let admins : Span<ContractAddress> = array![
-    //     // 0.try_into().unwrap()
-    // ].span();
-    // let enable_oracle_replacement = true;
-    // let required_majority = 2;
-    // let n_failing_oracles = 3;
-    // let oracles : Span<ContractAddress> = array![
-
-    // ].span();
-
-    // Deploy Contract
-    // let mut calldata = ArrayTrait::new();
-    // calldata.append();
-
-    // let (address, _) = deploy_syscall(
-    //     OracleConsensusImpl::TEST_CLASS_HASH.try_into().unwrap(), 0, calldata.span(), false
-    // )
-    //     .unwrap();
-
-    // // contract_a is of type IContractADispatcher. Its methods are defined in IContractADispatcherTrait.
-    // let contract = IOracleConsensusDispatcher {
-    //      contract_address: address 
-    // };
+    let admins = dispatcher.get_admin_list();
+    show_address_array(admins);
 }

@@ -1,7 +1,7 @@
 use starknet::ContractAddress;
 
 #[starknet::interface]
-trait IOracleConsensus<TContractState> {
+trait IOracleConsensus1DC<TContractState> {
     fn update_prediction(ref self: TContractState, prediction : u256);
     
     fn consensus_active(self: @TContractState) -> bool;
@@ -9,6 +9,8 @@ trait IOracleConsensus<TContractState> {
     fn get_first_pass_consensus_reliability(self: @TContractState) -> u256;
     fn get_second_pass_consensus_reliability(self: @TContractState) -> u256;
 
+    // TODO:
+    // fn get_oracle_list(self: @TContractState) -> Array<ContractAddress>;
     fn get_admin_list(self: @TContractState) -> Array<ContractAddress>;
 
     fn update_proposition(ref self: TContractState, proposition : Option<(usize, ContractAddress)>);
@@ -19,7 +21,7 @@ trait IOracleConsensus<TContractState> {
 }
 
 #[starknet::contract]
-mod oracle_consensus {
+mod OracleConsensus1DC {
     use starknet::ContractAddress;
     // use core::option::Option::{None, Some};
     use core::option::OptionTrait;
@@ -397,7 +399,7 @@ mod oracle_consensus {
 
 
     #[abi(embed_v0)]
-    impl OracleConsensusImpl of super::IOracleConsensus<ContractState> {
+    impl OracleConsensusImpl of super::IOracleConsensus1DC<ContractState> {
         fn update_prediction(ref self: ContractState, prediction : u256) {
             interval_check(@prediction);
 

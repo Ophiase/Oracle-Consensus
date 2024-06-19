@@ -5,6 +5,10 @@ mod data_science {
     use alexandria_math::{pow};    
     use alexandria_sorting::{QuickSort, MergeSort};
 
+    // ==============================================================================
+
+    // use Span<u256> as WadVector;
+
     fn find_index(value : @u256, array : @Array<u256>) -> usize {
         let mut i = 0;
         loop {
