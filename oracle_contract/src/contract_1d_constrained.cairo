@@ -1,4 +1,5 @@
 use starknet::ContractAddress;
+use oracle_consensus::structs::Oracle;
 
 #[starknet::interface]
 trait IOracleConsensus1DC<TContractState> {
@@ -13,7 +14,7 @@ trait IOracleConsensus1DC<TContractState> {
     fn get_oracle_list(self: @TContractState) -> Array<ContractAddress>;
     
     // only admins can get call this one
-    fn get_oracle_value_list(self: @TContractState) -> Array<OracleConsensus1DC::Oracle>;
+    fn get_oracle_value_list(self: @TContractState) -> Array<Oracle>;
 
     fn update_proposition(ref self: TContractState, proposition : Option<(usize, ContractAddress)>);
     fn vote_for_a_proposition(ref self: TContractState, which_admin : usize, support_his_proposition : bool);

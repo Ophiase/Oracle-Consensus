@@ -1,7 +1,6 @@
+use oracle_consensus::structs::Oracle;
 use alexandria_math::pow;
 use starknet::ContractAddress;
-use oracle_consensus::contract_1d_constrained;
-use oracle_consensus::structs::Oracle;
 use oracle_consensus::signed_wad_ray::{
     I128Div, I128Display, I128SignedBasics, unsigned_to_signed,
     ray_div, ray_mul, wad_div, wad_mul, ray_to_wad, wad_to_ray, ray, wad, half_ray, half_wad

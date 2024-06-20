@@ -85,6 +85,8 @@ fn fill_oracle_predictions(dispatcher : IOracleConsensus1DCDispatcher, predictio
     }
 }
 
+const VERBOSE : bool = false;
+
 #[test]
 #[available_gas(80000000)]
 fn test_basic_execution() {
@@ -96,14 +98,16 @@ fn test_basic_execution() {
 
     starknet::testing::set_contract_address(_admin_0);
 
-    println!("----------------------");
-    println!("Init");
-    println!("----------------------");
-    show_address_array(dispatcher.get_admin_list());
-    show_address_array(dispatcher.get_oracle_list());
-    show_replacement_propositions(dispatcher.get_replacement_propositions());
-    show_oracle_array(dispatcher.get_oracle_value_list(), true, true, true, true);
-    println!("----------------------");
+    if VERBOSE {
+        println!("----------------------");
+        println!("Init");
+        println!("----------------------");
+        show_address_array(dispatcher.get_admin_list());
+        show_address_array(dispatcher.get_oracle_list());
+        show_replacement_propositions(dispatcher.get_replacement_propositions());
+        show_oracle_array(dispatcher.get_oracle_value_list(), true, true, true, true);
+        println!("----------------------");
+    }
 
     assert!(dispatcher.consensus_active() == false, "error");
     assert!(dispatcher.get_consensus_value() == 0, "error");
@@ -125,14 +129,16 @@ fn test_basic_execution() {
     fill_oracle_predictions(dispatcher, @predictions);
     starknet::testing::set_contract_address(_admin_0);
 
-    show_oracle_array(dispatcher.get_oracle_value_list(), true, true, true, true);
-    println!("----------------------");
-    println!("consensus_active : {}", dispatcher.consensus_active());
-    println!("get_consensus_value : {}", wad_to_string(dispatcher.get_consensus_value(), 3));
-    println!("get_first_pass_consensus_reliability : {}", wad_to_string(dispatcher.get_first_pass_consensus_reliability(), 3));
-    println!("get_second_pass_consensus_reliability : {}", wad_to_string(dispatcher.get_second_pass_consensus_reliability(), 3));
-    println!("----------------------");
-    
+    if VERBOSE {
+        show_oracle_array(dispatcher.get_oracle_value_list(), true, true, true, true);
+        println!("----------------------");
+        println!("consensus_active : {}", dispatcher.consensus_active());
+        println!("get_consensus_value : {}", wad_to_string(dispatcher.get_consensus_value(), 3));
+        println!("get_first_pass_consensus_reliability : {}", wad_to_string(dispatcher.get_first_pass_consensus_reliability(), 3));
+        println!("get_second_pass_consensus_reliability : {}", wad_to_string(dispatcher.get_second_pass_consensus_reliability(), 3));
+        println!("----------------------");
+    }
+
     // --------------------
     // CHECK REPLACEMENT
 
@@ -147,10 +153,12 @@ fn test_basic_execution() {
     starknet::testing::set_contract_address(_admin_1);
     dispatcher.vote_for_a_proposition(0, true);
 
-    println!("----------------------");
-    show_replacement_propositions(dispatcher.get_replacement_propositions());
-    show_oracle_array(dispatcher.get_oracle_value_list(), true, true, true, true);
-    println!("----------------------");
+    if VERBOSE {
+        println!("----------------------");
+        show_replacement_propositions(dispatcher.get_replacement_propositions());
+        show_oracle_array(dispatcher.get_oracle_value_list(), true, true, true, true);
+        println!("----------------------");
+    }
 
     assert!(*dispatcher.get_oracle_list().at(old_oracle) == new_oracle, "error");
     
