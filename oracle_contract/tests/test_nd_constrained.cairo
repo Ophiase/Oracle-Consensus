@@ -108,7 +108,7 @@ fn test_basic_execution() {
     // -------------------
     // CHECK VOTES
 
-    // auto generated distribution (essence = [0.4, 0.2])
+    // auto generated distribution (essence = [0.4, 0.2]) with high dispersity
     // in drafts/beta_kumaraswamy_algorithm_demo.ipynb
     let predictions : Array<WadVector> = array![
         array![492954726014948928, 334814622544049920].span(), 
@@ -147,6 +147,10 @@ fn test_basic_execution() {
         println!("get_second_pass_consensus_reliability : {}", wad_to_string(dispatcher.get_second_pass_consensus_reliability(), 3));
         println!("----------------------");
     }
+
+    // notice that the second pass reliability is lower than for the 1d case : 0.798
+    // its normal, the number of dimensions increase the required number of oracles
+    // to fill the space
 
     // --------------------
     // CHECK REPLACEMENT
