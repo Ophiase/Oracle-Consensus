@@ -71,7 +71,11 @@ fn deploy_unconstrained_contract() -> IOracleConsensusNDDispatcher {
         2, // required_majority
         2, // n_failing_oracles
         0, // constrained
-        (wad() * 3_i128).as_unsigned_felt(), // unconstrained_max_spread
+        
+        (
+            (wad() * 10_i128)
+        ).as_unsigned_felt(), // unconstrained_max_spread
+        
         2, // dimension
 
         // ORACLES
@@ -212,7 +216,7 @@ fn test_constrained_basic_execution() {
 
 
 #[test]
-#[available_gas(80000000)]
+#[available_gas(100000000)]
 fn test_unconstrained_basic_execution() {
     let VERBOSE : bool = false;
 
@@ -284,8 +288,8 @@ fn test_unconstrained_basic_execution() {
 
     // results :
     // mu = (20.714, 10.4)
-    // first pass std : 4.66
-    // second pass std : 3.523
+    // first pass std : 0.533
+    // second pass std : 0.647
     
     // --------------------
     // CHECK REPLACEMENT

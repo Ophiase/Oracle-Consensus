@@ -326,7 +326,7 @@ mod OracleConsensusND {
 
     fn unconstrained_reliability(self : @ContractState, std_deviation : @i128) -> i128 {
         let max_spread = self.unconstrained_max_spread.read();
-        wad() - ( min(@max_spread, std_deviation) / max_spread )
+        wad() - wad_div( min(@max_spread, std_deviation), max_spread )
     }
 
     fn update_unconstrained_consensus(ref self: ContractState, oracle_index : @usize, prediction : @WadVector) {
