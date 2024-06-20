@@ -5,6 +5,7 @@ use oracle_consensus::signed_wad_ray::{
 };
 use alexandria_math::{pow};    
 use alexandria_sorting::{QuickSort, MergeSort};
+use oracle_consensus::utils::{wad_to_string};
 
 // ==============================================================================
 
@@ -64,6 +65,27 @@ pub fn median(values : @Array<i128>) -> i128 {
     *values.at(median_index(values))
 }
 
+// we assume at least 3 values in the array
+pub fn smooth_median(values : @Array<i128>) -> i128 {
+    let sorted = MergeSort::sort(values.span());
+    let mid = values.len() / 2;
+
+    let a = *sorted.at(mid-1);
+    let b = *sorted.at(mid);
+
+    if (values.len() & 2) == 1 {    
+        let c = *sorted.at(mid+1);
+        (a+b+c) / 3_i128
+    } else {
+        (a+b) / 2_i128
+    }
+}
+
+// TODO:
+// pub fn super_smooth_median(values : @Array<i128>) -> i128 {
+//     //
+// }
+
 // component wise implementation
 // there is no natural order on R^M
 pub fn nd_median(values : @Array<WadVector>) -> WadVector {
@@ -78,17 +100,26 @@ pub fn nd_median(values : @Array<WadVector>) -> WadVector {
     result.span()
 }
 
-const PREVENT_OVERFLOW : bool = true;
-const OVERFLOW_REDUCTION : i128 = 10000000000000; // 1e14
+// component wise implementation
+// there is no natural order on R^M
+pub fn nd_smooth_median(values : @Array<WadVector>) -> WadVector {
+    let arrays = nd_array_split(values);
+    let mut result = ArrayTrait::new();
+    let mut i = 0;
+    loop { if i == arrays.len() { break(); }
+        result.append( smooth_median(arrays.at(i)) );
+        i += 1; 
+    };
+
+    result.span()
+}
+
+// const PREVENT_OVERFLOW : bool = true;
+// const OVERFLOW_REDUCTION : i128 = 10000000000000; // 1e14
 
 pub fn quadratic_deviation(a : @i128, b : @i128) -> i128 {
-    // if PREVENT_OVERFLOW {
-    //     let c = (*a - *b);// / OVERFLOW_REDUCTION;
-    //     (c * c) //* OVERFLOW_REDUCTION * OVERFLOW_REDUCTION
-    // } else {
-    // }
-    
-    (*a - *b) * (*a - *b)
+    let x = (*a - *b);
+    wad_mul(x, x)
 }
 
 pub fn nd_quadratic_deviation(a : @WadVector, b : @WadVector) -> i128 {
@@ -112,9 +143,7 @@ pub fn quadratic_risk(values : @Array<i128>, center : @i128) -> Array<i128> {
         if i == values.len() {
             break();
         }
-
-        println!("{}", i);
-        println!("{}", *values.at(i));
+        
         result.append(quadratic_deviation(values.at(i), center));
 
         i += 1;

@@ -1,10 +1,9 @@
 use starknet::syscalls::deploy_syscall;
 use starknet::ContractAddress;
 
-use alexandria_math::wad_ray_math::{
-    ray_div, ray_mul, wad_div, wad_mul, 
-    ray_to_wad, wad_to_ray, ray, wad, 
-    half_ray, half_wad
+use oracle_consensus::signed_wad_ray::{
+    I128Div, I128Display, I128SignedBasics, unsigned_to_signed,
+    ray_div, ray_mul, wad_div, wad_mul, ray_to_wad, wad_to_ray, ray, wad, half_ray, half_wad
 };
 use alexandria_math::{pow};
 use alexandria_sorting::{QuickSort, MergeSort};
@@ -15,7 +14,7 @@ use oracle_consensus::math::{
 use oracle_consensus::utils::{
     show_array, show_address_array,
     show_replacement_propositions,
-    show_oracle_array
+    show_oracle_array, wad_to_string
 };
 use oracle_consensus::structs::{
     Oracle, VoteCoordinate
@@ -80,14 +79,14 @@ fn fill_oracle_predictions(dispatcher : IOracleConsensus1DCDispatcher, predictio
         if i == predictions.len() { break(); }
 
         starknet::testing::set_contract_address(*oracles.at(i));
-        dispatcher.update_prediction( *predictions.at(i));
+        dispatcher.update_prediction( *predictions.at(i) );
 
         i += 1;
     }
 }
 
 #[test]
-#[available_gas(30000000)]
+#[available_gas(80000000)]
 fn test_basic_execution() {
     let dispatcher = deploy_contract();
 
@@ -97,6 +96,7 @@ fn test_basic_execution() {
 
     starknet::testing::set_contract_address(_admin_0);
 
+    println!("----------------------");
     println!("Init");
     println!("----------------------");
     show_address_array(dispatcher.get_admin_list());
@@ -113,28 +113,46 @@ fn test_basic_execution() {
     // -------------------
     // CHECK VOTES
 
-    // auto generated distribution 
+    // auto generated distribution (essence = 0.5)
     // in drafts/beta_kumaraswamy_algorithm_demo.ipynb
     let predictions : Array<i128> = array![
         283665728520555872, 444978808172189056, 
         456312246206240704, 577063812648590720, 
         353406129181719872, 439786381700248704, 
-        422154759299759040, 613738354100202112, 
-        457460183532055616, 999874248921110656, 
-        563834305654715072, 625593778275535872, 
-        606902168251554432, 301967755140784896, 
-        995508477591357056, 406049235292915200, 
-        462012580658951104, 465891674064305792, 
-        670021933609384064, 595183478581031296
+        422154759299759040,
     ];
 
     fill_oracle_predictions(dispatcher, @predictions);
     starknet::testing::set_contract_address(_admin_0);
 
-    // show_oracle_array(dispatcher.get_oracle_value_list(), true, true, true, true);
-
-    // println!(dispatcher.get)
-
+    show_oracle_array(dispatcher.get_oracle_value_list(), true, true, true, true);
+    println!("----------------------");
+    println!("consensus_active : {}", dispatcher.consensus_active());
+    println!("get_consensus_value : {}", wad_to_string(dispatcher.get_consensus_value(), 3));
+    println!("get_first_pass_consensus_reliability : {}", wad_to_string(dispatcher.get_first_pass_consensus_reliability(), 3));
+    println!("get_second_pass_consensus_reliability : {}", wad_to_string(dispatcher.get_second_pass_consensus_reliability(), 3));
+    println!("----------------------");
+    
     // --------------------
     // CHECK REPLACEMENT
+
+    let old_oracle = 3_usize;
+    let old_oracle_addr = util_felt_addr('oracle_03');
+    let new_oracle = util_felt_addr('oracle_XX');
+
+    dispatcher.update_proposition(Option::Some((old_oracle, new_oracle)));
+    assert!(*dispatcher.get_oracle_list().at(old_oracle) == old_oracle_addr, "error");
+    dispatcher.vote_for_a_proposition(0, true);
+    assert!(*dispatcher.get_oracle_list().at(old_oracle) == old_oracle_addr, "error");
+    starknet::testing::set_contract_address(_admin_1);
+    dispatcher.vote_for_a_proposition(0, true);
+
+    println!("----------------------");
+    show_replacement_propositions(dispatcher.get_replacement_propositions());
+    show_oracle_array(dispatcher.get_oracle_value_list(), true, true, true, true);
+    println!("----------------------");
+
+    assert!(*dispatcher.get_oracle_list().at(old_oracle) == new_oracle, "error");
+    
+    // check for more replacements ?
 }

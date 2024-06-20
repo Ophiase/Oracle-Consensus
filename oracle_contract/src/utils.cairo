@@ -161,6 +161,17 @@ pub fn snd<U, +Copy<U>, +Drop<U>, V, +Copy<V>, +Drop<V>>(x : (U, V)) -> V {
     v
 }
 
+
+// not optimized, for debug purpose
+fn lfill(string : ByteArray, n_digits: usize, character: ByteArray) -> ByteArray {
+    if string.len() >= n_digits {
+        string
+    } else {
+        lfill(character.clone() + string, n_digits, character)
+    }
+}
+
+// not optimized, for debug purpose
 pub fn wad_to_string(value: i128, n_digits: usize) -> ByteArray {
     let uvalue = value.as_unsigned();
     let sign : ByteArray = if value.is_positive() { "" } else { "-" };
@@ -168,6 +179,7 @@ pub fn wad_to_string(value: i128, n_digits: usize) -> ByteArray {
     let integer_part = uvalue / pow(10, 18);
     let decimal_part = uvalue - (integer_part * pow(10, 18));
     let decimal_part_reduced = decimal_part / pow(10, 18 - n_digits.into());
+    let decimal_part_as_string = format!("{}", decimal_part_reduced);
 
-    format!("{}{}.{}", sign, integer_part, decimal_part_reduced)
+    format!("{}{}.{}", sign, integer_part, lfill(decimal_part_as_string, n_digits, "0"))
 }

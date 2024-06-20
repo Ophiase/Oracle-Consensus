@@ -102,26 +102,30 @@ Consequence : we want to be able to replace only the worst oracle relatively to 
 
 In the following, we'll consider a smart contract that establish a consensus on $e$ value and the accuracy of this consensus. \
 
+The smooth median is defined as the average between the two most centered values. \
+
 - Safe check : all the oracles have commited once
 - First Pass
     - compute the essence estimator on all the oracles
-        - median | constrained case
-        - median | uconstrained case
+        - smooth_median | constrained case
+        - smooth_median | uconstrained case
     - compute the individual oracles_scores
-        - squared distance to the median | constrained case
-        - squared distance to the median | unconstrained case
+        - squared distance to the smooth_median | constrained case
+        - squared distance to the smooth_median | unconstrained case
     - compute the reliability estimator on all the oracles
-        - average squared distance to the median | constrained case
-        - average squared distance to the median | unconstrained case
+        - average squared distance to the smooth_median | constrained case
+        - average squared distance to the smooth_median | unconstrained case
 - Second Pass
     - compute the essence estimator on the $(1-\alpha)$ percent of the best oracles
-        - median | constrained case
+        - smooth_median | constrained case
         - mean | uconstrained case
     - compute the reliability estimator on the $(1-\alpha)$ percent of the best oracles
-        - average squared distance to the median | constrained case
+        - average squared distance to the smooth_median | constrained case
         - average squared distance to the mean | unconstrained case
 
-Remark: there is no natural order over $\mathbb{R}^M$, therefore, we consider on higher dimension the component wise version.
+Remark: There is no natural order over $\mathbb{R}^M$, therefore, we consider on higher dimension the component wise version of the median/smoth_median.
+
+Idea/Todo: Can we efficiently remplace the smooth median with what i would call the super smooth median? A weighted sum based on the order, where the weights reproduce a bell shape.
 
 ### Replacement Vote Implementation
 

@@ -39,10 +39,11 @@ mod OracleConsensus1DC {
 
     use starknet::contract_address::{Felt252TryIntoContractAddress, ContractAddressIntoFelt252};
 
-    use oracle_consensus::math::{median, quadratic_risk, average, interval_check};
+    use oracle_consensus::math::{median, smooth_median, quadratic_risk, average, interval_check, sqrt};
     use oracle_consensus::sort::IndexedMergeSort;
     use oracle_consensus::utils::{fst, snd, contractaddress_to_bytearray, wad_to_string};
-    use alexandria_math::wad_ray_math::{
+    use oracle_consensus::signed_wad_ray::{
+        I128Div, I128Display, I128SignedBasics, unsigned_to_signed,
         ray_div, ray_mul, wad_div, wad_mul, ray_to_wad, wad_to_ray, ray, wad, half_ray, half_wad
     };
     use alexandria_math::{pow};
@@ -253,8 +254,6 @@ mod OracleConsensus1DC {
         if self.n_oracles.read() != self.n_active_oracles.read() {
             return();
         }
-
-        println!("Updating Consensus !");
         
         // ----------------------------
         // FIRST PASS
@@ -262,47 +261,38 @@ mod OracleConsensus1DC {
 
         let oracles_values = compute_oracle_values(@self, false);
 
-        println!("Compute Essence !");
-        
         // ESSENCE
 
-        let essence_first_pass = median(@oracles_values);
-        
+        let essence_first_pass = smooth_median(@oracles_values);
+
         // quadratic_risk
      
-        println!("Compute Quadratic risk !");
-     
         let quadratic_risk_values = quadratic_risk(@oracles_values, @essence_first_pass);
-        println!("a");
-        let reliability_first_pass = 1 - (average(@quadratic_risk_values) * 2);
-        println!("b");
+        let reliability_first_pass = wad() - (sqrt(average(@quadratic_risk_values)) * 2);
         interval_check(@reliability_first_pass);
-        println!("c");
         self.consensus_reliability_first_pass.write(reliability_first_pass);
-        println!("d");
         let ordered_oracles = IndexedMergeSort::sort(@quadratic_risk_values);
-        println!("e");
         update_oracles_reliability(ref self, @ordered_oracles);
 
         // ----------------------------
         // SECOND PASS
         // ----------------------------
-
-        println!("Second Pass !");
         
         let reliable_values = compute_oracle_values(@self, true);
         
         // ESSENCE
 
-        let essence = median(@reliable_values);
+        let essence = smooth_median(@reliable_values);
         self.consensus_value.write(essence);
-
+        
         // quadratic_risk
 
-        let quadratic_risk_second_pass = average(@quadratic_risk(@reliable_values, @essence));
-        self.consensus_reliability_second_pass.write(quadratic_risk_second_pass);
-
-        self.consensus_active.write(true);
+        let quadratic_risk_values = quadratic_risk(@reliable_values, @essence_first_pass);
+        let reliability_second_pass = wad() - (sqrt(average(@quadratic_risk_values)) * 2);
+        interval_check(@reliability_second_pass);
+        self.consensus_reliability_second_pass.write(reliability_second_pass);
+        
+        self.consensus_active.write(true);        
     }
 
     fn find_oracle_index (self: @ContractState, oracle : @ContractAddress) -> Option<usize> {
@@ -361,9 +351,10 @@ mod OracleConsensus1DC {
 
         // APPLY
         let proposition = self.replacement_propositions.read(which_proposition).unwrap();
+        let which_oracle = fst(proposition);
         let mut oracle = self.oracles.read(fst(proposition));
         oracle.address = snd(proposition);
-        self.oracles.write(which_proposition, oracle);
+        self.oracles.write(which_oracle, oracle);
 
         reinitialize_replacement_propositions(ref self, @n_admins);
         reinitialize_vote_matrix(ref self, @n_admins);
@@ -455,6 +446,7 @@ mod OracleConsensus1DC {
                         i += 1;
                     };
 
+                    // vote for itself
                     self.vote_matrix.write(VoteCoordinate{
                         vote_emitter: admin_index, vote_receiver: admin_index
                     }, true);
