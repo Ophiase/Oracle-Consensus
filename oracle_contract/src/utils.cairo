@@ -6,6 +6,8 @@ use oracle_consensus::signed_wad_ray::{
     ray_div, ray_mul, wad_div, wad_mul, ray_to_wad, wad_to_ray, ray, wad, half_ray, half_wad
 };
 
+use oracle_consensus::math::WadVector;
+
 pub fn show_array<T, +Copy<T>, +Drop<T>, +core::fmt::Display<T>>(
     array: Array<T>) {
     
@@ -54,6 +56,54 @@ pub fn show_oracle_array(
         i += 1;
     };
 }
+
+pub fn wadvector_to_string(vector: WadVector) -> ByteArray {
+    let mut i = 0;
+    let mut result : ByteArray = "(";
+    loop {
+        if i == vector.len() {
+            break(result.clone() + ")");
+        }
+
+        result = result.clone() + format!("{}, ", wad_to_string(*vector.at(i), 3));
+
+        i += 1;
+    }
+}
+
+pub fn show_nd_oracle_array(
+    array: Array<(ContractAddress, WadVector, bool, bool)>, 
+    show_address : bool, show_enabled : bool, show_reliable : bool, jump_line : bool
+    ) {
+    
+    let mut i = 0;
+    // print!("[");
+    loop {
+        if i == array.len() {
+            // println!("]");
+            println!("");
+            break();
+        }
+
+        let (address, value, enabled, reliable) = *array.at(i);
+
+        let mut result = wadvector_to_string(value);
+        if show_address { result = contractaddress_to_bytearray(address) + " : " + result; }
+        if show_enabled { result = format!("{}, e:{}", result, enabled); }
+        if show_reliable { result = format!("{}, r:{}", result, reliable); }
+
+        result = "(" + result + ")";
+
+        if jump_line {
+            println!("{}", result);
+        } else {
+            print!("{}", result);
+        }
+
+        i += 1;
+    };
+}
+
 
 pub fn show_wad_array(array: Array<i128>) {
     let mut i = 0;
