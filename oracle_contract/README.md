@@ -38,13 +38,20 @@ scarb cairo-test
 Sepolia execution with a configured starkli :
 
 ```bash
+# TO DECLARE THE CONTRACT :
+starkli declare target/dev/oracle_consensus_OracleConsensusND.contract_class.json --compiler-version=2.4.0
+# or
 starkli declare target/dev/<WANTED_CONTRACT>.json --compiler-version=2.4.0
+
+# TO DEPLOY THE CONTRACT (ie. generate an instance) :
 starkli deploy <CONTRACT_ADDRESS> <constructor as felt252>
 ```
 
 ```bash
-starkli call <CONTRACT_ADDRESS> <arguments as felt252> 
-starkli invoke <CONTRACT_ADDRESS> <arguments as felt252> 
+# METHODS WITHOUT SIDE EFFECTS (READ ONLY) :
+starkli call <CONTRACT_ADDRESS> <method> <arguments as felt252> 
+# METHODS WITH SIDE EFFECTS :
+starkli invoke <CONTRACT_ADDRESS> <method> <arguments as felt252> 
 ```
 
 ## Code details

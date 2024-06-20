@@ -425,10 +425,16 @@ mod OracleConsensus1DC {
 
             match proposition {
                 Option::None => self.replacement_propositions.write(admin_index, proposition),
-                Option::Some((old_oracle_index, _new_oracle_address)) => {
+                Option::Some((old_oracle_index, new_oracle_address)) => {
                     assert(
                         (0 <= old_oracle_index) && (old_oracle_index < self.n_oracles.read()), 
                         'wrong old oracle index');
+
+                    
+                    assert!(
+                        find_oracle_index(@self, @new_oracle_address).is_none(),
+                        "the oracle is already in the team"
+                    );
 
                     // TODO : check new_oracle_address exists
 
