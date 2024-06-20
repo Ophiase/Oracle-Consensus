@@ -236,3 +236,7 @@ fn nd_interval_check(value : @WadVector) {
     };
 }
 
+pub fn min(a : @i128, b : @i128) -> i128 {
+    if *a > *b { *a } else { *b }
+}
+

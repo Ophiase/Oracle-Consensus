@@ -48,7 +48,7 @@ mod OracleConsensusND {
 
     use oracle_consensus::math::{
         median, smooth_median, quadratic_risk, average, interval_check, sqrt, WadVector,
-        nd_median, nd_smooth_median, nd_quadratic_risk, nd_average, nd_interval_check
+        nd_median, nd_smooth_median, nd_quadratic_risk, nd_average, nd_interval_check, min
         };
     use oracle_consensus::sort::IndexedMergeSort;
     use oracle_consensus::utils::{fst, snd, contractaddress_to_bytearray, wad_to_string};
@@ -77,6 +77,7 @@ mod OracleConsensusND {
         n_oracles : usize,
         dimension : usize,
         constrained : bool,
+        unconstrained_max_spread: i128,
 
         oracles_info: LegacyMap<usize, OracleInfo>,
         oracles_values : LegacyMap<(usize, usize), i128>,
@@ -204,6 +205,8 @@ mod OracleConsensusND {
         n_failing_oracles : usize, 
         
         constrained : bool,
+        unconstrained_max_spread: i128,
+        
         dimension : usize,
         oracles: Span<ContractAddress>,
     ) {
@@ -218,8 +221,10 @@ mod OracleConsensusND {
         self.enable_oracle_replacement.write(enable_oracle_replacement);
         self.required_majority.write(required_majority);
         self.n_failing_oracles.write(n_failing_oracles);
+
         self.constrained.write(constrained);
-        
+        self.unconstrained_max_spread.write(unconstrained_max_spread);
+
         write_consensus(ref self, @empty_vector(dimension));
         self.consensus_reliability_first_pass.write(0_i128);
         self.consensus_reliability_second_pass.write(0_i128);
@@ -319,6 +324,10 @@ mod OracleConsensusND {
         };
     }
 
+    fn unconstrained_reliability(self : @ContractState, std_deviation : @i128) -> i128 {
+        let max_spread = self.unconstrained_max_spread.read();
+        wad() - ( min(@max_spread, std_deviation) / max_spread )
+    }
 
     fn update_unconstrained_consensus(ref self: ContractState, oracle_index : @usize, prediction : @WadVector) {
         update_a_single_oracle(ref self, oracle_index, prediction);
@@ -341,9 +350,10 @@ mod OracleConsensusND {
      
         let quadratic_risk_values = nd_quadratic_risk(@oracles_values, @essence_first_pass);
         
-        // TODO: NORMALIZATION
-        let reliability_first_pass = sqrt(average(@quadratic_risk_values));
-        // interval_check(@reliability_first_pass);
+        let reliability_first_pass = unconstrained_reliability(
+            @self, @sqrt(average(@quadratic_risk_values))
+        );
+        interval_check(@reliability_first_pass);
         
         self.consensus_reliability_first_pass.write(reliability_first_pass);
         let ordered_oracles = IndexedMergeSort::sort(@quadratic_risk_values);
@@ -363,9 +373,10 @@ mod OracleConsensusND {
         // quadratic_risk
         let quadratic_risk_values = nd_quadratic_risk(@reliable_values, @essence_first_pass);
         
-        // TODO: NORMALIZATION
-        let reliability_second_pass = sqrt(average(@quadratic_risk_values));
-        // interval_check(@reliability_second_pass);
+        let reliability_second_pass = unconstrained_reliability(
+            @self, @sqrt(average(@quadratic_risk_values))
+        );
+        interval_check(@reliability_second_pass);
         
         self.consensus_reliability_second_pass.write(reliability_second_pass);
         

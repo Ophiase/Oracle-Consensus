@@ -32,7 +32,7 @@ scarb build
 
 Tests :
 ```bash
-scarb cairo-test
+scarb test
 ```
 
 Sepolia execution with a configured starkli :

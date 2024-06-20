@@ -5,6 +5,7 @@ use core::fmt::{Display, Formatter, Error};
 trait SignedBasics {
     fn is_positive(self : @i128) -> bool;
     fn as_unsigned(self : @i128) -> u128;
+    fn as_unsigned_felt(self : @i128) -> felt252;
     fn abs(self: @i128) -> i128;
 }
 
@@ -19,6 +20,10 @@ impl I128SignedBasics of SignedBasics {
         } else {
             (-1_i128 * *self).try_into().unwrap()
         }
+    }
+
+    fn as_unsigned_felt(self : @i128) -> felt252 {
+        self.as_unsigned().try_into().unwrap()
     }
 
     fn abs(self: @i128) -> i128 {

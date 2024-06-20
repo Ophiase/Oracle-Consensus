@@ -42,6 +42,7 @@ fn deploy_constrained_contract() -> IOracleConsensusNDDispatcher {
         2, // required_majority
         2, // n_failing_oracles
         1, // constrained
+        0, // unconstrained_max_spread
         2, // dimension
 
         // ORACLES
@@ -70,6 +71,7 @@ fn deploy_unconstrained_contract() -> IOracleConsensusNDDispatcher {
         2, // required_majority
         2, // n_failing_oracles
         0, // constrained
+        (wad() * 3_i128).as_unsigned_felt(), // unconstrained_max_spread
         2, // dimension
 
         // ORACLES
