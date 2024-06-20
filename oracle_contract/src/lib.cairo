@@ -7,6 +7,4 @@ mod sort;
 mod structs;
 
 mod contract_1d_constrained;
-mod contract_nd_constrained;
-
-mod contract_nd_unconstrained;
+mod contract_nd;

@@ -30,7 +30,7 @@ In this project, we consider $N$ oracles' predictions of the same phenomenon: $(
 We want to approximate the value of $e$ and estimate the credibility of this estimation. \
 For basic law distributions, the visual intution is to characterize the $e$ value as the mode / center of the spike. 
 
-The kind of models that fit in our modelization can be simplified into fuzzy logic : \
+The kind of models that fit in the modelization constrained over $C$ can be simplified into fuzzy logic : \
 A `stress level` valued in $]0;1[$ would make as much sense in `{low, mid-low, moderate, mid-high, high}` \
 Therefore, the accuracy of the consensus matters more than the precision of its value.
 
@@ -38,7 +38,7 @@ Therefore, the accuracy of the consensus matters more than the precision of its 
 
 Let's say we want to create smart contracts based on the psychology of investors in Bitcoin.
 We can base our analysis on the following criteria:
-- We model the psychology of an individual as a vector of bases:
+- We model the psychology of an individual as a vector of base:
 (stress, anger, euphoria) with values between $0$ and $1$.
 - We consider the following two groups: (crowd, famous investors)
 
@@ -47,7 +47,10 @@ An oracle will predict a vector with the following labeled coordinates: \
 
 We consider 3 societies (A, B, C) and 10 oracles with 5 from A, 3 from B, and 2 from C.
 
-It is assumed that oracles from different societies can use different algorithms.
+It is assumed that oracles from different societies can use different algorithms. \
+More precisely, we expect that society do not use the same sources of informations for its oracles. \
+If a source of information get hacked, we want to have an on-chain certificate that only a sub part of \
+the oracles coming from a society are corrupted.
 
 ## Unimodal Modeling
 
@@ -70,6 +73,10 @@ Experiments are done in ``oracle_contract/drafts/beta_kumaraswamy_algorithm_demo
 Those laws seem more to fit the basic intution we have on the distribution of predictions. \
 The essence will now be modelized by the mode of the distribution.
 
+Under the Failing Oracale assumption below, the median is a robust estimator :
+
+![](../resources/beta_law_with_failing_oracles.png)
+
 ### Unconstrained, over $R^M$
 
 For regular oracles that predicts values over $R^M$ (eg: price of a barrel of oil, BTC/USD, $\dots$) the gaussian noise modelisation works better.
@@ -84,6 +91,14 @@ In a second time we might even consider a case with $K$ instances of $e$ with $\
 Each oracle will have a probability of $p_k$ to follow $\mu_k$. Mathematicaly :
 - $w \sim Mult(1, p)$ ie. $w$ is a discrete random variable of law $p$
 - $f(x) \sim \sum^K_k \mathcal{N}(e_k, \sigma_k) \times \mathbb{1}_w$ if $\mu_k$ are gaussians
+
+Example :
+- Multiple sources of informations that converge to different pole.
+    - Question: how should we interprate this case ?
+        - Take the biggest pole ?
+        - Average of all poles ?
+
+Currently, we do not provid an algorithm for this specific modelization.
 
 ## Failing Oracle
 
@@ -152,4 +167,8 @@ The oracle is replaced.
 When an admin change its proposition, he loose all its votes. \
 When an oracle is replaced, the vote matrix is reinitialized to its default value$
 
+## Benchmark
 
+### Oracles/Fails = 6/2 
+
+### Oracles/Fails = 20/2 

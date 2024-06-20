@@ -2,14 +2,17 @@
 
 - Constrained state space predictions
     - ``contract_1d_constrained.cairo`` (1DC) : Predictions over $]0;1[$
-    - ``contract_nd_constrained.cairo`` (NDC) : Predictions over $]0;1[^M$
+        - ``fn update_consensus``
+    - ``contract_nd.cairo`` (NDC) : Predictions over $]0;1[^M$
+        - ``fn update_constrained_consensus``
     - We assume a bêta probability law.
         - Essence estimator : 
             - median to identify reliables oracles
             - then : median on reliables oracles
         - Reliability estimator : variance / 2
 - Unconstrained state space predictions
-    - ``contract_nd_unconstrained.cairo`` (NDU) : Predictions over $\mathbb{R}^M$
+    - ``contract_nd.cairo`` (NDU) : Predictions over $\mathbb{R}^M$
+        - ``fn update_unconstrained_consensus``
     - We assume a gaussian probability law.
         - Essence estimator :
             - median on reliability check
@@ -32,14 +35,23 @@ Tests :
 scarb cairo-test
 ```
 
-Execution :
+Sepolia execution with a configured starkli :
+
 ```bash
-starkli ...
+starkli declare target/dev/<WANTED_CONTRACT>.json --compiler-version=2.4.0
+starkli deploy <CONTRACT_ADDRESS> <constructor as felt252>
 ```
 
-## Misc
+```bash
+starkli call <CONTRACT_ADDRESS> <arguments as felt252> 
+starkli invoke <CONTRACT_ADDRESS> <arguments as felt252> 
+```
 
-To manage floats, we use the wad convention on ``i128``.
+## Code details
+
+To manage floats, we use the wad convention on ``i128``. 
+- details in : ``signed_wad_ray.cairo``
+- The signed wad implementation is based on the code from alexandria.
 
 Currently, the implementations are uncrypted and can be called by anyone.
 A payment system will be added in the future.

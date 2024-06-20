@@ -2,7 +2,7 @@ use starknet::ContractAddress;
 use oracle_consensus::math::WadVector;
 
 #[starknet::interface]
-trait IOracleConsensusNDC<TContractState> {
+trait IOracleConsensusND<TContractState> {
     fn update_prediction(ref self: TContractState, prediction : WadVector);
     
     fn consensus_active(self: @TContractState) -> bool;
@@ -26,7 +26,7 @@ trait IOracleConsensusNDC<TContractState> {
 
 
 #[starknet::contract]
-mod OracleConsensusNDC {
+mod OracleConsensusND {
     use starknet::ContractAddress;
 
     // use core::option::Option::{None, Some};
@@ -76,6 +76,7 @@ mod OracleConsensusNDC {
         n_failing_oracles : usize,
         n_oracles : usize,
         dimension : usize,
+        constrained : bool,
 
         oracles_info: LegacyMap<usize, OracleInfo>,
         oracles_values : LegacyMap<(usize, usize), i128>,
@@ -202,6 +203,7 @@ mod OracleConsensusNDC {
         required_majority : usize,
         n_failing_oracles : usize, 
         
+        constrained : bool,
         dimension : usize,
         oracles: Span<ContractAddress>,
     ) {
@@ -216,6 +218,7 @@ mod OracleConsensusNDC {
         self.enable_oracle_replacement.write(enable_oracle_replacement);
         self.required_majority.write(required_majority);
         self.n_failing_oracles.write(n_failing_oracles);
+        self.constrained.write(constrained);
         
         write_consensus(ref self, @empty_vector(dimension));
         self.consensus_reliability_first_pass.write(0_i128);
@@ -317,7 +320,59 @@ mod OracleConsensusNDC {
     }
 
 
-    fn update_consensus(ref self: ContractState, oracle_index : @usize, prediction : @WadVector) {
+    fn update_unconstrained_consensus(ref self: ContractState, oracle_index : @usize, prediction : @WadVector) {
+        update_a_single_oracle(ref self, oracle_index, prediction);
+
+        if self.n_oracles.read() != self.n_active_oracles.read() {
+            return();
+        }
+        
+        // ----------------------------
+        // FIRST PASS
+        // ----------------------------
+
+        let oracles_values = compute_oracle_values(@self, false);
+
+        // ESSENCE
+
+        let essence_first_pass = nd_smooth_median(@oracles_values);
+
+        // quadratic_risk
+     
+        let quadratic_risk_values = nd_quadratic_risk(@oracles_values, @essence_first_pass);
+        
+        // TODO: NORMALIZATION
+        let reliability_first_pass = sqrt(average(@quadratic_risk_values));
+        // interval_check(@reliability_first_pass);
+        
+        self.consensus_reliability_first_pass.write(reliability_first_pass);
+        let ordered_oracles = IndexedMergeSort::sort(@quadratic_risk_values);
+        update_oracles_reliability(ref self, @ordered_oracles);
+
+        // ----------------------------
+        // SECOND PASS
+        // ----------------------------
+        
+        let reliable_values = compute_oracle_values(@self, true);
+        
+        // ESSENCE
+
+        let essence = nd_average(@reliable_values);
+        write_consensus(ref self, @essence);
+
+        // quadratic_risk
+        let quadratic_risk_values = nd_quadratic_risk(@reliable_values, @essence_first_pass);
+        
+        // TODO: NORMALIZATION
+        let reliability_second_pass = sqrt(average(@quadratic_risk_values));
+        // interval_check(@reliability_second_pass);
+        
+        self.consensus_reliability_second_pass.write(reliability_second_pass);
+        
+        self.consensus_active.write(true);        
+    }
+
+    fn update_constrained_consensus(ref self: ContractState, oracle_index : @usize, prediction : @WadVector) {
         update_a_single_oracle(ref self, oracle_index, prediction);
 
         if self.n_oracles.read() != self.n_active_oracles.read() {
@@ -454,13 +509,18 @@ mod OracleConsensusNDC {
 
 
     #[abi(embed_v0)]
-    impl OracleConsensusImpl of super::IOracleConsensusNDC<ContractState> {
+    impl OracleConsensusImpl of super::IOracleConsensusND<ContractState> {
         fn update_prediction(ref self: ContractState, prediction : WadVector) {
-            nd_interval_check(@prediction);
+            if self.constrained.read() { nd_interval_check(@prediction); }
 
             match find_oracle_index(@self, @get_caller_address()) {
                 Option::None => assert(false, 'not an oracle'),
-                Option::Some(oracle_index) => update_consensus(ref self, @oracle_index, @prediction)
+                Option::Some(oracle_index) => 
+                if self.constrained.read() { 
+                    update_constrained_consensus(ref self, @oracle_index, @prediction)
+                } else {
+                    update_unconstrained_consensus(ref self, @oracle_index, @prediction)
+                }
             }
 
         }
