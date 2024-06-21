@@ -5,6 +5,7 @@ use core::fmt::{Display, Formatter, Error};
 trait SignedBasics {
     fn is_positive(self : @i128) -> bool;
     fn as_unsigned(self : @i128) -> u128;
+    fn as_felt(self : @i128) -> felt252;
     fn as_unsigned_felt(self : @i128) -> felt252;
     fn abs(self: @i128) -> i128;
 }
@@ -22,6 +23,10 @@ impl I128SignedBasics of SignedBasics {
         }
     }
 
+    fn as_felt(self : @i128) -> felt252 {
+        (*self).try_into().unwrap()
+    }
+
     fn as_unsigned_felt(self : @i128) -> felt252 {
         self.as_unsigned().try_into().unwrap()
     }
@@ -35,14 +40,18 @@ impl I128SignedBasics of SignedBasics {
     }
 }
 
-fn unsigned_to_signed(x: u128) -> i128{
-    x.try_into().unwrap()
+fn unsigned_to_signed(x: @u128) -> i128 {
+    (*x).try_into().unwrap()
+}
+
+fn felt_to_i128(x : @felt252) -> i128 {
+    (*x).try_into().unwrap()
 }
 
 
 impl I128Div of Div<i128> {
     fn div(lhs: i128, rhs: i128) -> i128 {
-        let unsigned_div = unsigned_to_signed(lhs.as_unsigned() / rhs.as_unsigned());
+        let unsigned_div = unsigned_to_signed(@(lhs.as_unsigned() / rhs.as_unsigned()));
         let positive = lhs.is_positive() == rhs.is_positive();
 
         if positive {

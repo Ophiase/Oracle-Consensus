@@ -73,3 +73,22 @@ fn test_sqrt() {
 //     assert!(z == 22000000000000000000_i128, "error");
 //     // println!("{}", z);
 // }
+
+// #[test]
+// fn test_signed_conversions() {
+//     let x : i128 = 15_i128 * wad();
+
+//     println!("{}", wad_to_string(x, 3));
+
+//     let y : u128 = x.as_unsigned_unsafe();
+//     println!("{}", y);
+
+//     let z : i128 = unsigned_to_signed(y);
+//     println!("{}", wad_to_string(z, 3));
+
+//     let felt : felt252 = (-1_i128).into();
+//     println!("{}", felt);
+
+//     let a : i128 = felt.try_into().unwrap();
+//     println!("{}", a);
+// }
