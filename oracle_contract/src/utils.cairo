@@ -2,11 +2,14 @@ use oracle_consensus::structs::Oracle;
 use alexandria_math::pow;
 use starknet::ContractAddress;
 use oracle_consensus::signed_wad_ray::{
-    I128Div, I128Display, I128SignedBasics, unsigned_to_signed,
+    I128Div, I128Display, I128SignedBasics, unsigned_to_signed, felt_to_i128,
     ray_div, ray_mul, wad_div, wad_mul, ray_to_wad, wad_to_ray, ray, wad, half_ray, half_wad
 };
 
-use oracle_consensus::math::WadVector;
+use oracle_consensus::math::{
+    WadVector, FeltVector,
+    IWadVectorBasics, IFeltVectorBasics
+};
 
 pub fn show_array<T, +Copy<T>, +Drop<T>, +core::fmt::Display<T>>(
     array: Array<T>) {
@@ -88,6 +91,40 @@ pub fn show_nd_oracle_array(
         let (address, value, enabled, reliable) = *array.at(i);
 
         let mut result = wadvector_to_string(value);
+        if show_address { result = contractaddress_to_bytearray(address) + " : " + result; }
+        if show_enabled { result = format!("{}, e:{}", result, enabled); }
+        if show_reliable { result = format!("{}, r:{}", result, reliable); }
+
+        result = "(" + result + ")";
+
+        if jump_line {
+            println!("{}", result);
+        } else {
+            print!("{}", result);
+        }
+
+        i += 1;
+    };
+}
+
+
+pub fn show_nd_felt_oracle_array(
+    array: Array<(ContractAddress, FeltVector, bool, bool)>, 
+    show_address : bool, show_enabled : bool, show_reliable : bool, jump_line : bool
+    ) {
+    
+    let mut i = 0;
+    // print!("[");
+    loop {
+        if i == array.len() {
+            // println!("]");
+            println!("");
+            break();
+        }
+
+        let (address, value, enabled, reliable) = *array.at(i);
+
+        let mut result = wadvector_to_string(value.as_wad());
         if show_address { result = contractaddress_to_bytearray(address) + " : " + result; }
         if show_enabled { result = format!("{}, e:{}", result, enabled); }
         if show_reliable { result = format!("{}, r:{}", result, reliable); }
@@ -218,6 +255,10 @@ fn lfill(string : ByteArray, n_digits: usize, character: ByteArray) -> ByteArray
     } else {
         lfill(character.clone() + string, n_digits, character)
     }
+}
+
+pub fn felt_wad_to_string(value: felt252, n_digits: usize) -> ByteArray {
+    wad_to_string(felt_to_i128(@value), n_digits)
 }
 
 // not optimized, for debug purpose

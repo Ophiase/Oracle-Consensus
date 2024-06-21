@@ -1,20 +1,20 @@
 use starknet::ContractAddress;
-use oracle_consensus::math::WadVector;
+use oracle_consensus::math::FeltVector;
 
 #[starknet::interface]
 trait IOracleConsensusNDS<TContractState> {
-    fn update_prediction(ref self: TContractState, prediction : WadVector);
+    fn update_prediction(ref self: TContractState, prediction : FeltVector);
     
     fn consensus_active(self: @TContractState) -> bool;
-    fn get_consensus_value(self: @TContractState) -> WadVector;
-    fn get_first_pass_consensus_reliability(self: @TContractState) -> i128;
-    fn get_second_pass_consensus_reliability(self: @TContractState) -> i128;
+    fn get_consensus_value(self: @TContractState) -> FeltVector;
+    fn get_first_pass_consensus_reliability(self: @TContractState) -> felt252;
+    fn get_second_pass_consensus_reliability(self: @TContractState) -> felt252;
 
     fn get_admin_list(self: @TContractState) -> Array<ContractAddress>;
     fn get_oracle_list(self: @TContractState) -> Array<ContractAddress>;
     
     // only admins can get call this one
-    fn get_oracle_value_list(self: @TContractState) -> Array<(ContractAddress, WadVector, bool, bool)>;
+    fn get_oracle_value_list(self: @TContractState) -> Array<(ContractAddress, FeltVector, bool, bool)>;
     fn get_predictions_dimension(self: @TContractState) -> usize;
 
     fn update_proposition(ref self: TContractState, proposition : Option<(usize, ContractAddress)>);
@@ -48,12 +48,13 @@ mod OracleConsensusNDS {
 
     use oracle_consensus::math::{
         median, smooth_median, quadratic_risk, average, interval_check, sqrt, WadVector,
-        nd_median, nd_smooth_median, nd_quadratic_risk, nd_average, nd_interval_check, min
+        nd_median, nd_smooth_median, nd_quadratic_risk, nd_average, nd_interval_check, min,
+        FeltVector, IWadVectorBasics, IFeltVectorBasics
         };
     use oracle_consensus::sort::IndexedMergeSort;
     use oracle_consensus::utils::{fst, snd, contractaddress_to_bytearray, wad_to_string};
     use oracle_consensus::signed_wad_ray::{
-        I128Div, I128Display, I128SignedBasics, unsigned_to_signed,
+        I128Div, I128Display, I128SignedBasics, unsigned_to_signed, felt_to_i128,
         ray_div, ray_mul, wad_div, wad_mul, ray_to_wad, wad_to_ray, ray, wad, half_ray, half_wad
     };
     use alexandria_math::{pow};
@@ -205,7 +206,7 @@ mod OracleConsensusNDS {
         n_failing_oracles : usize, 
         
         constrained : bool,
-        unconstrained_max_spread: i128,
+        unconstrained_max_spread: felt252,
         
         dimension : usize,
         oracles: Span<ContractAddress>,
@@ -223,7 +224,9 @@ mod OracleConsensusNDS {
         self.n_failing_oracles.write(n_failing_oracles);
 
         self.constrained.write(constrained);
-        self.unconstrained_max_spread.write(unconstrained_max_spread);
+        self.unconstrained_max_spread.write(
+            felt_to_i128(@unconstrained_max_spread)
+        );
 
         write_consensus(ref self, @empty_vector(dimension));
         self.consensus_reliability_first_pass.write(0_i128);
@@ -521,16 +524,18 @@ mod OracleConsensusNDS {
 
     #[abi(embed_v0)]
     impl OracleConsensusImpl of super::IOracleConsensusNDS<ContractState> {
-        fn update_prediction(ref self: ContractState, prediction : WadVector) {
-            if self.constrained.read() { nd_interval_check(@prediction); }
+        fn update_prediction(ref self: ContractState, prediction : FeltVector) {
+            let wad_prediction = prediction.as_wad();
+
+            if self.constrained.read() { nd_interval_check(@wad_prediction); }
 
             match find_oracle_index(@self, @get_caller_address()) {
                 Option::None => assert(false, 'not an oracle'),
                 Option::Some(oracle_index) => 
                 if self.constrained.read() { 
-                    update_constrained_consensus(ref self, @oracle_index, @prediction)
+                    update_constrained_consensus(ref self, @oracle_index, @wad_prediction)
                 } else {
-                    update_unconstrained_consensus(ref self, @oracle_index, @prediction)
+                    update_unconstrained_consensus(ref self, @oracle_index, @wad_prediction)
                 }
             }
 
@@ -540,26 +545,26 @@ mod OracleConsensusNDS {
             self.consensus_active.read()
         }
         
-        fn get_consensus_value(self: @ContractState) -> WadVector {
+        fn get_consensus_value(self: @ContractState) -> FeltVector {
             let dim = self.dimension.read();
             let mut result = ArrayTrait::new();
             let mut i = 0;
             loop {
                 if i == dim { break(); }
-                result.append(self.consensus_value.read(i));
+                result.append(self.consensus_value.read(i).as_felt());
                 i += 1;
             };
             result.span()
         }
 
         // return 0 until all the oracles have voted once
-        fn get_first_pass_consensus_reliability(self: @ContractState) -> i128 {
-            self.consensus_reliability_first_pass.read()
+        fn get_first_pass_consensus_reliability(self: @ContractState) -> felt252 {
+            self.consensus_reliability_first_pass.read().as_felt()
         }
 
         // return 0 until all the oracles have voted once
-        fn get_second_pass_consensus_reliability(self: @ContractState) -> i128 {
-            self.consensus_reliability_second_pass.read()
+        fn get_second_pass_consensus_reliability(self: @ContractState) -> felt252 {
+            self.consensus_reliability_second_pass.read().as_felt()
         }
         
         fn update_proposition(ref self: ContractState, proposition : Option<(usize, ContractAddress)>) {
@@ -654,7 +659,7 @@ mod OracleConsensusNDS {
             result
         }
 
-        fn get_oracle_value_list(self: @ContractState) -> Array<(ContractAddress, WadVector, bool, bool)> {
+        fn get_oracle_value_list(self: @ContractState) -> Array<(ContractAddress, FeltVector, bool, bool)> {
             assert(is_admin(self, @get_caller_address()), 'not admin');
 
             let mut result = ArrayTrait::new();
@@ -665,7 +670,7 @@ mod OracleConsensusNDS {
                 if i == n_oracles { break(); }
                 
                 let oracle_infos : OracleInfo = self.oracles_info.read(i);
-                let vector : WadVector = specific_oracle_value(self, i);
+                let vector : FeltVector = specific_oracle_value(self, i).as_felt();
 
                 result.append((
                     oracle_infos.address,

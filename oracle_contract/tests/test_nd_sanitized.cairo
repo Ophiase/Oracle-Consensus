@@ -9,21 +9,21 @@ use alexandria_math::{pow};
 use alexandria_sorting::{QuickSort, MergeSort};
     
 use oracle_consensus::math::{
-    median, sqrt, interval_check, WadVector
+    median, sqrt, interval_check, FeltVector, WadVector, IFeltVectorBasics, IWadVectorBasics
 };
 use oracle_consensus::utils::{
     show_array, show_address_array,
     show_replacement_propositions,
-    show_nd_oracle_array, wad_to_string,
-    wadvector_to_string
+    show_nd_felt_oracle_array, felt_wad_to_string,
+    wadvector_to_string,
 };
 use oracle_consensus::structs::{
     Oracle, VoteCoordinate
 };
-use oracle_consensus::contract_nd::{
-    OracleConsensusND,
-    IOracleConsensusNDDispatcher,
-    IOracleConsensusNDDispatcherTrait
+use oracle_consensus::contract_nd_sanitized::{
+    OracleConsensusNDS,
+    IOracleConsensusNDSDispatcher,
+    IOracleConsensusNDSDispatcherTrait
 };
 
 // ==============================================================================
@@ -32,7 +32,7 @@ fn util_felt_addr(addr_felt: felt252) -> ContractAddress {
     addr_felt.try_into().unwrap()
 }
 
-fn deploy_constrained_contract() -> IOracleConsensusNDDispatcher {
+fn deploy_constrained_contract() -> IOracleConsensusNDSDispatcher {
     let mut calldata = array![
         // admins
         3,
@@ -52,16 +52,16 @@ fn deploy_constrained_contract() -> IOracleConsensusNDDispatcher {
     ];
     
     let (address0, _) = deploy_syscall(
-        OracleConsensusND::TEST_CLASS_HASH.try_into().unwrap(), 
+        OracleConsensusNDS::TEST_CLASS_HASH.try_into().unwrap(), 
         0, calldata.span(), false
     )
         .unwrap();
-    let contract0 = IOracleConsensusNDDispatcher { contract_address: address0 };
+    let contract0 = IOracleConsensusNDSDispatcher { contract_address: address0 };
     
     contract0
 }
 
-fn deploy_unconstrained_contract() -> IOracleConsensusNDDispatcher {
+fn deploy_unconstrained_contract() -> IOracleConsensusNDSDispatcher {
     let mut calldata = array![
         // admins
         3,
@@ -85,18 +85,18 @@ fn deploy_unconstrained_contract() -> IOracleConsensusNDDispatcher {
     ];
     
     let (address0, _) = deploy_syscall(
-        OracleConsensusND::TEST_CLASS_HASH.try_into().unwrap(), 
+        OracleConsensusNDS::TEST_CLASS_HASH.try_into().unwrap(), 
         0, calldata.span(), false
     )
         .unwrap();
-    let contract0 = IOracleConsensusNDDispatcher { contract_address: address0 };
+    let contract0 = IOracleConsensusNDSDispatcher { contract_address: address0 };
     
     contract0
 }
 
 // ==============================================================================
 
-fn fill_oracle_predictions(dispatcher : IOracleConsensusNDDispatcher, predictions : @Array<WadVector>) {
+fn fill_oracle_predictions(dispatcher : IOracleConsensusNDSDispatcher, predictions : @Array<FeltVector>) {
     let mut i = 0;
 
     let oracles = dispatcher.get_oracle_list();
@@ -132,7 +132,7 @@ fn test_constrained_basic_execution() {
         show_address_array(dispatcher.get_admin_list());
         show_address_array(dispatcher.get_oracle_list());
         show_replacement_propositions(dispatcher.get_replacement_propositions());
-        show_nd_oracle_array(dispatcher.get_oracle_value_list(), true, true, true, true);
+        show_nd_felt_oracle_array(dispatcher.get_oracle_value_list(), true, true, true, true);
         println!("----------------------");
     }
 
@@ -146,7 +146,7 @@ fn test_constrained_basic_execution() {
 
     // auto generated distribution (essence = [0.4, 0.2]) with high dispersity
     // in drafts/beta_kumaraswamy_algorithm_demo.ipynb
-    let predictions : Array<WadVector> = array![
+    let predictions : Array<FeltVector> = array![
         array![492954726014948928, 334814622544049920].span(), 
         array![437692571090454848, 410445303499263744].span(), 
         array![967794129545080320, 564219801545577856].span(), 
@@ -175,12 +175,12 @@ fn test_constrained_basic_execution() {
     starknet::testing::set_contract_address(_admin_0);
 
     if VERBOSE {
-        show_nd_oracle_array(dispatcher.get_oracle_value_list(), true, true, true, true);
+        show_nd_felt_oracle_array(dispatcher.get_oracle_value_list(), true, true, true, true);
         println!("----------------------");
         println!("consensus_active : {}", dispatcher.consensus_active());
-        println!("get_consensus_value : {}", wadvector_to_string(dispatcher.get_consensus_value()));
-        println!("get_first_pass_consensus_reliability : {}", wad_to_string(dispatcher.get_first_pass_consensus_reliability(), 3));
-        println!("get_second_pass_consensus_reliability : {}", wad_to_string(dispatcher.get_second_pass_consensus_reliability(), 3));
+        println!("get_consensus_value : {}", wadvector_to_string(dispatcher.get_consensus_value().as_wad()));
+        println!("get_first_pass_consensus_reliability : {}", felt_wad_to_string(dispatcher.get_first_pass_consensus_reliability(), 3));
+        println!("get_second_pass_consensus_reliability : {}", felt_wad_to_string(dispatcher.get_second_pass_consensus_reliability(), 3));
         println!("----------------------");
     }
 
@@ -205,7 +205,7 @@ fn test_constrained_basic_execution() {
     if VERBOSE {
         println!("----------------------");
         show_replacement_propositions(dispatcher.get_replacement_propositions());
-        show_nd_oracle_array(dispatcher.get_oracle_value_list(), true, true, true, true);
+        show_nd_felt_oracle_array(dispatcher.get_oracle_value_list(), true, true, true, true);
         println!("----------------------");
     }
 
@@ -235,7 +235,7 @@ fn test_unconstrained_basic_execution() {
         show_address_array(dispatcher.get_admin_list());
         show_address_array(dispatcher.get_oracle_list());
         show_replacement_propositions(dispatcher.get_replacement_propositions());
-        show_nd_oracle_array(dispatcher.get_oracle_value_list(), true, true, true, true);
+        show_nd_felt_oracle_array(dispatcher.get_oracle_value_list(), true, true, true, true);
         println!("----------------------");
     }
 
@@ -250,7 +250,7 @@ fn test_unconstrained_basic_execution() {
     // auto generated distribution with high dispersity
     // mu = [20, 12] | sigma = [3, 2]
     // in drafts/gaussian_distribution_for_tests.ipynb
-    let predictions : Array<WadVector> = array![
+    let predictions : Array<FeltVector> = array![
         array![20202804800890433536, 16401132114237284352].span(), 
         array![25630344446076841984, 13501687730243987456].span(), 
         array![22210028458728640512, 7472938283472651264].span(), 
@@ -277,12 +277,12 @@ fn test_unconstrained_basic_execution() {
     starknet::testing::set_contract_address(_admin_0);
 
     if VERBOSE {
-        show_nd_oracle_array(dispatcher.get_oracle_value_list(), true, true, true, true);
+        show_nd_felt_oracle_array(dispatcher.get_oracle_value_list(), true, true, true, true);
         println!("----------------------");
         println!("consensus_active : {}", dispatcher.consensus_active());
-        println!("get_consensus_value : {}", wadvector_to_string(dispatcher.get_consensus_value()));
-        println!("get_first_pass_consensus_reliability : {}", wad_to_string(dispatcher.get_first_pass_consensus_reliability(), 3));
-        println!("get_second_pass_consensus_reliability : {}", wad_to_string(dispatcher.get_second_pass_consensus_reliability(), 3));
+        println!("get_consensus_value : {}", wadvector_to_string(dispatcher.get_consensus_value().as_wad()));
+        println!("get_first_pass_consensus_reliability : {}", felt_wad_to_string(dispatcher.get_first_pass_consensus_reliability(), 3));
+        println!("get_second_pass_consensus_reliability : {}", felt_wad_to_string(dispatcher.get_second_pass_consensus_reliability(), 3));
         println!("----------------------");
     }
 
@@ -308,7 +308,7 @@ fn test_unconstrained_basic_execution() {
     if VERBOSE {
         println!("----------------------");
         show_replacement_propositions(dispatcher.get_replacement_propositions());
-        show_nd_oracle_array(dispatcher.get_oracle_value_list(), true, true, true, true);
+        show_nd_felt_oracle_array(dispatcher.get_oracle_value_list(), true, true, true, true);
         println!("----------------------");
     }
 

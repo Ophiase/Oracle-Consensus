@@ -1,6 +1,6 @@
 
 use oracle_consensus::signed_wad_ray::{
-    I128Div, I128Display, I128SignedBasics, unsigned_to_signed,
+    I128Div, I128Display, I128SignedBasics, unsigned_to_signed, felt_to_i128,
     ray_div, ray_mul, wad_div, wad_mul, ray_to_wad, wad_to_ray, ray, wad, half_ray, half_wad
 };
 use alexandria_math::{pow};    
@@ -10,6 +10,43 @@ use oracle_consensus::utils::{wad_to_string};
 // ==============================================================================
 
 type WadVector = Span<i128>;
+type FeltVector = Span<felt252>;
+
+trait IWadVectorBasics {
+    fn as_felt(self: @WadVector) -> FeltVector;
+}
+
+trait IFeltVectorBasics {
+    fn as_wad(self: @FeltVector) -> WadVector;
+}
+
+impl WadVectorBasics of IWadVectorBasics {
+    fn as_felt(self: @WadVector) -> FeltVector {
+        let mut result = ArrayTrait::new();
+        let mut i = 0;
+        loop {
+            if i == (*self).len() { break(); }
+            result.append((*(*self).at(i)).try_into().unwrap());
+            i += 1;
+        };
+        result.span()
+    }
+}
+
+impl FeltVectorBasics of IFeltVectorBasics {
+    fn as_wad(self: @FeltVector) -> WadVector {
+        let mut result = ArrayTrait::new();
+        let mut i = 0;
+        loop {
+            if i == (*self).len() { break(); }
+            result.append((*(*self).at(i)).try_into().unwrap());
+            i += 1;
+        };
+        result.span()
+    }
+}
+
+// ==============================================================================
 
 // Transpose an Array of vectors
 pub fn nd_array_split(array : @Array<WadVector>) -> Array<Array<i128>> {
