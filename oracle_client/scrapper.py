@@ -1,5 +1,6 @@
 import sqlite3
 import time
+from datetime import datetime, timezone
 from selenium import webdriver
 from selenium.webdriver.firefox.service import Service
 from selenium.webdriver.common.by import By
@@ -54,10 +55,29 @@ def save_to_db(comments: List[str]):
     conn.commit()
     conn.close()
 
+def get_last_comment_time():
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute('SELECT timestamp FROM comments ORDER BY id DESC LIMIT 1')
+    last_time = c.fetchone()
+    conn.close()
+    if last_time is None :
+        return last_time
+    return last_time[0]
+
 def main():
     init_db()
     driver = init_driver()
 
+    last_comment_time = get_last_comment_time()
+    if last_comment_time:
+        last_comment_time = datetime.strptime(last_comment_time, '%Y-%m-%d %H:%M:%S')
+        time_since_last_comment = datetime.now().astimezone(tz=timezone.utc).replace(tzinfo=None) - last_comment_time
+        if time_since_last_comment.total_seconds() < REFRESH_INTERVAL:
+            time_to_wait = REFRESH_INTERVAL - time_since_last_comment.total_seconds()
+            print(f"Please wait: {time_to_wait} seconds")
+            time.sleep(time_to_wait)
+    
     while True:
         js = find_js()
         comments = scrap(driver, js)
