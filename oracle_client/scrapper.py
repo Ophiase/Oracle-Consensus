@@ -1,4 +1,5 @@
 import sqlite3
+import argparse
 import time
 from datetime import datetime, timezone
 from selenium import webdriver
@@ -14,7 +15,7 @@ GECKODRIVER_PATH = '~/.cargo/bin/geckodriver'
 JS_PATH = "hn_scrapper.js"
 URL = "https://news.ycombinator.com/newcomments"
 DB_PATH = "db.sqlite"
-REFRESH_INTERVAL = 10 * 60  # each 10 minutes
+DEFAULT_REFRESH_INTERVAL = 10 * 60  # each 10 minutes
 
 def init_driver():
     options = Options()
@@ -65,7 +66,7 @@ def get_last_comment_time():
         return last_time
     return last_time[0]
 
-def main():
+def main(refresh_interval):
     init_db()
     driver = init_driver()
 
@@ -73,8 +74,8 @@ def main():
     if last_comment_time:
         last_comment_time = datetime.strptime(last_comment_time, '%Y-%m-%d %H:%M:%S')
         time_since_last_comment = datetime.now().astimezone(tz=timezone.utc).replace(tzinfo=None) - last_comment_time
-        if time_since_last_comment.total_seconds() < REFRESH_INTERVAL:
-            time_to_wait = REFRESH_INTERVAL - time_since_last_comment.total_seconds()
+        if time_since_last_comment.total_seconds() < refresh_interval:
+            time_to_wait = refresh_interval - time_since_last_comment.total_seconds()
             print(f"Please wait: {time_to_wait} seconds")
             time.sleep(time_to_wait)
     
@@ -82,9 +83,14 @@ def main():
         js = find_js()
         comments = scrap(driver, js)
         save_to_db(comments)
-        pprint(comments[0])
+        # pprint(comments[0])
+        print(f"- {datetime.now()} Fetched new informations ...")
         
-        time.sleep(REFRESH_INTERVAL)
+        time.sleep(refresh_interval)
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description="Hacker News comments scraper")
+    parser.add_argument('--rate', type=int, default=DEFAULT_REFRESH_INTERVAL, help='Refresh interval in seconds')
+    args = parser.parse_args()
+    print(f"Serveur started with a refresh rate of : {args.rate} seconds")
+    main(args.rate)
