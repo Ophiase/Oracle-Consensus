@@ -84,7 +84,7 @@ def read_window_from_db(position):
         ''')
     
     result = [ x[0] for x in c.fetchall() ]
-    print("fetched data from db:" + str(len(result)))
+    print("fetched data from db: " + str(len(result)))
     conn.close()
     return result, position
 
