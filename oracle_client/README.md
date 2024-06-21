@@ -3,7 +3,7 @@
 In this folder there are 3 scripts :
 - ``scrapper.py`` :
     - Look for new comments on Hackernews each 5 minutes and add them to the database.
-- ``oracle_scheduler.py`` :
+- ``main.py`` : Web demonstration of the smart contract on Sepolia.
     - Simulate oracles
         - Use sentiment analysis to evaluate metrics
     - Two modes :
@@ -14,8 +14,9 @@ In this folder there are 3 scripts :
 ## Installation
 
 Required : 
+- firefox
 - cargo : geckodriver
-- python : selenium, transformers, eel
+- python3 : selenium, transformers, eel
 
 ## Execution
 
