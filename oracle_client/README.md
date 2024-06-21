@@ -15,11 +15,11 @@ In this folder there are 3 scripts :
 
 Required : 
 - cargo : geckodriver
-- python : selenium, transformers
+- python : selenium, transformers, eel
 
 ## Execution
 
 ```bash
 python3 scrapper.py # real time database
-python3 oracle_scheduler.py # simulate the oracles using real datas
+python3 main.py # simulate the oracles using real datas
 ```

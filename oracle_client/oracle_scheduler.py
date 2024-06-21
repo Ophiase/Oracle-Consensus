@@ -1,4 +1,3 @@
-import argparse
 from pprint import pprint
 import random
 import sqlite3
@@ -8,36 +7,9 @@ import eel
 import numpy as np
 from transformers import pipeline
 from typing import List
-import subprocess
-import atexit
-import web_interface
-from web_interface import init_server
-
-DB_PATH = "db.sqlite"
-N_ORACLES = 7
-N_FAILING_ORACLES = 2
-
-SIMULATION_REFRESH_RATE = 5 # seconds
-
-# Simulation mode : 30 texts inputs each time (= number of elements on the comment page)
-# Live mode : 30 last texts inputs
-PREDICTION_WINDOW = 30
-BOOTSTRAPING_SUBSET = 20 # oracle average on 10 elements of the prediction window
-
-# https://huggingface.co/SamLowe/roberta-base-go_emotions
-LABELS = {
-    'optimism' : None,
-    'anger' : None,
-    'annoyance' : None,
-    'excitement' : None,
-    'nervousness' : None,
-    'remorse' : None
-}
-
-LABELS_KEYS = list(LABELS.keys())
-print(LABELS_KEYS)
-
-DIMENSION = len(LABELS)
+import time
+from datetime import datetime, timezone
+from common import globalState, DB_PATH, N_ORACLES, N_FAILING_ORACLES, SIMULATION_REFRESH_RATE, PREDICTION_WINDOW, BOOTSTRAPING_SUBSET, LABELS, LABELS_KEYS, DIMENSION
 
 # ---------------------------------------------------
 
@@ -60,16 +32,6 @@ def sentiment_analysis(classifier, inputs : List[str]) -> List[np.array]:
 
 # ---------------------------------------------------
 
-def read_all_from_db():
-    conn = sqlite3.connect(DB_PATH)
-    c = conn.cursor()
-    c.execute('SELECT * FROM comments')
-    rows = c.fetchall()
-    conn.close()
-
-    for row in rows:
-        print(row)
-
 def read_window_from_db(position):
     conn = sqlite3.connect(DB_PATH)
     
@@ -85,15 +47,17 @@ def read_window_from_db(position):
     c = conn.cursor()
     c.execute(
         f'''
-        SELECT comment FROM comments
+        SELECT comment, timestamp FROM comments
         WHERE id >= {position}
         ORDER BY id ASC LIMIT 30
         ''')
     
-    result = [ x[0] for x in c.fetchall() ]
-    print("fetched data from db: " + str(len(result)))
+    result = c.fetchall()
+    comments = [ x[0] for x in result ]
+    dates = [ x[1] for x in result ]
     conn.close()
-    return result, position
+
+    return comments, dates, position
 
 # ---------------------------------------------------
 
@@ -141,89 +105,41 @@ def predictions_to_eel_values(oracles_predictions):
     # pprint(component)
     return component
 
-# TODO:
-def commit_predictions(oracles_predictions : List[np.array], dimension) -> None :
+def show_predictions(oracles_predictions : List[np.array], timestamps : List[str], dimension : int) -> None :
     eel.updateComponents(predictions_to_eel_values(oracles_predictions))
+
+    # date = datetime.strptime(timestamps[-1], '%Y-%m-%d %H:%M:%S').astimezone(tz=timezone.fromutc) 
+    eel.writeToConsole(f"fetched {len(oracles_predictions)} predictions from {timestamps[-1]} UTC")
     
     # reduce dimension
     reduced_oracles_predictions = [ x[:dimension] for x in oracles_predictions ]
     # pprint("Last predictions: ")
     # pprint(reduced_oracles_predictions)
 
-def simulation_mode(dimension) :
+def simulation_fetch(classifier) :
+    posts, timestamps, globalState.simulation_step = read_window_from_db(globalState.simulation_step)
+    sentiment_analysis_results = sentiment_analysis(classifier, posts)
+    oracles_predictions = gen_oracles_predictions(sentiment_analysis_results)
+    
+    show_predictions(oracles_predictions, timestamps, globalState.dimension)
+
+def simulation_mode() :
     print("------------------------")
-    print("LAUNCH : Simulation Mode")
+    print("LAUNCH : Simulation Auto")
     print("------------------------")
 
     classifier = gen_classifier()
-    position = 0
-    while True:
-        posts, position = read_window_from_db(position)
-        
-        sentiment_analysis_results = sentiment_analysis(classifier, posts)
-        oracles_predictions = gen_oracles_predictions(sentiment_analysis_results)
-        commit_predictions(oracles_predictions, dimension)
-
+    while globalState.auto_fetch:
+        simulation_fetch(classifier)
         eel.sleep(SIMULATION_REFRESH_RATE)
 
 # TODO: 
-def live_mode(refresh_rate, dimension):
+def live_mode():
     print("------------------")
-    print("LAUNCH : Live Mode")
+    print("LAUNCH : Live Auto")
     print("------------------")
 
     classifier = gen_classifier()
     while True:
         # sentiment_analysis(classifier, )
-        # 
-
-        eel.sleep(refresh_rate)
-
-# ---------------------------------------------------
-
-
-def main():
-    parser = argparse.ArgumentParser(description="Oracle Scheduler")
-
-    parser.add_argument('--high_dimension', action='store_true', default=False)
-    parser.add_argument('--live_mode', action='store_true', default=False)
-    parser.add_argument('-scrapper', type=bool, default=False, help='Run the scrapper in background.')
-    parser.add_argument('--rate', type=int, default=30*60, help='Scrapper Refresh interval in seconds')
-    
-    args = parser.parse_args()
-    
-    print("------------------------------------")
-
-    if not args.scrapper and args.live_mode :
-        print("Info: Simulation mode disabled. Either run the scrapper externaly or restart this application with -scrapper.")
-
-    if not args.live_mode :
-        print(f"Info: Simulation mode requires at least {PREDICTION_WINDOW} posts in {DB_PATH}")
-
-    if args.scrapper :
-        background_process = subprocess.Popen(["python3", "scrapper", "--rate", args.rate])
-        atexit.register(lambda: cleanup(background_process))
-
-    dimension = DIMENSION if args.high_dimension else 2
-
-    init_server()
-    eel.initComponents(DIMENSION // 2)
-
-    if args.live_mode :
-        Thread(target=lambda: live_mode(args.rate, dimension)).start()
-    else :
-        Thread(target=lambda: simulation_mode(dimension)).start()
-
-    while True :
-        eel.sleep(100)
-    
-    # print("Scheduler terminated.")
-
-def cleanup(background_process) :
-    # print("Cleaning up the background process...")
-    background_process.terminate()
-    background_process.wait()
-    print("Scrapper terminated.")
-
-if __name__ == "__main__":
-    main()
+        eel.sleep(globalState.refresh_rate)

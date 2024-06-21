@@ -1,5 +1,2 @@
-sepolia.json
-starknet_js
-contracts
 geckodriver.log
-db.sqlite
+__pycache__
