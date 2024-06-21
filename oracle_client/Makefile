@@ -7,10 +7,10 @@ import_contracts:
 	cp -r ../oracle_contract/target/dev/* contracts
 
 run_only_scrapper:
-	python3 scrapper
+	python3 scrapper.py
 
 run_simulation:
-	python3 oracle_scheduler
+	python3 oracle_scheduler.py
 
 run_live:
-	python3 oracle_scheduler --simulation_mode 0
+	python3 oracle_scheduler.py --simulation_mode 0

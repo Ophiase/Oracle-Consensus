@@ -20,7 +20,7 @@ use oracle_consensus::utils::{
 use oracle_consensus::structs::{
     Oracle, VoteCoordinate
 };
-use oracle_consensus::contract_nd_sanitized::{
+use oracle_consensus::contract::{
     OracleConsensusNDS,
     IOracleConsensusNDSDispatcher,
     IOracleConsensusNDSDispatcherTrait
