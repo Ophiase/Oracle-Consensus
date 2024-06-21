@@ -48,6 +48,9 @@ def not_implemented() : eel.writeToConsole("not implemented yet")
 def query(text : str):
     print(f"Query : {text}")
 
+    if len(splitted) == 0:
+        return
+
     splitted = text.split()
     match splitted[0] :
 

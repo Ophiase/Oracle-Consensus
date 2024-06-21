@@ -45,7 +45,7 @@ canvas {
     margin-top: 20px;
 }
 
-.left-container, .right-container {
+.bot-container {
     background: #47505b;
     border: 1px solid #292c31;
     padding: 20px;
@@ -54,9 +54,10 @@ canvas {
     height: auto;
 }
 
-.left-container h2, .right-container h2 {
+.bot-container h2 {
     font-size: 20px;
     color: #fff;
+    text-align: center;
 }
 
 #console-output {

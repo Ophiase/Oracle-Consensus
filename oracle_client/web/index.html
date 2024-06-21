@@ -19,7 +19,7 @@
     </div>
 
     <div class="container">
-        <div class="left-container">
+        <div class="bot-container">
             <h2>Simulation</h2>
             <!-- <button class="btn" onclick="">Enable Auto-Fetch</button> -->
             <button class="btn" onclick="query('fetch')">Fetch Data</button>
@@ -27,12 +27,17 @@
             <button class="btn" onclick="query('commit')">Commit Predictions</button>
             <button class="btn" onclick="query('resume')">Sepolia Resume</button>
         </div>
-        <div class="right-container">
+
+        <div class="bot-container">
             <h2>Console</h2>
             <div id="console-output">
                 
             </div>
             <input id="console-input" type="text" autofocus>
+        </div>
+
+        <div class="bot-container">
+            <h2>On-Chain State (Sepolia)</h2>
         </div>
     </div>
 
