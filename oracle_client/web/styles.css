@@ -1,0 +1,40 @@
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: column; /* Affichage en colonne pour aligner le contenu verticalement */
+    align-items: center; /* Centrer horizontalement */
+    justify-content: center; /* Centrer verticalement */
+    padding: 20px;
+    background-color: #f0f0f0;
+}
+
+#plots-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.plot {
+    background: white;
+    border: 1px solid #ccc;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    width: 400px;
+    height: 400px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+canvas {
+    width: 100%;
+    height: 100%;
+}
+
+.page-title {
+    margin-top: 20px; /* Espacement vers le haut */
+    margin-bottom: 20px; /* Espacement vers le bas */
+    font-size: 24px;
+    font-weight: bold;
+    color: #333; 
+}

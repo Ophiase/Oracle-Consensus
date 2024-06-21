@@ -2,12 +2,16 @@ import argparse
 from pprint import pprint
 import random
 import sqlite3
+from threading import Thread
 import time
+import eel
 import numpy as np
 from transformers import pipeline
 from typing import List
 import subprocess
 import atexit
+import web_interface
+from web_interface import init_server
 
 DB_PATH = "db.sqlite"
 N_ORACLES = 7
@@ -18,7 +22,7 @@ SIMULATION_REFRESH_RATE = 5 # seconds
 # Simulation mode : 30 texts inputs each time (= number of elements on the comment page)
 # Live mode : 30 last texts inputs
 PREDICTION_WINDOW = 30
-BOOTSTRAPING_SUBSET = 10 # oracle average on 10 elements of the prediction window
+BOOTSTRAPING_SUBSET = 20 # oracle average on 10 elements of the prediction window
 
 # https://huggingface.co/SamLowe/roberta-base-go_emotions
 LABELS = {
@@ -29,6 +33,9 @@ LABELS = {
     'nervousness' : None,
     'remorse' : None
 }
+
+LABELS_KEYS = list(LABELS.keys())
+print(LABELS_KEYS)
 
 DIMENSION = len(LABELS)
 
@@ -111,13 +118,37 @@ def gen_oracles_predictions(sentiment_analysis : List[np.array]) -> List[np.arra
 
     return oracles_values
 
-# TODO:
-def commit_predictions(oracles_predictions, dimension) -> None :
-    # reduce dimension
-    oracles_predictions = [ x[:dimension] for x in oracles_predictions ]
+def predictions_to_eel_values(oracles_predictions):
+    component = []
+    for i in range(0, DIMENSION, 2) :
+        two_components = i+1 < DIMENSION
+        
+        columnNames = [ LABELS_KEYS[i] ]
+        columnNames.append( LABELS_KEYS[i + 1] if two_components else "None" )
 
-    pprint("Last predictions: ")
-    pprint(oracles_predictions)
+        data = []
+        for j in range(DIMENSION):
+            data.append({
+                'x': oracles_predictions[i][j],
+                'y': oracles_predictions[i+1][j] if two_components else 0
+            })
+
+        component.append({
+            'columnNames': columnNames,
+            'data': data
+        })
+
+    # pprint(component)
+    return component
+
+# TODO:
+def commit_predictions(oracles_predictions : List[np.array], dimension) -> None :
+    eel.updateComponents(predictions_to_eel_values(oracles_predictions))
+    
+    # reduce dimension
+    reduced_oracles_predictions = [ x[:dimension] for x in oracles_predictions ]
+    # pprint("Last predictions: ")
+    # pprint(reduced_oracles_predictions)
 
 def simulation_mode(dimension) :
     print("------------------------")
@@ -133,7 +164,7 @@ def simulation_mode(dimension) :
         oracles_predictions = gen_oracles_predictions(sentiment_analysis_results)
         commit_predictions(oracles_predictions, dimension)
 
-        time.sleep(SIMULATION_REFRESH_RATE)
+        eel.sleep(SIMULATION_REFRESH_RATE)
 
 # TODO: 
 def live_mode(refresh_rate, dimension):
@@ -146,7 +177,7 @@ def live_mode(refresh_rate, dimension):
         # sentiment_analysis(classifier, )
         # 
 
-        time.sleep(refresh_rate)
+        eel.sleep(refresh_rate)
 
 # ---------------------------------------------------
 
@@ -154,8 +185,8 @@ def live_mode(refresh_rate, dimension):
 def main():
     parser = argparse.ArgumentParser(description="Oracle Scheduler")
 
-    parser.add_argument('-lowdimension', type=bool, default=True)
-    parser.add_argument('-simulation_mode', type=bool, default=True)
+    parser.add_argument('--high_dimension', action='store_true', default=False)
+    parser.add_argument('--live_mode', action='store_true', default=False)
     parser.add_argument('-scrapper', type=bool, default=False, help='Run the scrapper in background.')
     parser.add_argument('--rate', type=int, default=30*60, help='Scrapper Refresh interval in seconds')
     
@@ -163,24 +194,30 @@ def main():
     
     print("------------------------------------")
 
-    if not args.scrapper and not args.simulation_mode :
+    if not args.scrapper and args.live_mode :
         print("Info: Simulation mode disabled. Either run the scrapper externaly or restart this application with -scrapper.")
 
-    if args.simulation_mode :
+    if not args.live_mode :
         print(f"Info: Simulation mode requires at least {PREDICTION_WINDOW} posts in {DB_PATH}")
 
     if args.scrapper :
         background_process = subprocess.Popen(["python3", "scrapper", "--rate", args.rate])
         atexit.register(lambda: cleanup(background_process))
 
-    dimension = 2 if args.lowdimension else DIMENSION
+    dimension = DIMENSION if args.high_dimension else 2
 
-    if args.simulation_mode :
-        simulation_mode(dimension)
+    init_server()
+    eel.initComponents(DIMENSION // 2)
+
+    if args.live_mode :
+        Thread(target=lambda: live_mode(args.rate, dimension)).start()
     else :
-        live_mode(args.rate, dimension)
+        Thread(target=lambda: simulation_mode(dimension)).start()
+
+    while True :
+        eel.sleep(100)
     
-    print("Scheduler terminated.")
+    # print("Scheduler terminated.")
 
 def cleanup(background_process) :
     # print("Cleaning up the background process...")
