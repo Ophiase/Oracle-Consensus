@@ -1,7 +1,17 @@
+function clearConsole() {
+    d = document.querySelector("#console-output")
+    d.innerText = "";
+    d.scrollTop = d.scrollHeight;    
+}
+
+eel.expose(clearConsole)
+
 function writeToConsole(text, user_input=false) {
     d = document.querySelector("#console-output")
     if (user_input) d.innerText += "$ ";
     d.innerText += text + "\n";
+
+    d.scrollTop = d.scrollHeight;
 }
 
 eel.expose(writeToConsole);
@@ -19,12 +29,9 @@ inputElement.addEventListener('keyup', function(event) {
 
 eel.query("help")
 
+function query(text) {
+    writeToConsole(text, true)
+    eel.query(text)
+}
+
 // -----------------------------------------------------------------
-
-function fetchData() {
-    console.log("Fetch data ...")
-}
-
-function commitPrediction() {
-    console.log("Commit predictions ...")
-}

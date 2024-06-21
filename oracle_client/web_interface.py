@@ -3,6 +3,7 @@ import time
 from threading import Thread
 from oracle_scheduler import simulation_mode, simulation_fetch, gen_classifier
 from common import globalState
+from contract import call_consensus, call_first_pass_consensus_reliability, call_second_pass_consensus_reliability
 
 # -----------------------------------
 
@@ -59,21 +60,27 @@ def query(text : str):
             if globalState.auto_fetch :
                 simulation_mode()
         case "commit": not_implemented()
-        case "resume" : not_implemented()
-        case "consensus" : not_implemented()
-        case "reliability_first_pass" : not_implemented()
-        case "reliability" : not_implemented()
+
+        case "consensus" :
+            consensus = call_consensus()
+            eel.writeToConsole("consensus : " + str([
+                f"{x:0.2f}" for x in consensus
+            ]))
+        case "reliability_first_pass" :
+            eel.writeToConsole(f"reliability_first_pass : {call_first_pass_consensus_reliability()}")
+        case "reliability" :
+            eel.writeToConsole(f"reliability : {call_second_pass_consensus_reliability()}")
+        
+        case "resume" :
+            for x in ["consensus", "reliability_first_pass", "reliability"] :
+                query(x)
 
         case "live_mode" : not_implemented()
 
         # -------------------------------------
 
-        case "clear": not_implemented()
-        case "help" :
-            eel.writeToConsole(HELP)
-        case "exit" :
-            exit()
-        case "" :
-            pass
-        case _ :
-            eel.writeToConsole("invalid command")
+        case "clear": eel.clearConsole()
+        case "help" : eel.writeToConsole(HELP)
+        case "exit" : exit()
+        case "" : pass
+        case _ : eel.writeToConsole("invalid command")

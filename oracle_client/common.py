@@ -1,4 +1,8 @@
+import json
 import os
+from starknet_py.net.full_node_client import FullNodeClient
+
+# ----------------------------------------------------------------------
 
 DB_PATH = os.path.join("data","db.sqlite")
 N_ORACLES = 7
@@ -26,17 +30,34 @@ print(LABELS_KEYS)
 
 DIMENSION = len(LABELS)
 
-# -----------------------------------
+# ----------------------------------------------------------------------
 # GLOBAL VARIABLES
 
 class GlobalState:
     def __init__(self):
         self.application_on = True
 
-        self.simulation_step = 0
         self.auto_fetch = False
+        self.simulation_step = 0
+
         self.predictions = None
         self.dimension = DIMENSION
 
+        self.remote_consensus = None
+        self.remote_first_pass_consensus_reliability = None
+        self.remote_second_pass_consensus_reliability = None
+
+        # -----------------------------
+
+        with open(os.path.join('data', 'contract_info.json'), 'r') as file :
+            data = json.load(file)
+            self.RPC = data['rpc']
+            self.DECLARED_ADDRESS = data['declared_address']
+            self.DEPLOYED_ADDRESS = data['deployed_address']
+
+        self.client = FullNodeClient(node_url=self.RPC)
+        self.addresses = None
+        self.private_keys = None
+        self.accounts = None
 
 globalState = GlobalState()

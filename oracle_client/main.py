@@ -7,10 +7,12 @@ import web_interface
 import argparse
 from threading import Thread
 from common import globalState, DB_PATH, N_ORACLES, N_FAILING_ORACLES, SIMULATION_REFRESH_RATE, PREDICTION_WINDOW, BOOTSTRAPING_SUBSET, LABELS, LABELS_KEYS, DIMENSION
+from contract import retrieve_account_data
 
 def main():
     parser = argparse.ArgumentParser(description="Oracle Scheduler")
 
+    parser.add_argument('--disable_sepolia', action='store_true', default=False, help='Do not load data/sepolia.json by default')
     parser.add_argument('--high_dimension', action='store_true', default=False, help='High dimension contract')
     parser.add_argument('--live_mode', action='store_true', default=False)
     parser.add_argument('--scrapper', action='store_true', default=False, help='Run the scrapper in background.')
@@ -31,6 +33,9 @@ def main():
         atexit.register(lambda: cleanup(background_process))
 
     globalState.dimension = DIMENSION if args.high_dimension else 2
+
+    if not args.disable_sepolia :
+        retrieve_account_data()
 
     init_server()
     eel.initComponents(DIMENSION // 2)
