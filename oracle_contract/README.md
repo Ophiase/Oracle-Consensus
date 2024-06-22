@@ -49,7 +49,7 @@ We recommand you to declare/deploy using Argent :
 2, # n_failing_oracles
 1, # constrained (over ]0,1[^M)
 0, # unconstrained_max_spread (required to compute relibaility over R^M)
-2, # dimension ie. M
+6, # dimension ie. M
 
 7, 
 <oracle_address_00>, 
@@ -69,7 +69,7 @@ Sepolia execution with a configured starkli :
 
 ```bash
 # TO DECLARE THE CONTRACT :
-starkli declare target/dev/oracle_consensus_OracleConsensusND.contract_class.json --compiler-version=2.4.0
+starkli declare target/dev/oracle_consensus_OracleConsensusNDS.contract_class.json --compiler-version=2.4.0
 # or
 starkli declare target/dev/<WANTED_CONTRACT>.json --compiler-version=2.4.0
 

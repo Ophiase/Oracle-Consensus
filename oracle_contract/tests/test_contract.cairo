@@ -32,7 +32,7 @@ fn util_felt_addr(addr_felt: felt252) -> ContractAddress {
     addr_felt.try_into().unwrap()
 }
 
-fn deploy_constrained_contract() -> IOracleConsensusNDSDispatcher {
+fn deploy_constrained_contract(dimension : felt252) -> IOracleConsensusNDSDispatcher {
     let mut calldata = array![
         // admins
         3,
@@ -43,7 +43,7 @@ fn deploy_constrained_contract() -> IOracleConsensusNDSDispatcher {
         2, // n_failing_oracles
         1, // constrained
         0, // unconstrained_max_spread
-        2, // dimension
+        dimension, // dimension
 
         // ORACLES
         7,
@@ -115,9 +115,9 @@ fn fill_oracle_predictions(dispatcher : IOracleConsensusNDSDispatcher, predictio
 #[test]
 #[available_gas(80000000)]
 fn test_constrained_basic_execution() {
-    let VERBOSE : bool = true;
+    let VERBOSE : bool = false;
 
-    let dispatcher = deploy_constrained_contract();
+    let dispatcher = deploy_constrained_contract(2);
 
     let _admin_0 = util_felt_addr('Akashi');
     let _admin_1 = util_felt_addr('Ozu');
@@ -328,4 +328,69 @@ fn test_unconstrained_basic_execution() {
     assert!(*dispatcher.get_oracle_list().at(old_oracle) == new_oracle, "error");
     
     // check for more replacements ?
+}
+
+#[test]
+#[available_gas(180000000)]
+fn test_constrained_high_dimension_execution() {
+    let VERBOSE : bool = false;
+
+    let dispatcher = deploy_constrained_contract(6);
+
+    let _admin_0 = util_felt_addr('Akashi');
+    let _admin_1 = util_felt_addr('Ozu');
+    let _admin_2 = util_felt_addr('Higuchi');
+
+    starknet::testing::set_contract_address(_admin_0);
+
+    if VERBOSE {
+        println!("----------------------");
+        println!("Init");
+        println!("----------------------");
+        show_address_array(dispatcher.get_admin_list());
+        show_address_array(dispatcher.get_oracle_list());
+        show_replacement_propositions(dispatcher.get_replacement_propositions());
+        show_nd_felt_oracle_array(dispatcher.get_oracle_value_list(), true, true, true, true);
+        println!("----------------------");
+    }
+
+    assert!(dispatcher.consensus_active() == false, "consensus_active");
+    assert!(dispatcher.get_consensus_value() == array![0, 0, 0, 0, 0, 0].span(), "consensus_value");
+    assert!(dispatcher.get_first_pass_consensus_reliability() == 0, "first_pass_consensus_value");
+    assert!(dispatcher.get_second_pass_consensus_reliability() == 0, "second_pass_consensus_value");
+
+    // -------------------
+    // CHECK VOTES
+
+    // auto generated distribution (essence = [0.4, 0.2]) with high dispersity
+    // in drafts/beta_kumaraswamy_algorithm_demo.ipynb
+    let predictions : Array<FeltVector> = array![
+        array![444545450094968000, 54331720669767392, 321181078572394112, 93574367249953184, 58452039497953944, 27915343914963376].span(),
+        array![650669127808916224, 423808048148146112, 458776506491212608, 619552493748596608, 867737597105629696, 117888125945635584].span(),
+        array![360849081405407488, 61583929809227872, 445841315446630848, 66219794988070208, 44810161025411928, 20695717325251576].span(),
+        array![442049577864458944, 38888720223952632, 420748899304341504, 44428919781444840, 30533379497426468, 23350503328375608].span(),
+        array![260736445564093152, 619146099575272576, 110294980129303280, 505377314776397440, 699358821457823104, 584216095123548800].span(),
+        array![267262952031874432, 48987557540192640, 551858409493303232, 74674503261155552, 26617771556882452, 30598806116591560].span(),
+        array![268500121655803936, 45379019562329192, 495298026521257472, 145887867344075584, 22256102607492420, 22678862309041344].span()
+    ]; 
+
+    // println!("V : {}", wadvector_to_string((*predictions.at(0)).as_wad()));
+    // println!("V : {}", wadvector_to_string((*predictions.at(1)).as_wad()));
+    // println!("V : {}", wadvector_to_string((*predictions.at(2)).as_wad()));
+    // println!("V : {}", wadvector_to_string((*predictions.at(3)).as_wad()));
+    // println!("V : {}", wadvector_to_string((*predictions.at(4)).as_wad()));
+
+
+    fill_oracle_predictions(dispatcher, @predictions);
+    starknet::testing::set_contract_address(_admin_0);
+
+    if VERBOSE {
+        show_nd_felt_oracle_array(dispatcher.get_oracle_value_list(), true, true, true, true);
+        println!("----------------------");
+        println!("consensus_active : {}", dispatcher.consensus_active());
+        println!("get_consensus_value : {}", wadvector_to_string(dispatcher.get_consensus_value().as_wad()));
+        println!("get_first_pass_consensus_reliability : {}", felt_wad_to_string(dispatcher.get_first_pass_consensus_reliability(), 3));
+        println!("get_second_pass_consensus_reliability : {}", felt_wad_to_string(dispatcher.get_second_pass_consensus_reliability(), 3));
+        println!("----------------------");
+    }
 }

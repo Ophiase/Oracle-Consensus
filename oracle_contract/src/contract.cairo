@@ -338,7 +338,7 @@ mod OracleConsensusNDS {
         if self.n_oracles.read() != self.n_active_oracles.read() {
             return();
         }
-        
+
         // ----------------------------
         // FIRST PASS
         // ----------------------------
@@ -386,6 +386,12 @@ mod OracleConsensusNDS {
         self.consensus_active.write(true);        
     }
 
+    fn compute_constrained_reliability(self : @ContractState, qr : @i128) -> i128 {
+        let dim : i128 = self.dimension.read().try_into().unwrap();
+        wad() - (sqrt(*qr / dim) * 2)
+    }
+
+
     fn update_constrained_consensus(ref self: ContractState, oracle_index : @usize, prediction : @WadVector) {
         update_a_single_oracle(ref self, oracle_index, prediction);
 
@@ -397,6 +403,8 @@ mod OracleConsensusNDS {
         // FIRST PASS
         // ----------------------------
 
+
+
         let oracles_values = compute_oracle_values(@self, false);
 
         // ESSENCE
@@ -406,7 +414,7 @@ mod OracleConsensusNDS {
         // quadratic_risk
      
         let quadratic_risk_values = nd_quadratic_risk(@oracles_values, @essence_first_pass);
-        let reliability_first_pass = wad() - (sqrt(average(@quadratic_risk_values)) * 2);
+        let reliability_first_pass = compute_constrained_reliability(@self, @average(@quadratic_risk_values));
         interval_check(@reliability_first_pass);
         self.consensus_reliability_first_pass.write(reliability_first_pass);
         let ordered_oracles = IndexedMergeSort::sort(@quadratic_risk_values);
@@ -425,7 +433,7 @@ mod OracleConsensusNDS {
 
         // quadratic_risk
         let quadratic_risk_values = nd_quadratic_risk(@reliable_values, @essence_first_pass);
-        let reliability_second_pass = wad() - (sqrt(average(@quadratic_risk_values)) * 2);
+        let reliability_second_pass = compute_constrained_reliability(@self, @average(@quadratic_risk_values));
         interval_check(@reliability_second_pass);
         self.consensus_reliability_second_pass.write(reliability_second_pass);
         
@@ -528,7 +536,7 @@ mod OracleConsensusNDS {
             let wad_prediction = prediction.as_wad();
 
             if self.constrained.read() { nd_interval_check(@wad_prediction); }
-
+            
             match find_oracle_index(@self, @get_caller_address()) {
                 Option::None => assert(false, 'not an oracle'),
                 Option::Some(oracle_index) => 
