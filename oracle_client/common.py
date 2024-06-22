@@ -46,6 +46,8 @@ class GlobalState:
         self.remote_consensus = None
         self.remote_first_pass_consensus_reliability = None
         self.remote_second_pass_consensus_reliability = None
+        self.remote_skewness = None
+        self.remote_kurtosis = None
 
         self.remote_consensus_active = None
         self.remote_admin_list = None

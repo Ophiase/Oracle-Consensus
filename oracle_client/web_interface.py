@@ -7,7 +7,7 @@ from contract import call_consensus, call_first_pass_consensus_reliability, \
 call_second_pass_consensus_reliability, update_all_the_predictions, \
 invoke_update_proposition, invoke_vote_for_a_proposition, \
 call_replacement_propositions, call_dimension, call_oracle_list, \
-call_admin_list, call_consensus_active
+call_admin_list, call_consensus_active, call_skewness, call_kurtosis
 
 # ----------------------------------------------------------------------
 
@@ -130,7 +130,7 @@ def query(text : str):
                 eel.writeToConsole("Done.")
         case "consensus" :
             consensus = call_consensus()
-            eel.writeToConsole("consensus :\n" + str([
+            eel.writeToConsole("consensus :\n" + ','.join([
                 f"{x:0.2f}" for x in consensus
             ]))
         case "reliability_first_pass" :
@@ -154,12 +154,16 @@ def query(text : str):
             fpr = globalState.remote_first_pass_consensus_reliability
             spr = globalState.remote_second_pass_consensus_reliability
 
+            skewness = call_skewness()
+            kurtosis = call_kurtosis()
+
             eel.setSepoliaConsole(
-                f"SEPOLIA RESUME: \n" +
                 f"consensus_active: {active} \n" + 
-                f"consensus : " + str([f"{x:0.2f}" for x in consensus]) + "\n" +
-                f"reliability_first_pass : {fpr} \n" +
-                f"reliability_second_pass : {spr}\n"
+                f"consensus : " + ', '.join([f"{x:0.2f}" for x in consensus]) + "\n" +
+                f"reliability_first_pass : {fpr:0.3f} \n" +
+                f"reliability_second_pass : {spr:0.3f}\n" +
+                f"skewness : " + ', '.join([f"{x:0.2f}" for x in skewness]) + "\n" +
+                f"kurtosis : " + ', '.join([f"{x:0.2f}" for x in kurtosis])
             )
 
         case "live_mode" : not_implemented()

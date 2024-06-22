@@ -96,6 +96,16 @@ def call_consensus() -> np.array :
     globalState.remote_consensus = [fwsad_to_float(x) for x in value]
     return globalState.remote_consensus
 
+def call_skewness() -> np.array :
+    value = call_generic('get_skewness')
+    globalState.remote_skewness = [fwsad_to_float(x) for x in value]
+    return globalState.remote_skewness
+
+def call_kurtosis() -> np.array :
+    value = call_generic('get_kurtosis')
+    globalState.remote_kurtosis = [fwsad_to_float(x) for x in value]
+    return globalState.remote_kurtosis
+
 def call_first_pass_consensus_reliability() -> float :
     value = call_generic("get_first_pass_consensus_reliability")
     globalState.remote_first_pass_consensus_reliability = fwsad_to_float(value)
