@@ -2,7 +2,7 @@
 
 In this folder there are 3 scripts :
 - ``scraper.py`` :
-    - Look for new comments on Hackernews each 5 minutes and add them to the database.
+    - It looks for new comments on Hackernews each 5 minutes and add them to the database.
 - ``main.py`` : Web demonstration of the smart contract on Sepolia.
     - Simulate oracles
         - Use sentiment analysis to evaluate metrics
