@@ -6,7 +6,7 @@ use oracle_consensus::sort::IndexedMergeSort;
 use oracle_consensus::math::{sqrt};
 use oracle_consensus::signed_decimal::{
     I128Div, I128Display, I128SignedBasics, unsigned_to_signed,
-    ray_div, ray_mul, wad_div, wad_mul, ray_to_wad, wad_to_ray, ray, wad, half_ray, half_wad
+    wad_div, wad_mul, wad, half_wad
 };
 
 // ==============================================================================

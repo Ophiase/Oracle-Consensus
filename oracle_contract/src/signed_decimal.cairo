@@ -85,28 +85,12 @@ pub fn wad() -> i128 {
     return WAD;
 }
 
-/// Return the ray value
-/// # Returns
-/// * `i128` - The value
-pub fn ray() -> i128 {
-    return RAY;
-}
-
 /// Return the half wad value
 /// # Returns
 /// * `i128` - The value
 pub fn half_wad() -> i128 {
     return HALF_WAD;
 }
-
-/// Return the half ray value
-/// # Returns
-/// * `i128` - The value
-pub fn half_ray() -> i128 {
-    return HALF_RAY;
-}
-
-
 
 // const PREVENT_OVERFLOW : bool = true;
 // const OVERFLOW_REDUCTION : i128 = 10000000000000; // 1e10
@@ -145,42 +129,4 @@ pub fn wad_mul(a: i128, b: i128) -> i128 {
 /// * a/b, in wad
 pub fn wad_div(a: i128, b: i128) -> i128 {
     return (a * WAD + (b / 2)) / b;
-}
-
-/// Multiplies two ray, rounding half up to the nearest ray
-/// # Arguments
-/// * a Ray
-/// * b Ray
-/// # Returns
-/// * a raymul b
-pub fn ray_mul(a: i128, b: i128) -> i128 {
-    return (a * b + HALF_RAY) / RAY;
-}
-
-/// Divides two ray, rounding half up to the nearest ray
-/// # Arguments
-/// * a Ray
-/// * b Ray
-/// # Returns
-/// * a raydiv b
-pub fn ray_div(a: i128, b: i128) -> i128 {
-    return (a * RAY + (b / 2)) / b;
-}
-
-/// Casts ray down to wad
-/// # Arguments
-/// * a Ray
-/// # Returns
-/// * a converted to wad, rounded half up to the nearest wad
-pub fn ray_to_wad(a: i128) -> i128 {
-    return (HALF_WAD_RAY_RATIO + a) / WAD_RAY_RATIO;
-}
-
-/// Converts wad up to ray
-/// # Arguments
-/// * a Wad
-/// # Returns
-/// * a converted to ray
-pub fn wad_to_ray(a: i128) -> i128 {
-    return a * WAD_RAY_RATIO;
 }
