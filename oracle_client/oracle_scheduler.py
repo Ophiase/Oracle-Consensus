@@ -13,8 +13,16 @@ from common import globalState, DB_PATH, N_ORACLES, N_FAILING_ORACLES, SIMULATIO
 
 # ---------------------------------------------------
 
+def softmax(x):
+    exp_x = np.exp(x - np.max(x))
+    return exp_x / np.sum(exp_x)
+
+def normalize(x):
+    return x / np.sum(x)
+
 def gen_classifier():
     return pipeline(task="text-classification", model="SamLowe/roberta-base-go_emotions", top_k=None)
+    # return pipeline(task="text-classification", model="jitesh/emotion-english", top_k=None)
 
 def prediction_to_vector(prediction : dict) -> np.array :
     result = LABELS.copy()
@@ -26,8 +34,9 @@ def prediction_to_vector(prediction : dict) -> np.array :
     return np.array([result[label] for label in LABELS_KEYS])
 
 def sentiment_analysis(classifier, inputs : List[str]) -> List[np.array]:
+    f = normalize # normalization_function
     return [
-        prediction_to_vector(specific_output) for specific_output in classifier(inputs)
+        f(prediction_to_vector(specific_output)) for specific_output in classifier(inputs)
     ]
 
 # ---------------------------------------------------
@@ -82,7 +91,13 @@ def gen_oracles_predictions(sentiment_analysis : List[np.array]) -> List[np.arra
 
     return oracles_values
 
-def predictions_to_eel_values(oracles_predictions):
+def predictions_to_eel_values(oracles_predictions : List[np.array]):
+    mean = np.mean(oracles_predictions, axis=0)
+    median = np.median(oracles_predictions, axis=0)
+    deviation_from_median = [np.linalg.norm(pred - median) for pred in oracles_predictions]
+    ranks = np.argsort(deviation_from_median)
+    normalized_ranks = ranks / (len(oracles_predictions) - 1)
+
     component = []
     for i in range(0, DIMENSION, 2) :
         two_components = i+1 < DIMENSION
@@ -94,7 +109,8 @@ def predictions_to_eel_values(oracles_predictions):
         for j in range(N_ORACLES):
             data.append({
                 'x': oracles_predictions[j][i],
-                'y': oracles_predictions[j][i+1] if two_components else 0
+                'y': oracles_predictions[j][i+1] if two_components else 0,
+                'score' : normalized_ranks[j]
             })
 
         component.append({
@@ -103,10 +119,12 @@ def predictions_to_eel_values(oracles_predictions):
         })
 
     # pprint(component)
-    return component
+    return component, mean, median
 
 def show_predictions(oracles_predictions : List[np.array], timestamps : List[str], dimension : int) -> None :
-    eel.updateComponents(predictions_to_eel_values(oracles_predictions))
+    eel_values, mean, median = predictions_to_eel_values(oracles_predictions)
+
+    eel.updateComponents(eel_values, list(mean), list(median))
 
     # date = datetime.strptime(timestamps[-1], '%Y-%m-%d %H:%M:%S').astimezone(tz=timezone.fromutc) 
     eel.writeToConsole(f"fetched {len(oracles_predictions)} predictions from {timestamps[-1]} UTC")

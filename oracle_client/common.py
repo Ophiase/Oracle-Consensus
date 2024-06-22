@@ -13,7 +13,7 @@ SIMULATION_REFRESH_RATE = 5 # seconds
 # Simulation mode : 30 texts inputs each time (= number of elements on the comment page)
 # Live mode : 30 last texts inputs
 PREDICTION_WINDOW = 30
-BOOTSTRAPING_SUBSET = 20 # oracle average on 10 elements of the prediction window
+BOOTSTRAPING_SUBSET = 15 # oracle average on 10 elements of the prediction window
 
 # https://huggingface.co/SamLowe/roberta-base-go_emotions
 LABELS = {
