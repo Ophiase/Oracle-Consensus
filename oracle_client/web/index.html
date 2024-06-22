@@ -26,11 +26,19 @@
             <!-- <button class="btn" onclick="">Enable Auto-Commit</button> -->
             <button class="btn" onclick="query('commit')">Commit Predictions</button>
             <button class="btn" onclick="query('resume')">Sepolia Resume</button>
+            <button class="btn" onclick="query('admin_list')">Sepolia Admins</button>
+            <button class="btn" onclick="query('oracle_list')">Sepolia Oracles</button>
+            <button class="btn" onclick="query('replacement_propositions')">Replacement propositions</button>
+            
+            <h3>Simulation data :</h3>
+            <div id="simulation-output" class="console-short">
+                Nothing, please fetch.
+            </div>
         </div>
 
         <div class="bot-container">
             <h2>Console</h2>
-            <div id="console-output">
+            <div id="console-output" class="console">
                 
             </div>
             <input id="console-input" type="text" autofocus>
@@ -38,12 +46,20 @@
 
         <div class="bot-container">
             <h2>On-Chain State (Sepolia)</h2>
+
+            <canvas id="progress-bar-1" width="400" height="100"></canvas>
+            <div id="progress-text-1"></div>
+            <canvas id="progress-bar-2" width="400" height="100"></canvas>
+            <div id="progress-text-2"></div>
+            <!-- <canvas id="progress-bar-3" width="400" height="100"></canvas>
+            <div id="progress-text-3"></div> -->
         </div>
     </div>
 
     <script type="text/javascript" src="/eel.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="scripts/main.js"></script>
-    <script src="scripts/graphics.js"></script>
+    <script src="scripts/sepolia_graphics.js"></script>
+    <script src="scripts/simulation_graphics.js"></script>
 </body>
 </html>

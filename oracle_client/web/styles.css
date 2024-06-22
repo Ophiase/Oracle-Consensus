@@ -60,13 +60,27 @@ canvas {
     text-align: center;
 }
 
-#console-output {
+.bot-container h3 {
+    font-size: 16px;
+    color: #fff;
+    /* text-align: center; */
+}
+
+.console, .console-short {
     border: 1px solid #ccc;
-    padding: 10px;
-    height: 300px;
-    overflow-y: auto;
     background-color: #f9f9f9;
     font-family: monospace;
+    padding: 10px;
+}
+
+.console {
+    height: 300px;
+    overflow-y: auto;
+}
+
+.console-short {
+    height: 120px;
+    overflow-y: auto;
 }
 
 #console-input {
@@ -92,4 +106,8 @@ canvas {
 
 .btn:hover {
     background-color: #366d7a;
+}
+
+#progress-text-1, #progress-text-2, #progress-text-3 {
+    color: white;
 }

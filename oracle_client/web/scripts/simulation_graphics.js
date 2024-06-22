@@ -1,4 +1,4 @@
-let chartInstances = []; // Array to hold Chart instances
+let simulation_charts = []; // Array to hold Chart instances
 
 Chart.defaults.borderColor = '#363636';
 Chart.defaults.color = '#000';
@@ -6,7 +6,7 @@ Chart.defaults.color = '#000';
 initComponents(3);
 
 function initComponents(dimension) {
-    chartInstances = [];
+    simulation_charts = [];
     const container = document.getElementById('plots-container');
     container.innerHTML = ''; 
 
@@ -61,7 +61,7 @@ function initComponents(dimension) {
             }
         });
 
-        chartInstances.push(chart); // Store each chart instance
+        simulation_charts.push(chart); // Store each chart instance
     }
 }
 
@@ -70,7 +70,7 @@ eel.expose(initComponents)
 
 function updateComponents(components) {
     components.forEach((component, index) => {
-        const chart = chartInstances[index];
+        const chart = simulation_charts[index];
         chart.data.datasets[0].label = `Component ${index + 1}`;
         chart.data.datasets[0].data = component.data;
         chart.options.scales.x.title.text = component.columnNames[0];
