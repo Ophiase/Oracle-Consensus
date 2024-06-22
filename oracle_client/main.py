@@ -16,7 +16,7 @@ def main():
     parser.add_argument('--dimension', type=int, default=DIMENSION, help='contract dimension')
     parser.add_argument('--live_mode', action='store_true', default=False)
     parser.add_argument('--scraper', action='store_true', default=False, help='Run the scraper in background.')
-    parser.add_argument('--rate', type=int, default=30*60, help='scraper Refresh interval in seconds')
+    parser.add_argument('--rate', type=int, default=int(30*60), help='scraper Refresh interval in seconds')
     
     args = parser.parse_args()
     
@@ -29,7 +29,7 @@ def main():
         print(f"Info: Simulation mode requires at least {PREDICTION_WINDOW} posts in {DB_PATH}")
 
     if args.scraper :
-        background_process = subprocess.Popen(["python3", "scraper", "--rate", args.rate])
+        background_process = subprocess.Popen(["python3", "scraper.py", "--rate", str(args.rate)])
         atexit.register(lambda: cleanup(background_process))
 
     globalState.dimension = args.dimension # DIMENSION if args.high_dimension else 2

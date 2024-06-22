@@ -81,7 +81,7 @@ def main(refresh_interval):
         time_since_last_comment = datetime.now().astimezone(tz=timezone.utc).replace(tzinfo=None) - last_comment_time
         if time_since_last_comment.total_seconds() < refresh_interval:
             time_to_wait = refresh_interval - time_since_last_comment.total_seconds()
-            print(f"Please wait: {time_to_wait} seconds")
+            print(f"<scraper> Please wait: {time_to_wait} seconds")
             time.sleep(time_to_wait)
     
     while True:
@@ -89,7 +89,7 @@ def main(refresh_interval):
         comments = scrap(driver, js)
         save_to_db(comments)
         # pprint(comments[0])
-        print(f"- {datetime.now()} Fetched new informations ...")
+        print(f"<scraper> - {datetime.now()} Fetched new informations ...")
         
         time.sleep(refresh_interval)
 
@@ -97,5 +97,5 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Hacker News comments scraper")
     parser.add_argument('--rate', type=int, default=DEFAULT_REFRESH_INTERVAL, help='Refresh interval in seconds')
     args = parser.parse_args()
-    print(f"Serveur started with a refresh rate of : {args.rate} seconds")
+    print(f"<scraper> Serveur started with a refresh rate of : {args.rate} seconds")
     main(args.rate)

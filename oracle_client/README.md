@@ -18,7 +18,55 @@ Required :
 - cargo : geckodriver
 - python3 : selenium, transformers, eel
 
+### Fill the following files (create them if necessary) :
+
+``data/contract_info.json``
+```json
+{
+    "rpc": "https://free-rpc.nethermind.io/sepolia-juno",
+    "declared_address" : "<INSERT>",
+    "deployed_address" : "<INSERT>"
+}
+```
+
+Declaration/Deployment explained in [oracle_contract/README.md](oracle_contract/README.md)
+
+``data/contract_info.json``
+```json
+{
+    "addresses" : [
+        "<INSERT>",
+        "<INSERT>",
+        "<INSERT>",
+        "<INSERT>",
+        "<INSERT>",
+        "<INSERT>",
+        "<INSERT>",
+        "<INSERT>"
+    ],
+    "private_keys": [
+        "<INSERT>",
+        "<INSERT>",
+        "<INSERT>",
+        "<INSERT>",
+        "<INSERT>",
+        "<INSERT>",
+        "<INSERT>",
+        "<INSERT>"
+    ]
+}
+```
+
+It's not safe to put your private keys in a json file. \
+We assume you are using test accounts specificaly for Sepolia.
+
 ## Execution
+
+The main program requires ``data/db.sqlite`` to fetch.
+
+Launch ``scraper.py`` a first time to fill it (30 posts / 10 minutes with default parameters). 
+
+It can also be executed at ``main.py`` startup with ``--scraper`` option.
 
 ```bash
 python3 scraper.py # real time database
