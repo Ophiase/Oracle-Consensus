@@ -14,6 +14,18 @@ body {
     gap: 20px;
 }
 
+.active-plot {
+    background: white;
+    border: 4px solid #ff00cb;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    width: 300px;
+    height: 300px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
 .plot {
     background: white;
     border: 1px solid #ccc;

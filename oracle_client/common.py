@@ -12,8 +12,8 @@ SIMULATION_REFRESH_RATE = 5 # seconds
 
 # Simulation mode : 30 texts inputs each time (= number of elements on the comment page)
 # Live mode : 30 last texts inputs
-PREDICTION_WINDOW = 30
-BOOTSTRAPING_SUBSET = 15 # oracle average on 10 elements of the prediction window
+PREDICTION_WINDOW = 50
+BOOTSTRAPING_SUBSET = 10 # oracle average on 10 elements of the prediction window
 
 # https://huggingface.co/SamLowe/roberta-base-go_emotions
 LABELS = {
@@ -53,6 +53,8 @@ class GlobalState:
         self.remote_dimension = None
         self.remote_replacement_propositions = None
 
+        self.active_component = 0
+
         # -----------------------------
 
         with open(os.path.join('data', 'contract_info.json'), 'r') as file :
@@ -65,5 +67,6 @@ class GlobalState:
         self.addresses = None
         self.private_keys = None
         self.accounts = None
+        self.oracles_accounts = None
 
 globalState = GlobalState()

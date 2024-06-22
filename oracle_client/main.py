@@ -13,7 +13,7 @@ def main():
     parser = argparse.ArgumentParser(description="Oracle Scheduler")
 
     parser.add_argument('--disable_sepolia', action='store_true', default=False, help='Do not load data/sepolia.json by default')
-    parser.add_argument('--high_dimension', action='store_true', default=False, help='High dimension contract')
+    parser.add_argument('--dimension', type=int, default=DIMENSION, help='contract dimension')
     parser.add_argument('--live_mode', action='store_true', default=False)
     parser.add_argument('--scraper', action='store_true', default=False, help='Run the scraper in background.')
     parser.add_argument('--rate', type=int, default=30*60, help='scraper Refresh interval in seconds')
@@ -32,7 +32,7 @@ def main():
         background_process = subprocess.Popen(["python3", "scraper", "--rate", args.rate])
         atexit.register(lambda: cleanup(background_process))
 
-    globalState.dimension = DIMENSION if args.high_dimension else 2
+    globalState.dimension = args.dimension # DIMENSION if args.high_dimension else 2
 
     if not args.disable_sepolia :
         retrieve_account_data()

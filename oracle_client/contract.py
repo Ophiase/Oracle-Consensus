@@ -73,8 +73,7 @@ def retrieve_account_data():
     globalState.addresses = addresses
     globalState.private_keys = private_keys
     globalState.accounts = accounts
-
-
+    globalState.oracles_accounts = globalState.accounts[:N_ORACLES]
 
     globalState.default_contract = asyncio.run(
         Contract.from_address(
@@ -142,7 +141,7 @@ def call_replacement_propositions() -> List :
 # requires globalState.remote_dimension
 def update_all_the_predictions(predictions: List[np.array]):
     print("update propositions : [ ", end="")
-    for i, (account, prediction) in enumerate(zip(globalState.accounts, predictions)) :
+    for i, (account, prediction) in enumerate(zip(globalState.oracles_accounts, predictions)) :
         invoke_update_prediction(account, prediction, True, i)
         print(f"done {i}, ", end="")
     print("]")
@@ -155,8 +154,11 @@ def invoke_update_prediction(account, prediction: np.array, debug=False, which_i
                 address=globalState.DEPLOYED_ADDRESS
     ))
 
+    # comp_start = globalState.active_component * globalState.remote_dimension 
+    # comp_end = comp_start + globalState.remote_dimension
+
     prediction_as_felt = [
-       float_to_fwad(x) for x in prediction[:globalState.remote_dimension]
+       float_to_fwad(x) for x in prediction #[comp_start, comp_end]
     ]
 
     asyncio.run(

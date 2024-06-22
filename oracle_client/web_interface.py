@@ -50,6 +50,8 @@ For <admin> <oracle> arguments, you can either specify the index in the contract
 
 '''
 
+#     - set_component <component> (max : contract_dimension / local_prediction_dimension)
+
 # ----------------------------------------------------------------------
 
 def init_server():
@@ -88,6 +90,15 @@ def query(text : str):
 
         case "contract_address" :
             eel.writeToConsole(f"Contract Address :\n{globalState.DEPLOYED_ADDRESS}")
+
+        # case "get_component" :
+        #     eel.writeToConsole("Active component: " + str(globalState.active_component))
+
+        # case "set_component" :
+        #     if unexpected_argument(2, splitted) : return
+        #     component = int(splitted[1])
+        #     globalState.active_component = component
+        #     eel.writeToConsole(f"Switched to :{globalState.active_component}")
 
         case "fetch":
             eel.writeToConsole("Processing ..")
