@@ -173,6 +173,7 @@ pub fn nd_quadratic_deviation(a : @WsadVector, b : @WsadVector) -> i128 {
     result
 }
 
+
 // compute the quadratic_risk of each values
 pub fn quadratic_risk(values : @Array<i128>, center : @i128) -> Array<i128> {
     let mut result = ArrayTrait::new();
@@ -187,6 +188,19 @@ pub fn quadratic_risk(values : @Array<i128>, center : @i128) -> Array<i128> {
         i += 1;
     };
     result
+}
+
+pub fn nd_component_wise_variance(values : @Array<WsadVector>, center : @WsadVector) -> WsadVector {
+    let arrays = nd_array_split(values);
+    let mut result = ArrayTrait::new();
+    let mut i = 0;
+    loop { if i == arrays.len() { break(); }
+        let qr = quadratic_risk(arrays.at(i), (*center).at(i));
+        result.append(average(@qr));
+        i += 1; 
+    };
+
+    result.span()
 }
 
 // compute the quadratic_risk of each values
@@ -323,7 +337,7 @@ pub fn kurtosis(values : @Array<i128>, mean : @i128, variance : @i128) -> i128 {
     (term1 - term2) / ((n - 2) * (n - 3))
 }
 
-pub fn nd_skewness(values : @Array<WsadVector>, means : @WsadVector, variances : @Array<i128>) -> WsadVector {
+pub fn nd_skewness(values : @Array<WsadVector>, means : @WsadVector, variances : @WsadVector) -> WsadVector {
     let arrays = nd_array_split(values);
     let mut result = ArrayTrait::new();
     let mut i = 0;
@@ -332,14 +346,15 @@ pub fn nd_skewness(values : @Array<WsadVector>, means : @WsadVector, variances :
             break();
         }
 
-        result.append(skewness(arrays.at(i), (*means).at(i), variances.at(i)));
+
+        result.append(skewness(arrays.at(i), (*means).at(i), (*variances).at(i)));
         i += 1;
     };
 
     result.span()
 }
 
-pub fn nd_kurtosis(values : @Array<WsadVector>, means : @WsadVector, variances : @Array<i128>) -> WsadVector {
+pub fn nd_kurtosis(values : @Array<WsadVector>, means : @WsadVector, variances : @WsadVector) -> WsadVector {
     let arrays = nd_array_split(values);
     let mut result = ArrayTrait::new();
     let mut i = 0;
@@ -348,7 +363,7 @@ pub fn nd_kurtosis(values : @Array<WsadVector>, means : @WsadVector, variances :
             break();
         }
 
-        result.append(kurtosis(arrays.at(i), (*means).at(i), variances.at(i)));
+        result.append(kurtosis(arrays.at(i), (*means).at(i), (*variances).at(i)));
         i += 1;
     };
     result.span()

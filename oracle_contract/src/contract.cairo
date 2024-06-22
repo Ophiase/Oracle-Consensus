@@ -51,7 +51,7 @@ mod OracleConsensusNDS {
     use oracle_consensus::math::{
         median, smooth_median, quadratic_risk, average, interval_check, sqrt, WsadVector,
         nd_median, nd_smooth_median, nd_quadratic_risk, nd_average, nd_interval_check, min,
-        kurtosis, skewness, nd_kurtosis, nd_skewness,
+        kurtosis, skewness, nd_kurtosis, nd_skewness, nd_component_wise_variance,
         FeltVector, IWsadVectorBasics, IFeltVectorBasics
         };
     use oracle_consensus::sort::IndexedMergeSort;
@@ -410,7 +410,7 @@ mod OracleConsensusNDS {
         // KURTOSIS / SKEWNESS
 
         let means = nd_average(@reliable_values);
-        let variances =  nd_quadratic_risk(@reliable_values, @means);
+        let variances =  nd_component_wise_variance(@reliable_values, @means);
 
         let skewness = nd_skewness(@reliable_values, @means, @variances);
         let kurtosis = nd_kurtosis(@reliable_values, @means, @variances);
@@ -475,7 +475,8 @@ mod OracleConsensusNDS {
         // KURTOSIS / SKEWNESS
 
         let means = nd_average(@reliable_values);
-        let variances =  nd_quadratic_risk(@reliable_values, @means);
+        let variances =  nd_component_wise_variance(@reliable_values, @means);
+
 
         let skewness = nd_skewness(@reliable_values, @means, @variances);
         let kurtosis = nd_kurtosis(@reliable_values, @means, @variances);
