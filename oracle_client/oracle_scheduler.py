@@ -20,10 +20,10 @@ def prediction_to_vector(prediction : dict) -> np.array :
     result = LABELS.copy()
     
     for item in prediction:
-        if item['label'] in result:
+        if item['label'] in LABELS_KEYS:
             result[item['label']] = item['score']
 
-    return np.array([result[label] for label in LABELS])
+    return np.array([result[label] for label in LABELS_KEYS])
 
 def sentiment_analysis(classifier, inputs : List[str]) -> List[np.array]:
     return [
@@ -91,10 +91,10 @@ def predictions_to_eel_values(oracles_predictions):
         columnNames.append( LABELS_KEYS[i + 1] if two_components else "None" )
 
         data = []
-        for j in range(DIMENSION):
+        for j in range(N_ORACLES):
             data.append({
-                'x': oracles_predictions[i][j],
-                'y': oracles_predictions[i+1][j] if two_components else 0
+                'x': oracles_predictions[j][i],
+                'y': oracles_predictions[j][i+1] if two_components else 0
             })
 
         component.append({
