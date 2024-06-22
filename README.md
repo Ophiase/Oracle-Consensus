@@ -1,8 +1,8 @@
 # Stochastic Vector Oracle Consensus
 
-<center> 
+<p align="center">
     <img src="./resources/consensus_graphic.png" width=500>
-</center>
+</p>
 
 Sponsorized by [StarkHack Hackaton](https://ethglobal.com/events/starkhack).
 
