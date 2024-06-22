@@ -1,28 +1,28 @@
 
 use oracle_consensus::signed_decimal::{
     I128Div, I128Display, I128SignedBasics, unsigned_to_signed, felt_to_i128,
-    wad_div, wad_mul, wad, half_wad,
-    safe_wad_mul
+    wsad_div, wsad_mul, wsad, half_wsad,
+    safe_wsad_mul
 };
 use alexandria_math::{pow};    
 use alexandria_sorting::{QuickSort, MergeSort};
-use oracle_consensus::utils::{wad_to_string};
+use oracle_consensus::utils::{wsad_to_string};
 
 // ==============================================================================
 
-type WadVector = Span<i128>;
+type WsadVector = Span<i128>;
 type FeltVector = Span<felt252>;
 
-trait IWadVectorBasics {
-    fn as_felt(self: @WadVector) -> FeltVector;
+trait IWsadVectorBasics {
+    fn as_felt(self: @WsadVector) -> FeltVector;
 }
 
 trait IFeltVectorBasics {
-    fn as_wad(self: @FeltVector) -> WadVector;
+    fn as_wsad(self: @FeltVector) -> WsadVector;
 }
 
-impl WadVectorBasics of IWadVectorBasics {
-    fn as_felt(self: @WadVector) -> FeltVector {
+impl WsadVectorBasics of IWsadVectorBasics {
+    fn as_felt(self: @WsadVector) -> FeltVector {
         let mut result = ArrayTrait::new();
         let mut i = 0;
         loop {
@@ -35,7 +35,7 @@ impl WadVectorBasics of IWadVectorBasics {
 }
 
 impl FeltVectorBasics of IFeltVectorBasics {
-    fn as_wad(self: @FeltVector) -> WadVector {
+    fn as_wsad(self: @FeltVector) -> WsadVector {
         let mut result = ArrayTrait::new();
         let mut i = 0;
         loop {
@@ -50,7 +50,7 @@ impl FeltVectorBasics of IFeltVectorBasics {
 // ==============================================================================
 
 // Transpose an Array of vectors
-pub fn nd_array_split(array : @Array<WadVector>) -> Array<Array<i128>> {
+pub fn nd_array_split(array : @Array<WsadVector>) -> Array<Array<i128>> {
     let dimension = (*array.at(0)).len();
     let n_vectors = array.len();
 
@@ -126,7 +126,7 @@ pub fn smooth_median(values : @Array<i128>) -> i128 {
 
 // component wise implementation
 // there is no natural order on R^M
-pub fn nd_median(values : @Array<WadVector>) -> WadVector {
+pub fn nd_median(values : @Array<WsadVector>) -> WsadVector {
     let arrays = nd_array_split(values);
     let mut result = ArrayTrait::new();
     let mut i = 0;
@@ -140,7 +140,7 @@ pub fn nd_median(values : @Array<WadVector>) -> WadVector {
 
 // component wise implementation
 // there is no natural order on R^M
-pub fn nd_smooth_median(values : @Array<WadVector>) -> WadVector {
+pub fn nd_smooth_median(values : @Array<WsadVector>) -> WsadVector {
     let arrays = nd_array_split(values);
     let mut result = ArrayTrait::new();
     let mut i = 0;
@@ -157,10 +157,10 @@ pub fn nd_smooth_median(values : @Array<WadVector>) -> WadVector {
 
 pub fn quadratic_deviation(a : @i128, b : @i128) -> i128 {
     let x = (*a - *b);
-    wad_mul(x, x)
+    wsad_mul(x, x)
 }
 
-pub fn nd_quadratic_deviation(a : @WadVector, b : @WadVector) -> i128 {
+pub fn nd_quadratic_deviation(a : @WsadVector, b : @WsadVector) -> i128 {
     let dim = (*a).len();
 
     let mut result = 0;
@@ -190,7 +190,7 @@ pub fn quadratic_risk(values : @Array<i128>, center : @i128) -> Array<i128> {
 }
 
 // compute the quadratic_risk of each values
-pub fn nd_quadratic_risk(values : @Array<WadVector>, center : @WadVector) -> Array<i128> {
+pub fn nd_quadratic_risk(values : @Array<WsadVector>, center : @WsadVector) -> Array<i128> {
     let mut result = ArrayTrait::<i128>::new();
     let mut i = 0;
     loop {
@@ -221,7 +221,7 @@ pub fn average(values : @Array<i128>) -> i128 {
     result / values.len().into()
 }
 
-pub fn nd_average(values : @Array<WadVector>) -> WadVector {
+pub fn nd_average(values : @Array<WsadVector>) -> WsadVector {
     let arrays = nd_array_split(values);
     let mut result = ArrayTrait::new();
     let mut i = 0;
@@ -240,7 +240,7 @@ pub fn sqrt(value : i128) -> i128 {
     }
 
     let mut g = value / 2;
-    let mut g2 = g + wad();
+    let mut g2 = g + wsad();
 
     let mut i = 0;
     loop {
@@ -248,7 +248,7 @@ pub fn sqrt(value : i128) -> i128 {
             break(g);
         }
 
-        let n = wad_div(value, g);
+        let n = wsad_div(value, g);
         g2 = g;
         g = (g + n) / 2;
 
@@ -257,17 +257,17 @@ pub fn sqrt(value : i128) -> i128 {
 }
 
 fn interval_check(value : @i128) {
-    assert((0_i128 <= *value) && (*value <= wad()), 'interval error');
+    assert((0_i128 <= *value) && (*value <= wsad()), 'interval error');
 }
 
-fn nd_interval_check(value : @WadVector) {
+fn nd_interval_check(value : @WsadVector) {
     let mut i = 0;
     loop {
         if i == (*value).len() { break(); }
 
         let v = *(*value).at(i);
         assert(
-            ( 0_i128 <= v ) && ( v <= wad() ), 
+            ( 0_i128 <= v ) && ( v <= wsad() ), 
             'interval error');
 
         i += 1;
@@ -289,10 +289,8 @@ pub fn skewness(values : @Array<i128>, mean : @i128, variance : @i128) -> i128 {
             break();
         }
 
-        let diff = wad_div(*values.at(i) - *mean, std_dev);
-        println!("diff {} = {}", i, wad_to_string(diff, 3));
-        skew += wad_mul(wad_mul(diff, diff), diff);
-        println!("skew: {}", wad_to_string(skew, 3));
+        let diff = wsad_div(*values.at(i) - *mean, std_dev);
+        skew += wsad_mul(wsad_mul(diff, diff), diff);
 
         i += 1;
     };
@@ -311,26 +309,21 @@ pub fn kurtosis(values : @Array<i128>, mean : @i128, variance : @i128) -> i128 {
             break();
         }
 
-        let diff = wad_div(*values.at(i) - *mean, std_dev);
-        println!("diff {} = {}", i, wad_to_string(diff, 3));
-        let diff_squared = wad_mul(diff, diff);
-        println!("diff {} = {}", i, wad_to_string(diff_squared, 3));
-        let diff_hypercube = safe_wad_mul(diff_squared, diff_squared);
-        println!("diff {} = {}", i, wad_to_string(diff_hypercube, 3));
+        let diff = wsad_div(*values.at(i) - *mean, std_dev);
+        let diff_squared = wsad_mul(diff, diff);
+        let diff_hypercube = safe_wsad_mul(diff_squared, diff_squared);
         kurt += diff_hypercube;
-        println!("kurtosis: {}", wad_to_string(kurt, 3));
 
         i += 1;
     };
 
     let term1 = (kurt * n * (n + 1)) / (n - 1);
-    let term2 = (3 * wad() * (n - 1) * (n - 1));
+    let term2 = (3 * wsad() * (n - 1) * (n - 1));
 
     (term1 - term2) / ((n - 2) * (n - 3))
 }
 
-pub fn nd_skewness(values : @Array<WadVector>, means : @WadVector, variances : @Array<i128>) -> WadVector {
-    println!("skewness");
+pub fn nd_skewness(values : @Array<WsadVector>, means : @WsadVector, variances : @Array<i128>) -> WsadVector {
     let arrays = nd_array_split(values);
     let mut result = ArrayTrait::new();
     let mut i = 0;
@@ -338,7 +331,6 @@ pub fn nd_skewness(values : @Array<WadVector>, means : @WadVector, variances : @
         if i == arrays.len() {
             break();
         }
-        println!("i = {}", i);
 
         result.append(skewness(arrays.at(i), (*means).at(i), variances.at(i)));
         i += 1;
@@ -347,8 +339,7 @@ pub fn nd_skewness(values : @Array<WadVector>, means : @WadVector, variances : @
     result.span()
 }
 
-pub fn nd_kurtosis(values : @Array<WadVector>, means : @WadVector, variances : @Array<i128>) -> WadVector {
-    println!("kurtosis");
+pub fn nd_kurtosis(values : @Array<WsadVector>, means : @WsadVector, variances : @Array<i128>) -> WsadVector {
     let arrays = nd_array_split(values);
     let mut result = ArrayTrait::new();
     let mut i = 0;
@@ -356,7 +347,6 @@ pub fn nd_kurtosis(values : @Array<WadVector>, means : @WadVector, variances : @
         if i == arrays.len() {
             break();
         }
-        println!("i = {}", i);
 
         result.append(kurtosis(arrays.at(i), (*means).at(i), variances.at(i)));
         i += 1;

@@ -86,9 +86,9 @@ starkli invoke <CONTRACT_ADDRESS> <method> <arguments as felt252>
 
 ## Code details
 
-To manage floats, we use the wad convention on ``i128``. 
+To manage floats, we use the wsad convention on ``i128``. 
 - details in : ``signed_decimal.cairo``
-- The signed wad implementation is based on the code from alexandria.
+- The signed wsad implementation is based on the code from alexandria.
 
 Currently, the implementations are uncrypted and can be called by anyone.
 A payment system will be added in the future.

@@ -36,19 +36,19 @@ UPPER_BOUND__I128 = (2**127) - 1 # included
 3618502788666131213697322783095070105623107215331596699973092056135872020480
 # ----------------------------------------------------------------------
 
-# fwad for wad as felt252
-def fwad_to_float(x) :
+# fwsad for wsad as felt252
+def fwsad_to_float(x) :
     return float(
         (x - UPPER_BOUND_FELT252) if x > UPPER_BOUND__I128 \
         else x
-    ) * 1e-18
+    ) * 1e-6
 
-# fwad for wad as felt252
-def float_to_fwad(x) :
-    as_wad = int(x*1e18)
+# fwsad for wsad as felt252
+def float_to_fwsad(x) :
+    as_wsad = int(x*1e6)
     return (
-        as_wad + UPPER_BOUND_FELT252 if as_wad < 0 \
-        else as_wad
+        as_wsad + UPPER_BOUND_FELT252 if as_wsad < 0 \
+        else as_wsad
     )
 
 def to_hex(x: int) -> str:
@@ -93,17 +93,17 @@ def call_generic(function_name : str) :
 
 def call_consensus() -> np.array :
     value = call_generic('get_consensus_value')
-    globalState.remote_consensus = [fwad_to_float(x) for x in value]
+    globalState.remote_consensus = [fwsad_to_float(x) for x in value]
     return globalState.remote_consensus
 
 def call_first_pass_consensus_reliability() -> float :
     value = call_generic("get_first_pass_consensus_reliability")
-    globalState.remote_first_pass_consensus_reliability = fwad_to_float(value)
+    globalState.remote_first_pass_consensus_reliability = fwsad_to_float(value)
     return globalState.remote_first_pass_consensus_reliability
 
 def call_second_pass_consensus_reliability() -> float :
     value = call_generic('get_second_pass_consensus_reliability')
-    globalState.remote_second_pass_consensus_reliability = fwad_to_float(value)
+    globalState.remote_second_pass_consensus_reliability = fwsad_to_float(value)
     return globalState.remote_second_pass_consensus_reliability
 
 def call_consensus_active() -> bool :
@@ -158,7 +158,7 @@ def invoke_update_prediction(account, prediction: np.array, debug=False, which_i
     # comp_end = comp_start + globalState.remote_dimension
 
     prediction_as_felt = [
-       float_to_fwad(x) for x in prediction #[comp_start, comp_end]
+       float_to_fwsad(x) for x in prediction #[comp_start, comp_end]
     ]
 
     asyncio.run(

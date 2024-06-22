@@ -1,12 +1,12 @@
 use oracle_consensus::utils::{
-    show_tuple_array, show_array, wad_to_string,
-    show_wad_array
+    show_tuple_array, show_array, wsad_to_string,
+    show_wsad_array
     };
 use oracle_consensus::sort::IndexedMergeSort;
 use oracle_consensus::math::{sqrt};
 use oracle_consensus::signed_decimal::{
     I128Div, I128Display, I128SignedBasics, unsigned_to_signed,
-    wad_div, wad_mul, wad, half_wad
+    wsad_div, wsad_mul, wsad, half_wsad
 };
 
 // ==============================================================================
@@ -36,17 +36,17 @@ fn test_sqrt() {
 
         // let values = array![
         //     sqrt(0_i128), 
-        //     sqrt(9_i128 * wad()), 
-        //     sqrt(16_i128 * wad()), 
-        //     sqrt(305_i128 * wad())
+        //     sqrt(9_i128 * wsad()), 
+        //     sqrt(16_i128 * wsad()), 
+        //     sqrt(305_i128 * wsad())
         // ];
 
-        // show_wad_array(values);
+        // show_wsad_array(values);
         // wanted : [0, 3, 4, 17.4928]
     }
 
     assert!(
-    (sqrt(9 * wad())) == (3 * wad()),
+    (sqrt(9 * wsad())) == (3 * wsad()),
     "sqrt error"
     );
 }
@@ -64,10 +64,10 @@ fn test_sqrt() {
 // }
 
 // #[test]
-// fn test_wad() {
-//     let x : i128 = -90 * wad();
-//     let y : i128 = -9 * wad();
-//     let z : i128 = wad_mul(wad_div(x, y) + wad(), 2*wad());
+// fn test_wsad() {
+//     let x : i128 = -90 * wsad();
+//     let y : i128 = -9 * wsad();
+//     let z : i128 = wsad_mul(wsad_div(x, y) + wsad(), 2*wsad());
 
 //     assert!(z == 22000000000000000000_i128, "error");
 //     // println!("{}", z);
@@ -75,15 +75,15 @@ fn test_sqrt() {
 
 // #[test]
 // fn test_signed_conversions() {
-//     // let x : i128 = 15_i128 * wad();
+//     // let x : i128 = 15_i128 * wsad();
 
-//     // println!("{}", wad_to_string(x, 3));
+//     // println!("{}", wsad_to_string(x, 3));
 
 //     // let y : u128 = x.as_unsigned_unsafe();
 //     // println!("{}", y);
 
 //     // let z : i128 = unsigned_to_signed(y);
-//     // println!("{}", wad_to_string(z, 3));
+//     // println!("{}", wsad_to_string(z, 3));
 
 //     let felt : felt252 = (-1_i128).into();
 //     println!("{}", felt);

@@ -49,16 +49,16 @@ mod OracleConsensusNDS {
     }
 
     use oracle_consensus::math::{
-        median, smooth_median, quadratic_risk, average, interval_check, sqrt, WadVector,
+        median, smooth_median, quadratic_risk, average, interval_check, sqrt, WsadVector,
         nd_median, nd_smooth_median, nd_quadratic_risk, nd_average, nd_interval_check, min,
         kurtosis, skewness, nd_kurtosis, nd_skewness,
-        FeltVector, IWadVectorBasics, IFeltVectorBasics
+        FeltVector, IWsadVectorBasics, IFeltVectorBasics
         };
     use oracle_consensus::sort::IndexedMergeSort;
-    use oracle_consensus::utils::{fst, snd, contractaddress_to_bytearray, wad_to_string};
+    use oracle_consensus::utils::{fst, snd, contractaddress_to_bytearray, wsad_to_string};
     use oracle_consensus::signed_decimal::{
         I128Div, I128Display, I128SignedBasics, unsigned_to_signed, felt_to_i128,
-        wad_div, wad_mul, wad, half_wad
+        wsad_div, wsad_mul, wsad, half_wsad
     };
     use alexandria_math::{pow};
     
@@ -92,11 +92,11 @@ mod OracleConsensusNDS {
         vote_matrix : LegacyMap<VoteCoordinate, bool>,
         replacement_propositions : LegacyMap<usize, Option<(usize, ContractAddress)>>,
 
-        consensus_value: LegacyMap<usize, i128>, // wad convention
-        consensus_reliability_second_pass : i128, // wad convention
-        consensus_reliability_first_pass : i128, // wad convention
-        skewness : LegacyMap<usize, i128>, // wad convention
-        kurtosis : LegacyMap<usize, i128> // wad convention
+        consensus_value: LegacyMap<usize, i128>, // wsad convention
+        consensus_reliability_second_pass : i128, // wsad convention
+        consensus_reliability_first_pass : i128, // wsad convention
+        skewness : LegacyMap<usize, i128>, // wsad convention
+        kurtosis : LegacyMap<usize, i128> // wsad convention
     }
 
     // ==============================================================================
@@ -117,7 +117,7 @@ mod OracleConsensusNDS {
         self.n_admins.write(array.len());
     }
 
-    fn write_vector(ref self: ContractState, which_oracle : @usize, vector : @WadVector) {
+    fn write_vector(ref self: ContractState, which_oracle : @usize, vector : @WsadVector) {
         let dim = (*vector).len();
         let mut i = 0;
         loop {
@@ -127,7 +127,7 @@ mod OracleConsensusNDS {
         };
     }
 
-    fn write_consensus(ref self: ContractState, vector : @WadVector) {
+    fn write_consensus(ref self: ContractState, vector : @WsadVector) {
         let dim = (*vector).len();
         let mut i = 0;
         loop {
@@ -137,7 +137,7 @@ mod OracleConsensusNDS {
         };
     }
 
-    fn write_skewness(ref self: ContractState, vector : @WadVector) {
+    fn write_skewness(ref self: ContractState, vector : @WsadVector) {
         let dim = (*vector).len();
         let mut i = 0;
         loop {
@@ -147,7 +147,7 @@ mod OracleConsensusNDS {
         };
     }
 
-    fn write_kurtosis(ref self: ContractState, vector : @WadVector) {
+    fn write_kurtosis(ref self: ContractState, vector : @WsadVector) {
         let dim = (*vector).len();
         let mut i = 0;
         loop {
@@ -157,7 +157,7 @@ mod OracleConsensusNDS {
         };
     }
 
-    fn empty_vector(dimension: usize) -> WadVector {
+    fn empty_vector(dimension: usize) -> WsadVector {
         let mut empty_vector = ArrayTrait::new();
         let mut i = 0;
         loop {
@@ -262,7 +262,7 @@ mod OracleConsensusNDS {
     // ORALCE CONSENSUS
     // ------------------------------------------------------------------------------
 
-    fn specific_oracle_value(self: @ContractState, which_oracle: usize) -> WadVector {
+    fn specific_oracle_value(self: @ContractState, which_oracle: usize) -> WsadVector {
         let dim = self.dimension.read();
         let mut result = ArrayTrait::new();
         let mut i = 0;
@@ -276,7 +276,7 @@ mod OracleConsensusNDS {
     
 
     // require that all oracle have already commited once
-    fn oracles_optional_values(self: @ContractState) -> Array<Option<WadVector>> {
+    fn oracles_optional_values(self: @ContractState) -> Array<Option<WsadVector>> {
         let mut result = ArrayTrait::new();
     
         let mut i = 0;
@@ -299,7 +299,7 @@ mod OracleConsensusNDS {
     }
 
     // require that all oracle have already commited once
-    fn compute_oracle_values(self: @ContractState, only_reliable : bool) -> Array<WadVector> {
+    fn compute_oracle_values(self: @ContractState, only_reliable : bool) -> Array<WsadVector> {
         let mut result = ArrayTrait::new();
      
         let mut i = 0;
@@ -320,7 +320,7 @@ mod OracleConsensusNDS {
         result
     }
 
-    fn update_a_single_oracle(ref self: ContractState, oracle_index : @usize, prediction : @WadVector) {
+    fn update_a_single_oracle(ref self: ContractState, oracle_index : @usize, prediction : @WsadVector) {
         let mut oracle_info = self.oracles_info.read(*oracle_index);
         
         if !oracle_info.enabled {
@@ -354,10 +354,10 @@ mod OracleConsensusNDS {
 
     fn unconstrained_reliability(self : @ContractState, std_deviation : @i128) -> i128 {
         let max_spread = self.unconstrained_max_spread.read();
-        wad() - wad_div( min(@max_spread, std_deviation), max_spread )
+        wsad() - wsad_div( min(@max_spread, std_deviation), max_spread )
     }
 
-    fn update_unconstrained_consensus(ref self: ContractState, oracle_index : @usize, prediction : @WadVector) {
+    fn update_unconstrained_consensus(ref self: ContractState, oracle_index : @usize, prediction : @WsadVector) {
         update_a_single_oracle(ref self, oracle_index, prediction);
 
         if self.n_oracles.read() != self.n_active_oracles.read() {
@@ -423,11 +423,11 @@ mod OracleConsensusNDS {
 
     fn compute_constrained_reliability(self : @ContractState, qr : @i128) -> i128 {
         let dim : i128 = self.dimension.read().try_into().unwrap();
-        wad() - (sqrt(*qr / dim) * 2)
+        wsad() - (sqrt(*qr / dim) * 2)
     }
 
 
-    fn update_constrained_consensus(ref self: ContractState, oracle_index : @usize, prediction : @WadVector) {
+    fn update_constrained_consensus(ref self: ContractState, oracle_index : @usize, prediction : @WsadVector) {
         update_a_single_oracle(ref self, oracle_index, prediction);
 
         if self.n_oracles.read() != self.n_active_oracles.read() {
@@ -579,17 +579,17 @@ mod OracleConsensusNDS {
     #[abi(embed_v0)]
     impl OracleConsensusImpl of super::IOracleConsensusNDS<ContractState> {
         fn update_prediction(ref self: ContractState, prediction : FeltVector) {
-            let wad_prediction = prediction.as_wad();
+            let wsad_prediction = prediction.as_wsad();
 
-            if self.constrained.read() { nd_interval_check(@wad_prediction); }
+            if self.constrained.read() { nd_interval_check(@wsad_prediction); }
             
             match find_oracle_index(@self, @get_caller_address()) {
                 Option::None => assert(false, 'not an oracle'),
                 Option::Some(oracle_index) => 
                 if self.constrained.read() { 
-                    update_constrained_consensus(ref self, @oracle_index, @wad_prediction)
+                    update_constrained_consensus(ref self, @oracle_index, @wsad_prediction)
                 } else {
-                    update_unconstrained_consensus(ref self, @oracle_index, @wad_prediction)
+                    update_unconstrained_consensus(ref self, @oracle_index, @wsad_prediction)
                 }
             }
 

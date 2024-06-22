@@ -3,7 +3,7 @@ use starknet::ContractAddress;
 
 use oracle_consensus::signed_decimal::{
     I128Div, I128Display, I128SignedBasics, unsigned_to_signed,
-    wad_div, wad_mul, wad, half_wad
+    wsad_div, wsad_mul, wsad, half_wsad
 };
 use alexandria_math::{pow};
 use alexandria_sorting::{QuickSort, MergeSort};
@@ -14,7 +14,7 @@ use oracle_consensus::math::{
 use oracle_consensus::utils::{
     show_array, show_address_array,
     show_replacement_propositions,
-    show_oracle_array, wad_to_string
+    show_oracle_array, wsad_to_string
 };
 use oracle_consensus::structs::{
     Oracle, VoteCoordinate
@@ -133,9 +133,9 @@ fn test_basic_execution() {
         show_oracle_array(dispatcher.get_oracle_value_list(), true, true, true, true);
         println!("----------------------");
         println!("consensus_active : {}", dispatcher.consensus_active());
-        println!("get_consensus_value : {}", wad_to_string(dispatcher.get_consensus_value(), 3));
-        println!("get_first_pass_consensus_reliability : {}", wad_to_string(dispatcher.get_first_pass_consensus_reliability(), 3));
-        println!("get_second_pass_consensus_reliability : {}", wad_to_string(dispatcher.get_second_pass_consensus_reliability(), 3));
+        println!("get_consensus_value : {}", wsad_to_string(dispatcher.get_consensus_value(), 3));
+        println!("get_first_pass_consensus_reliability : {}", wsad_to_string(dispatcher.get_first_pass_consensus_reliability(), 3));
+        println!("get_second_pass_consensus_reliability : {}", wsad_to_string(dispatcher.get_second_pass_consensus_reliability(), 3));
         println!("----------------------");
     }
 

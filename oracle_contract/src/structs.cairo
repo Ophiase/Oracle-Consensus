@@ -1,13 +1,13 @@
 use starknet::ContractAddress;
 use core::fmt::{Display, Formatter, Error};
 use oracle_consensus::utils::{
-    contractaddress_to_bytearray, wad_to_string
+    contractaddress_to_bytearray, wsad_to_string
 };
 
 #[derive(Drop, Serde, starknet::Store, Copy)]
 pub struct Oracle {
     address : ContractAddress,
-    value: i128, // wad convention
+    value: i128, // wsad convention
     enabled: bool, // have a value ?
     reliable: bool // pass the consensus ?
 }
@@ -21,7 +21,7 @@ pub struct VoteCoordinate {
 impl OracleDisplay of Display<Oracle> {
     fn fmt(self: @Oracle, ref f: Formatter) -> Result<(), Error> {
         let address = contractaddress_to_bytearray(*self.address);
-        let value = wad_to_string(*self.value, 2);
+        let value = wsad_to_string(*self.value, 2);
         let enabled = self.enabled;
         let reliable = self.reliable;
 

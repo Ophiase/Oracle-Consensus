@@ -42,10 +42,10 @@ mod OracleConsensus1DC {
 
     use oracle_consensus::math::{median, smooth_median, quadratic_risk, average, interval_check, sqrt};
     use oracle_consensus::sort::IndexedMergeSort;
-    use oracle_consensus::utils::{fst, snd, contractaddress_to_bytearray, wad_to_string};
+    use oracle_consensus::utils::{fst, snd, contractaddress_to_bytearray, wsad_to_string};
     use oracle_consensus::signed_decimal::{
         I128Div, I128Display, I128SignedBasics, unsigned_to_signed,
-        wad_div, wad_mul, half_wad
+        wsad_div, wsad_mul, half_wsad
     };
     use alexandria_math::{pow};
     
@@ -67,9 +67,9 @@ mod OracleConsensus1DC {
         vote_matrix : LegacyMap<VoteCoordinate, bool>,
         replacement_propositions : LegacyMap<usize, Option<(usize, ContractAddress)>>,
 
-        consensus_value: i128, // wad convention
-        consensus_reliability_second_pass : i128, // wad convention
-        consensus_reliability_first_pass : i128 // wad convention
+        consensus_value: i128, // wsad convention
+        consensus_reliability_second_pass : i128, // wsad convention
+        consensus_reliability_first_pass : i128 // wsad convention
     }
 
     // ==============================================================================
@@ -269,7 +269,7 @@ mod OracleConsensus1DC {
         // quadratic_risk
      
         let quadratic_risk_values = quadratic_risk(@oracles_values, @essence_first_pass);
-        let reliability_first_pass = wad() - (sqrt(average(@quadratic_risk_values)) * 2);
+        let reliability_first_pass = wsad() - (sqrt(average(@quadratic_risk_values)) * 2);
         interval_check(@reliability_first_pass);
         self.consensus_reliability_first_pass.write(reliability_first_pass);
         let ordered_oracles = IndexedMergeSort::sort(@quadratic_risk_values);
@@ -289,7 +289,7 @@ mod OracleConsensus1DC {
         // quadratic_risk
 
         let quadratic_risk_values = quadratic_risk(@reliable_values, @essence_first_pass);
-        let reliability_second_pass = wad() - (sqrt(average(@quadratic_risk_values)) * 2);
+        let reliability_second_pass = wsad() - (sqrt(average(@quadratic_risk_values)) * 2);
         interval_check(@reliability_second_pass);
         self.consensus_reliability_second_pass.write(reliability_second_pass);
         

@@ -3,12 +3,12 @@ use alexandria_math::pow;
 use starknet::ContractAddress;
 use oracle_consensus::signed_decimal::{
     I128Div, I128Display, I128SignedBasics, unsigned_to_signed, felt_to_i128,
-    wad_div, wad_mul, wad, half_wad
+    wsad_div, wsad_mul, wsad, half_wsad
 };
 
 use oracle_consensus::math::{
-    WadVector, FeltVector,
-    IWadVectorBasics, IFeltVectorBasics
+    WsadVector, FeltVector,
+    IWsadVectorBasics, IFeltVectorBasics
 };
 
 pub fn show_array<T, +Copy<T>, +Drop<T>, +core::fmt::Display<T>>(
@@ -43,7 +43,7 @@ pub fn show_oracle_array(
 
         let oracle = *array.at(i);
 
-        let mut result = wad_to_string(oracle.value, 2);
+        let mut result = wsad_to_string(oracle.value, 2);
         if show_address { result = contractaddress_to_bytearray(oracle.address) + " : " + result; }
         if show_enabled { result = format!("{}, e:{}", result, oracle.enabled); }
         if show_reliable { result = format!("{}, r:{}", result, oracle.reliable); }
@@ -60,7 +60,7 @@ pub fn show_oracle_array(
     };
 }
 
-pub fn wadvector_to_string(vector: WadVector) -> ByteArray {
+pub fn wsadvector_to_string(vector: WsadVector) -> ByteArray {
     let mut i = 0;
     let mut result : ByteArray = "(";
     loop {
@@ -68,14 +68,14 @@ pub fn wadvector_to_string(vector: WadVector) -> ByteArray {
             break(result.clone() + ")");
         }
 
-        result = result.clone() + format!("{}, ", wad_to_string(*vector.at(i), 3));
+        result = result.clone() + format!("{}, ", wsad_to_string(*vector.at(i), 3));
 
         i += 1;
     }
 }
 
 pub fn show_nd_oracle_array(
-    array: Array<(ContractAddress, WadVector, bool, bool)>, 
+    array: Array<(ContractAddress, WsadVector, bool, bool)>, 
     show_address : bool, show_enabled : bool, show_reliable : bool, jump_line : bool
     ) {
     
@@ -90,7 +90,7 @@ pub fn show_nd_oracle_array(
 
         let (address, value, enabled, reliable) = *array.at(i);
 
-        let mut result = wadvector_to_string(value);
+        let mut result = wsadvector_to_string(value);
         if show_address { result = contractaddress_to_bytearray(address) + " : " + result; }
         if show_enabled { result = format!("{}, e:{}", result, enabled); }
         if show_reliable { result = format!("{}, r:{}", result, reliable); }
@@ -124,7 +124,7 @@ pub fn show_nd_felt_oracle_array(
 
         let (address, value, enabled, reliable) = *array.at(i);
 
-        let mut result = wadvector_to_string(value.as_wad());
+        let mut result = wsadvector_to_string(value.as_wsad());
         if show_address { result = contractaddress_to_bytearray(address) + " : " + result; }
         if show_enabled { result = format!("{}, e:{}", result, enabled); }
         if show_reliable { result = format!("{}, r:{}", result, reliable); }
@@ -142,7 +142,7 @@ pub fn show_nd_felt_oracle_array(
 }
 
 
-pub fn show_wad_array(array: Array<i128>) {
+pub fn show_wsad_array(array: Array<i128>) {
     let mut i = 0;
     print!("[");
     loop {
@@ -151,7 +151,7 @@ pub fn show_wad_array(array: Array<i128>) {
             break();
         }
 
-        print!("{}, ", wad_to_string(*array.at(i), 3));
+        print!("{}, ", wsad_to_string(*array.at(i), 3));
 
         i += 1;
     };
@@ -257,18 +257,18 @@ fn lfill(string : ByteArray, n_digits: usize, character: ByteArray) -> ByteArray
     }
 }
 
-pub fn felt_wad_to_string(value: felt252, n_digits: usize) -> ByteArray {
-    wad_to_string(felt_to_i128(@value), n_digits)
+pub fn felt_wsad_to_string(value: felt252, n_digits: usize) -> ByteArray {
+    wsad_to_string(felt_to_i128(@value), n_digits)
 }
 
 // not optimized, for debug purpose
-pub fn wad_to_string(value: i128, n_digits: usize) -> ByteArray {
+pub fn wsad_to_string(value: i128, n_digits: usize) -> ByteArray {
     let uvalue = value.as_unsigned();
     let sign : ByteArray = if value.is_positive() { "" } else { "-" };
 
-    let integer_part = uvalue / pow(10, 18);
-    let decimal_part = uvalue - (integer_part * pow(10, 18));
-    let decimal_part_reduced = decimal_part / pow(10, 18 - n_digits.into());
+    let integer_part = uvalue / pow(10, 6);
+    let decimal_part = uvalue - (integer_part * pow(10, 6));
+    let decimal_part_reduced = decimal_part / pow(10, 6 - n_digits.into());
     let decimal_part_as_string = format!("{}", decimal_part_reduced);
 
     format!("{}{}.{}", sign, integer_part, lfill(decimal_part_as_string, n_digits, "0"))

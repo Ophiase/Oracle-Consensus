@@ -69,33 +69,33 @@ impl I128Display of Display<i128> {
     }
 }
 
-/// Provides functions to perform calculations with Wad and Ray units
-/// @dev Provides mul and div function for wads (decimal numbers with 18 digits of precision) and rays (decimal numbers
+/// Provides functions to perform calculations with Wsad and Ray units
+/// @dev Provides mul and div function for wsads (decimal numbers with 18 digits of precision) and rays (decimal numbers
 /// with 27 digits of precision)
 /// Operations are rounded. If a value is >=.5, will be rounded up, otherwise rounded down.
 /// https://github.com/aave/aave-v3-core/blob/master/contracts/protocol/libraries/math/WadRayMath.sol
 
-pub(crate) const WAD: i128 = 1_000_000_000_000_000_000; // 1e18
-pub(crate) const HALF_WAD: i128 = 500_000_000_000_000_000; // 0.5e18
+pub(crate) const WSAD: i128 = 1_000_000; // 1e6 instead of  1e18
+pub(crate) const HALF_WSAD: i128 = 500_000_000; // 0.5e6 instead of 0.5e18
 
-/// Return the wad value
+/// Return the wsad value
 /// # Returns
 /// * `i128` - The value
-pub fn wad() -> i128 {
-    return WAD;
+pub fn wsad() -> i128 {
+    return WSAD;
 }
 
-/// Return the half wad value
+/// Return the half wsad value
 /// # Returns
 /// * `i128` - The value
-pub fn half_wad() -> i128 {
-    return HALF_WAD;
+pub fn half_wsad() -> i128 {
+    return HALF_WSAD;
 }
 
 // const PREVENT_OVERFLOW : bool = true;
 // const OVERFLOW_REDUCTION : i128 = 10000000000000; // 1e10
-pub fn safe_wad_mul(a: i128, b: i128) -> i128 {
-    wad_mul(a, b)
+pub fn safe_wsad_mul(a: i128, b: i128) -> i128 {
+    wsad_mul(a, b)
 
     // let x = a / OVERFLOW_REDUCTION;
     // println!(":: {}", x);
@@ -106,27 +106,27 @@ pub fn safe_wad_mul(a: i128, b: i128) -> i128 {
     // 1
 
     // (OVERFLOW_REDUCTION*OVERFLOW_REDUCTION) * 
-    // ((a/OVERFLOW_REDUCTION) * (b/OVERFLOW_REDUCTION) + HALF_WAD) / WAD
+    // ((a/OVERFLOW_REDUCTION) * (b/OVERFLOW_REDUCTION) + HALF_WSAD) / WSAD
 }
 
 
 
-/// Multiplies two wad, rounding half up to the nearest wad
+/// Multiplies two wsad, rounding half up to the nearest wsad
 /// # Arguments
-/// * a Wad
-/// * b Wad
+/// * a Wsad
+/// * b Wsad
 /// # Returns
-/// * a*b, in wad
-pub fn wad_mul(a: i128, b: i128) -> i128 {
-    return (a * b + HALF_WAD) / WAD;
+/// * a*b, in wsad
+pub fn wsad_mul(a: i128, b: i128) -> i128 {
+    return (a * b + HALF_WSAD) / WSAD;
 }
 
-/// Divides two wad, rounding half up to the nearest wad
+/// Divides two wsad, rounding half up to the nearest wsad
 /// # Arguments
-/// * a Wad
-/// * b Wad
+/// * a Wsad
+/// * b Wsad
 /// # Returns
-/// * a/b, in wad
-pub fn wad_div(a: i128, b: i128) -> i128 {
-    return (a * WAD + (b / 2)) / b;
+/// * a/b, in wsad
+pub fn wsad_div(a: i128, b: i128) -> i128 {
+    return (a * WSAD + (b / 2)) / b;
 }
