@@ -91,12 +91,23 @@ def gen_oracles_predictions(sentiment_analysis : List[np.array]) -> List[np.arra
 
     return oracles_values
 
+def rank_array(list : List[float]) -> List[float] :
+    '''
+        Takes a list of values.
+        Replace them with a deviation score (the highest the best).
+    '''
+    s = np.argsort(list)
+    rev_indexes = [0 for i in range(len(s))]
+    for from_idx, to_idx in enumerate(s):
+        rev_indexes[to_idx] = s.size - from_idx - 1 
+    return np.array(rev_indexes) / (s.size - 1)
+
 def predictions_to_eel_values(oracles_predictions : List[np.array]):
     mean = np.mean(oracles_predictions, axis=0)
     median = np.median(oracles_predictions, axis=0)
+
     deviation_from_median = [np.linalg.norm(pred - median) for pred in oracles_predictions]
-    ranks = np.argsort(deviation_from_median)
-    normalized_ranks = ranks / (len(oracles_predictions) - 1)
+    normalized_ranks = rank_array(deviation_from_median)
 
     component = []
     for i in range(0, DIMENSION, 2) :

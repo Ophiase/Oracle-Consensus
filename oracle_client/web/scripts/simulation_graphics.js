@@ -23,15 +23,17 @@ function initComponents(dimension) {
                 datasets: [{
                     label: `Prediction ${i*2},${i*2 + 1}`,
                     data: [], // Initial empty data
-                    backgroundColor: 'rgba(54, 54, 54, 0.6)',  // Dark gray background
+                    backgroundColor: ['rgba(54, 54, 54, 0.6)'],  // Dark gray background
                     borderColor: 'rgba(34, 34, 34, 1)',        // Even darker border
-                    borderWidth: 1
+                    borderWidth: 1,
+                    pointRadius: 5
                 }, {
                     label: "Median",
                     data: [], // Initial empty data
                     backgroundColor: 'rgba(100, 200, 50, 0.6)',  // Dark gray background
-                    borderColor: 'rgba(34, 34, 34, 1)',        // Even darker border
-                    borderWidth: 1
+                    borderColor: 'rgba(34, 134, 34, 0.2)',        // Even darker border
+                    borderWidth: 20,
+                    pointRadius: 15
                 }, {
                     label: "Mean",
                     data: [], // Initial empty data
