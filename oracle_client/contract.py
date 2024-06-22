@@ -30,15 +30,26 @@ RESSOURCE_BOUND_UPDATE_PREDICTION = ResourceBounds(400000, 40932837875699)
 RESSOURCE_BOUND_UPDATE_PROPOSITION = ResourceBounds(400000, 40932837875699)
 RESSOURCE_BOUND_VOTE_FOR_A_PREDICTION = ResourceBounds(400000, 40932837875699)
 
+UPPER_BOUND_FELT252 = 3618502788666131213697322783095070105623107215331596699973092056135872020481
+UPPER_BOUND__I128 = (2**127) - 1 # included
+
+3618502788666131213697322783095070105623107215331596699973092056135872020480
 # ----------------------------------------------------------------------
 
-# TODO: manage negative values
-def wad_to_float(x) :
-    return float(x) * 1e-18
+# fwad for wad as felt252
+def fwad_to_float(x) :
+    return float(
+        (x - UPPER_BOUND_FELT252) if x > UPPER_BOUND__I128 \
+        else x
+    ) * 1e-18
 
-# TODO: manage negative values
-def float_to_wad(x) :
-    return int(x * 1e18)
+# fwad for wad as felt252
+def float_to_fwad(x) :
+    as_wad = int(x*1e18)
+    return (
+        as_wad + UPPER_BOUND_FELT252 if as_wad < 0 \
+        else as_wad
+    )
 
 def to_hex(x: int) -> str:
     return f"0x{x:0x}"
@@ -83,17 +94,17 @@ def call_generic(function_name : str) :
 
 def call_consensus() -> np.array :
     value = call_generic('get_consensus_value')
-    globalState.remote_consensus = [wad_to_float(x) for x in value]
+    globalState.remote_consensus = [fwad_to_float(x) for x in value]
     return globalState.remote_consensus
 
 def call_first_pass_consensus_reliability() -> float :
     value = call_generic("get_first_pass_consensus_reliability")
-    globalState.remote_first_pass_consensus_reliability = wad_to_float(value)
+    globalState.remote_first_pass_consensus_reliability = fwad_to_float(value)
     return globalState.remote_first_pass_consensus_reliability
 
 def call_second_pass_consensus_reliability() -> float :
     value = call_generic('get_second_pass_consensus_reliability')
-    globalState.remote_second_pass_consensus_reliability = wad_to_float(value)
+    globalState.remote_second_pass_consensus_reliability = fwad_to_float(value)
     return globalState.remote_second_pass_consensus_reliability
 
 def call_consensus_active() -> bool :
@@ -145,7 +156,7 @@ def invoke_update_prediction(account, prediction: np.array) :
     ))
 
     prediction_as_felt = [
-       float_to_wad(x) for x in prediction[:globalState.remote_dimension]
+       float_to_fwad(x) for x in prediction[:globalState.remote_dimension]
     ]
 
     asyncio.run(

@@ -11,7 +11,6 @@ use oracle_consensus::signed_wad_ray::{
 
 // ==============================================================================
 
-
 #[test]
 fn test_indexed_merge_sort() {
     let input = array![20_i128, 30, 29, 1, 300, 100];
@@ -76,19 +75,39 @@ fn test_sqrt() {
 
 // #[test]
 // fn test_signed_conversions() {
-//     let x : i128 = 15_i128 * wad();
+//     // let x : i128 = 15_i128 * wad();
 
-//     println!("{}", wad_to_string(x, 3));
+//     // println!("{}", wad_to_string(x, 3));
 
-//     let y : u128 = x.as_unsigned_unsafe();
-//     println!("{}", y);
+//     // let y : u128 = x.as_unsigned_unsafe();
+//     // println!("{}", y);
 
-//     let z : i128 = unsigned_to_signed(y);
-//     println!("{}", wad_to_string(z, 3));
+//     // let z : i128 = unsigned_to_signed(y);
+//     // println!("{}", wad_to_string(z, 3));
 
 //     let felt : felt252 = (-1_i128).into();
 //     println!("{}", felt);
 
 //     let a : i128 = felt.try_into().unwrap();
 //     println!("{}", a);
+// }
+
+// #[test]
+// fn test_signed_conversions_in_python() {
+//     println!("-------------------");
+//     let mut i = 5_i128; 
+//     loop {
+//         if i == -11_i128 { break(); }
+
+//         let felt : felt252 = (i).into();
+//         println!("{}", felt);
+
+//         i -= 1_i128;
+//     };
+
+//     let minus : felt252 = 3618502788666131213697322783095070105623107215331596699973092056135872020480;
+//     let k : i128 = minus.try_into().unwrap();
+//     println!("{}", k);
+
+//     println!("");
 // }
