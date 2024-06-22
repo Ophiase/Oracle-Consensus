@@ -15,7 +15,7 @@ from starknet_py.net.client_models import ResourceBounds, EstimatedFee, PriceUni
 from pprint import pprint
 
 from typing import List, Tuple
-from common import globalState
+from common import globalState, N_ORACLES
 
 # import aioconsole
 import asyncio
@@ -143,12 +143,12 @@ def call_replacement_propositions() -> List :
 def update_all_the_predictions(predictions: List[np.array]):
     print("update propositions : [ ", end="")
     for i, (account, prediction) in enumerate(zip(globalState.accounts, predictions)) :
-        invoke_update_prediction(account, prediction)
-        print("done {i}, ", end="")
+        invoke_update_prediction(account, prediction, True, i)
+        print(f"done {i}, ", end="")
     print("]")
 
 # requires globalState.remote_dimension
-def invoke_update_prediction(account, prediction: np.array) :
+def invoke_update_prediction(account, prediction: np.array, debug=False, which_index = None) :
     contract = asyncio.run(
         Contract.from_address(
                 provider=account, 
@@ -164,6 +164,8 @@ def invoke_update_prediction(account, prediction: np.array) :
             prediction=prediction_as_felt, l1_resource_bounds=RESSOURCE_BOUND_UPDATE_PREDICTION
         )
     )
+
+    eel.writeToConsole(f"Updated [{which_index+1}/{N_ORACLES}] with : \n{prediction_as_felt}")
 
 def invoke_update_proposition(acccount, prediction: List) :
     # RESSOURCE_BOUND_UPDATE_PROPOSITION

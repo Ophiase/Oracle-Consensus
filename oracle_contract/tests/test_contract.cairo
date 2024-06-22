@@ -115,7 +115,7 @@ fn fill_oracle_predictions(dispatcher : IOracleConsensusNDSDispatcher, predictio
 #[test]
 #[available_gas(80000000)]
 fn test_constrained_basic_execution() {
-    let VERBOSE : bool = false;
+    let VERBOSE : bool = true;
 
     let dispatcher = deploy_constrained_contract();
 
@@ -154,7 +154,20 @@ fn test_constrained_basic_execution() {
         array![487609527760088832, 337990045876390976].span(), 
         array![284178293988284864, 485072442019714880].span(), 
         array![990059578132686080, 558600821433541504].span(),
+        // array![41771899326704440, 2753696149738971].span(),
+        // array![906700648391441792, 107009062792520656].span(),
+        // array![12893986527342350, 3883828797552269].span(),
+        // array![43323881679680192, 3157344275678042].span(),
+        // array![16353277035523206, 3597251237079035].span(),
+        // array![345874654443167424, 77803999719279424].span(),
+        // array![10893020476214588, 3568622465536464].span(),
     ]; 
+
+    // println!("V : {}", wadvector_to_string((*predictions.at(0)).as_wad()));
+    // println!("V : {}", wadvector_to_string((*predictions.at(1)).as_wad()));
+    // println!("V : {}", wadvector_to_string((*predictions.at(2)).as_wad()));
+    // println!("V : {}", wadvector_to_string((*predictions.at(3)).as_wad()));
+    // println!("V : {}", wadvector_to_string((*predictions.at(4)).as_wad()));
 
     //     array![437936475867688192, 349587800435125504].span(), 
     //     array![473744510163695040, 548875132636806080].span(), 

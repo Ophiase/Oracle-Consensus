@@ -21,6 +21,9 @@ Commands :
     - auto_fetch on/off (default: off)
     - scraper on/off (default: off)
 
+    - contract_declaration_address
+    - contract_address
+
     - (S) commit (call update_proposition for each oracle)
     
     - (S) resume
@@ -42,6 +45,9 @@ Commands :
 For <admin> <oracle> arguments, you can either specify the index in the contract or the address starting with "0x"
 
 (S) indicates an interaction with Sepolia
+
+---------------------------------------
+
 '''
 
 # ----------------------------------------------------------------------
@@ -76,6 +82,12 @@ def query(text : str):
     match splitted[0] :
 
         # -------------------------------------
+
+        case "contract_declaration_address" :
+            eel.writeToConsole(f"Contract Declaration Address :\n{globalState.DECLARED_ADDRESS}")            
+
+        case "contract_address" :
+            eel.writeToConsole(f"Contract Address :\n{globalState.DEPLOYED_ADDRESS}")
 
         case "fetch":
             eel.writeToConsole("Processing ..")
@@ -118,6 +130,20 @@ def query(text : str):
         case "resume" :
             for x in ["consensus", "reliability_first_pass", "reliability"] :
                 query(x)
+
+            active = globalState.remote_consensus_active
+            consensus = globalState.remote_consensus
+            
+            fpr = globalState.remote_first_pass_consensus_reliability
+            spr = globalState.remote_second_pass_consensus_reliability
+
+            eel.setSepoliaConsole(
+                f"SEPOLIA RESUME: \n" +
+                f"consensus_active: {active} \n" + 
+                f"consensus : " + str([f"{x:0.2f}" for x in consensus]) + "\n" +
+                f"reliability_first_pass : {fpr} \n" +
+                f"reliability_second_pass : {spr}\n"
+            )
 
         case "live_mode" : not_implemented()
         case "scraper" : NotImplemented()

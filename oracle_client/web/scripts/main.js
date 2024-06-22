@@ -10,11 +10,26 @@ function writeToConsole(text, user_input=false) {
     d = document.querySelector("#console-output")
     if (user_input) d.innerText += "$ ";
     d.innerText += text + "\n";
-
     d.scrollTop = d.scrollHeight;
 }
 
 eel.expose(writeToConsole);
+
+function setSimulationConsole(text) {
+  d = document.querySelector("#simulation-output")
+  d.innerText = text;
+  d.scrollTop = d.scrollHeight;
+}
+
+eel.expose(setSimulationConsole);
+
+function setSepoliaConsole(text) {
+  d = document.querySelector("#sepolia_infos")
+  d.innerText = text;
+  d.scrollTop = d.scrollHeight;
+}
+
+eel.expose(setSepoliaConsole);
 
 const inputElement = document.querySelector('#console-input');
 inputElement.addEventListener('keyup', function(event) {

@@ -111,6 +111,12 @@ def show_predictions(oracles_predictions : List[np.array], timestamps : List[str
     # date = datetime.strptime(timestamps[-1], '%Y-%m-%d %H:%M:%S').astimezone(tz=timezone.fromutc) 
     eel.writeToConsole(f"fetched {len(oracles_predictions)} predictions from {timestamps[-1]} UTC")
     
+    s = "LABELS : " + str(LABELS_KEYS) + "\n----------------\n"
+    for index, prediction in enumerate(oracles_predictions) :
+        prediction_str = [float(f"{x:0.2f}") for x in prediction]
+        s += f"oracle {index:2d} : {prediction_str} \n"
+    eel.setSimulationConsole(s)
+
     # # reduce dimension
     # reduced_oracles_predictions = [ x[:dimension] for x in oracles_predictions ]
     # pprint("Last predictions: ")
