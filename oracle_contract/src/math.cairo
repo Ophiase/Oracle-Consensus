@@ -1,7 +1,8 @@
 
-use oracle_consensus::signed_wad_ray::{
+use oracle_consensus::signed_decimal::{
     I128Div, I128Display, I128SignedBasics, unsigned_to_signed, felt_to_i128,
-    ray_div, ray_mul, wad_div, wad_mul, ray_to_wad, wad_to_ray, ray, wad, half_ray, half_wad
+    ray_div, ray_mul, wad_div, wad_mul, ray_to_wad, wad_to_ray, ray, wad, half_ray, half_wad,
+    safe_wad_mul
 };
 use alexandria_math::{pow};    
 use alexandria_sorting::{QuickSort, MergeSort};
@@ -275,4 +276,90 @@ fn nd_interval_check(value : @WadVector) {
 
 pub fn min(a : @i128, b : @i128) -> i128 {
     if *a > *b { *b } else { *a }
+}
+
+pub fn skewness(values : @Array<i128>, mean : @i128, variance : @i128) -> i128 {
+    let n = values.len().into();
+    let std_dev = sqrt(*variance);
+    
+    let mut skew = 0_i128;
+    let mut i = 0;
+    loop {
+        if i == values.len() {
+            break();
+        }
+
+        let diff = wad_div(*values.at(i) - *mean, std_dev);
+        println!("diff {} = {}", i, wad_to_string(diff, 3));
+        skew += wad_mul(wad_mul(diff, diff), diff);
+        println!("skew: {}", wad_to_string(skew, 3));
+
+        i += 1;
+    };
+
+    (skew * n) / ((n-1) * (n-2))
+}
+
+pub fn kurtosis(values : @Array<i128>, mean : @i128, variance : @i128) -> i128 {
+    let n = values.len().into();
+    let std_dev = sqrt(*variance);
+    
+    let mut kurt = 0_i128;
+    let mut i = 0;
+    loop {
+        if i == values.len() {
+            break();
+        }
+
+        let diff = wad_div(*values.at(i) - *mean, std_dev);
+        println!("diff {} = {}", i, wad_to_string(diff, 3));
+        let diff_squared = wad_mul(diff, diff);
+        println!("diff {} = {}", i, wad_to_string(diff_squared, 3));
+        let diff_hypercube = safe_wad_mul(diff_squared, diff_squared);
+        println!("diff {} = {}", i, wad_to_string(diff_hypercube, 3));
+        kurt += diff_hypercube;
+        println!("kurtosis: {}", wad_to_string(kurt, 3));
+
+        i += 1;
+    };
+
+    let term1 = (kurt * n * (n + 1)) / (n - 1);
+    let term2 = (3 * wad() * (n - 1) * (n - 1));
+
+    (term1 - term2) / ((n - 2) * (n - 3))
+}
+
+pub fn nd_skewness(values : @Array<WadVector>, means : @WadVector, variances : @Array<i128>) -> WadVector {
+    println!("skewness");
+    let arrays = nd_array_split(values);
+    let mut result = ArrayTrait::new();
+    let mut i = 0;
+    loop {
+        if i == arrays.len() {
+            break();
+        }
+        println!("i = {}", i);
+
+        result.append(skewness(arrays.at(i), (*means).at(i), variances.at(i)));
+        i += 1;
+    };
+
+    result.span()
+}
+
+pub fn nd_kurtosis(values : @Array<WadVector>, means : @WadVector, variances : @Array<i128>) -> WadVector {
+    println!("kurtosis");
+    let arrays = nd_array_split(values);
+    let mut result = ArrayTrait::new();
+    let mut i = 0;
+    loop {
+        if i == arrays.len() {
+            break();
+        }
+        println!("i = {}", i);
+
+        result.append(kurtosis(arrays.at(i), (*means).at(i), variances.at(i)));
+        i += 1;
+    };
+    result.span()
 }

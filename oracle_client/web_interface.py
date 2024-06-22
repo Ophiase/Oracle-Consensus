@@ -64,6 +64,12 @@ def init_server():
 
 # ----------------------------------------------------------------------
 
+# def address_as_hex(input: str) -> int :
+#     if str.startswith(input, "0x") :
+#         pass
+
+# def address_as_index(input: str) -> int :pass
+
 def on_off_to_bool(x):
     return True if x == "on" else False
 
@@ -124,7 +130,7 @@ def query(text : str):
                 eel.writeToConsole("Done.")
         case "consensus" :
             consensus = call_consensus()
-            eel.writeToConsole("consensus : " + str([
+            eel.writeToConsole("consensus :\n" + str([
                 f"{x:0.2f}" for x in consensus
             ]))
         case "reliability_first_pass" :

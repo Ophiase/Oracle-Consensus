@@ -1,4 +1,4 @@
-// Signed Wad/Ray implementation based on alexandria implementation : https://github.com/keep-starknet-strange/alexandria/blob/main/packages/math/src/wad_ray_math.cairo
+// Implementation based on alexandria implementation : https://github.com/keep-starknet-strange/alexandria/blob/main/packages/math/src/wad_ray_math.cairo
 
 use core::fmt::{Display, Formatter, Error};
 
@@ -77,10 +77,6 @@ impl I128Display of Display<i128> {
 
 pub(crate) const WAD: i128 = 1_000_000_000_000_000_000; // 1e18
 pub(crate) const HALF_WAD: i128 = 500_000_000_000_000_000; // 0.5e18
-pub(crate) const RAY: i128 = 1_000_000_000_000_000_000_000_000_000; // 1e27
-pub(crate) const HALF_RAY: i128 = 500_000_000_000_000_000_000_000_000; // 0.5e27
-pub(crate) const WAD_RAY_RATIO: i128 = 1_000_000_000; // 1e9
-pub(crate) const HALF_WAD_RAY_RATIO: i128 = 500_000_000; // 0.5e9
 
 /// Return the wad value
 /// # Returns
@@ -109,6 +105,26 @@ pub fn half_wad() -> i128 {
 pub fn half_ray() -> i128 {
     return HALF_RAY;
 }
+
+
+
+// const PREVENT_OVERFLOW : bool = true;
+// const OVERFLOW_REDUCTION : i128 = 10000000000000; // 1e10
+pub fn safe_wad_mul(a: i128, b: i128) -> i128 {
+    wad_mul(a, b)
+
+    // let x = a / OVERFLOW_REDUCTION;
+    // println!(":: {}", x);
+    // let y = b / OVERFLOW_REDUCTION;
+    // println!(":: {}", y);
+    // println!(":: {}", x*y);
+    // println!(":: {}", (x*y) * (OVERFLOW_REDUCTION*OVERFLOW_REDUCTION));
+    // 1
+
+    // (OVERFLOW_REDUCTION*OVERFLOW_REDUCTION) * 
+    // ((a/OVERFLOW_REDUCTION) * (b/OVERFLOW_REDUCTION) + HALF_WAD) / WAD
+}
+
 
 
 /// Multiplies two wad, rounding half up to the nearest wad

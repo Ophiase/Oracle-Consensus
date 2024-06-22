@@ -1,7 +1,7 @@
 mod math;
 mod utils;
 
-mod signed_wad_ray;
+mod signed_decimal;
 mod sort;
 
 mod structs;

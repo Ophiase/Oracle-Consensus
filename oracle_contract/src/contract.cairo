@@ -9,6 +9,8 @@ trait IOracleConsensusNDS<TContractState> {
     fn get_consensus_value(self: @TContractState) -> FeltVector;
     fn get_first_pass_consensus_reliability(self: @TContractState) -> felt252;
     fn get_second_pass_consensus_reliability(self: @TContractState) -> felt252;
+    fn get_skewness(self: @TContractState) -> FeltVector;
+    fn get_kurtosis(self: @TContractState) -> FeltVector;
 
     fn get_admin_list(self: @TContractState) -> Array<ContractAddress>;
     fn get_oracle_list(self: @TContractState) -> Array<ContractAddress>;
@@ -49,11 +51,12 @@ mod OracleConsensusNDS {
     use oracle_consensus::math::{
         median, smooth_median, quadratic_risk, average, interval_check, sqrt, WadVector,
         nd_median, nd_smooth_median, nd_quadratic_risk, nd_average, nd_interval_check, min,
+        kurtosis, skewness, nd_kurtosis, nd_skewness,
         FeltVector, IWadVectorBasics, IFeltVectorBasics
         };
     use oracle_consensus::sort::IndexedMergeSort;
     use oracle_consensus::utils::{fst, snd, contractaddress_to_bytearray, wad_to_string};
-    use oracle_consensus::signed_wad_ray::{
+    use oracle_consensus::signed_decimal::{
         I128Div, I128Display, I128SignedBasics, unsigned_to_signed, felt_to_i128,
         ray_div, ray_mul, wad_div, wad_mul, ray_to_wad, wad_to_ray, ray, wad, half_ray, half_wad
     };
@@ -91,7 +94,9 @@ mod OracleConsensusNDS {
 
         consensus_value: LegacyMap<usize, i128>, // wad convention
         consensus_reliability_second_pass : i128, // wad convention
-        consensus_reliability_first_pass : i128 // wad convention
+        consensus_reliability_first_pass : i128, // wad convention
+        skewness : LegacyMap<usize, i128>, // wad convention
+        kurtosis : LegacyMap<usize, i128> // wad convention
     }
 
     // ==============================================================================
@@ -128,6 +133,26 @@ mod OracleConsensusNDS {
         loop {
             if i == dim { break(); }
             self.consensus_value.write(i, *(*vector).at(i));
+            i += 1;
+        };
+    }
+
+    fn write_skewness(ref self: ContractState, vector : @WadVector) {
+        let dim = (*vector).len();
+        let mut i = 0;
+        loop {
+            if i == dim { break(); }
+            self.skewness.write(i, *(*vector).at(i));
+            i += 1;
+        };
+    }
+
+    fn write_kurtosis(ref self: ContractState, vector : @WadVector) {
+        let dim = (*vector).len();
+        let mut i = 0;
+        loop {
+            if i == dim { break(); }
+            self.kurtosis.write(i, *(*vector).at(i));
             i += 1;
         };
     }
@@ -349,7 +374,7 @@ mod OracleConsensusNDS {
 
         let essence_first_pass = nd_smooth_median(@oracles_values);
 
-        // quadratic_risk
+        // RELIABILITY
      
         let quadratic_risk_values = nd_quadratic_risk(@oracles_values, @essence_first_pass);
         
@@ -373,16 +398,26 @@ mod OracleConsensusNDS {
         let essence = nd_average(@reliable_values);
         write_consensus(ref self, @essence);
 
-        // quadratic_risk
+        // RELIABILITY
         let quadratic_risk_values = nd_quadratic_risk(@reliable_values, @essence_first_pass);
         
         let reliability_second_pass = unconstrained_reliability(
             @self, @sqrt(average(@quadratic_risk_values))
         );
         interval_check(@reliability_second_pass);
-        
         self.consensus_reliability_second_pass.write(reliability_second_pass);
-        
+
+        // KURTOSIS / SKEWNESS
+
+        let means = nd_average(@reliable_values);
+        let variances =  nd_quadratic_risk(@reliable_values, @means);
+
+        let skewness = nd_skewness(@reliable_values, @means, @variances);
+        let kurtosis = nd_kurtosis(@reliable_values, @means, @variances);
+
+        write_skewness(ref self, @skewness);
+        write_kurtosis(ref self, @kurtosis);
+
         self.consensus_active.write(true);        
     }
 
@@ -436,6 +471,17 @@ mod OracleConsensusNDS {
         let reliability_second_pass = compute_constrained_reliability(@self, @average(@quadratic_risk_values));
         interval_check(@reliability_second_pass);
         self.consensus_reliability_second_pass.write(reliability_second_pass);
+
+        // KURTOSIS / SKEWNESS
+
+        let means = nd_average(@reliable_values);
+        let variances =  nd_quadratic_risk(@reliable_values, @means);
+
+        let skewness = nd_skewness(@reliable_values, @means, @variances);
+        let kurtosis = nd_kurtosis(@reliable_values, @means, @variances);
+
+        write_skewness(ref self, @skewness);
+        write_kurtosis(ref self, @kurtosis);
         
         self.consensus_active.write(true);        
     }
@@ -573,6 +619,30 @@ mod OracleConsensusNDS {
         // return 0 until all the oracles have voted once
         fn get_second_pass_consensus_reliability(self: @ContractState) -> felt252 {
             self.consensus_reliability_second_pass.read().as_felt()
+        }
+
+        fn get_skewness(self: @ContractState) -> FeltVector {
+            let dim = self.dimension.read();
+            let mut result = ArrayTrait::new();
+            let mut i = 0;
+            loop {
+                if i == dim { break(); }
+                result.append(self.skewness.read(i).as_felt());
+                i += 1;
+            };
+            result.span()
+        }
+
+        fn get_kurtosis(self: @ContractState) -> FeltVector {
+            let dim = self.dimension.read();
+            let mut result = ArrayTrait::new();
+            let mut i = 0;
+            loop {
+                if i == dim { break(); }
+                result.append(self.kurtosis.read(i).as_felt());
+                i += 1;
+            };
+            result.span()
         }
         
         fn update_proposition(ref self: ContractState, proposition : Option<(usize, ContractAddress)>) {

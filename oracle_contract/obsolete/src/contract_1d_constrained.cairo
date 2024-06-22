@@ -43,7 +43,7 @@ mod OracleConsensus1DC {
     use oracle_consensus::math::{median, smooth_median, quadratic_risk, average, interval_check, sqrt};
     use oracle_consensus::sort::IndexedMergeSort;
     use oracle_consensus::utils::{fst, snd, contractaddress_to_bytearray, wad_to_string};
-    use oracle_consensus::signed_wad_ray::{
+    use oracle_consensus::signed_decimal::{
         I128Div, I128Display, I128SignedBasics, unsigned_to_signed,
         ray_div, ray_mul, wad_div, wad_mul, ray_to_wad, wad_to_ray, ray, wad, half_ray, half_wad
     };
