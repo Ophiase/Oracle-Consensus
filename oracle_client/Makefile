@@ -3,8 +3,8 @@ import_contracts:
 	mkdir contracts 
 	cp -r ../oracle_contract/target/dev/* contracts
 
-run_scrapper:
-	python3 scrapper.py
+run_scraper:
+	python3 scraper.py
 
 run:
 	python3 main.py

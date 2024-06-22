@@ -1,4 +1,4 @@
-// tiny hackernews scrapper
+// tiny hackernews scraper
 
 const divs = document.querySelectorAll('div.commtext.c00');
 const contentArray = [];

@@ -47,6 +47,12 @@ class GlobalState:
         self.remote_first_pass_consensus_reliability = None
         self.remote_second_pass_consensus_reliability = None
 
+        self.remote_consensus_active = None
+        self.remote_admin_list = None
+        self.remote_oracle_list = None
+        self.remote_dimension = None
+        self.remote_replacement_propositions = None
+
         # -----------------------------
 
         with open(os.path.join('data', 'contract_info.json'), 'r') as file :

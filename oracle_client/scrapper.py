@@ -12,11 +12,15 @@ from typing import List
 from pprint import pprint
 import os
 
+# ----------------------------------------------------------------------
+
 GECKODRIVER_PATH = '~/.cargo/bin/geckodriver'
-JS_PATH = "hn_scrapper.js"
+JS_PATH = "hn_scraper.js"
 URL = "https://news.ycombinator.com/newcomments"
 DB_PATH = os.path.join("data","db.sqlite")
 DEFAULT_REFRESH_INTERVAL = 10 * 60  # each 10 minutes
+
+# ----------------------------------------------------------------------
 
 def init_driver():
     options = Options()

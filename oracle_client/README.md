@@ -1,7 +1,7 @@
 # Off Chain oracle model
 
 In this folder there are 3 scripts :
-- ``scrapper.py`` :
+- ``scraper.py`` :
     - Look for new comments on Hackernews each 5 minutes and add them to the database.
 - ``main.py`` : Web demonstration of the smart contract on Sepolia.
     - Simulate oracles
@@ -21,6 +21,6 @@ Required :
 ## Execution
 
 ```bash
-python3 scrapper.py # real time database
+python3 scraper.py # real time database
 python3 main.py # simulate the oracles using real datas
 ```

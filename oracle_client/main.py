@@ -15,21 +15,21 @@ def main():
     parser.add_argument('--disable_sepolia', action='store_true', default=False, help='Do not load data/sepolia.json by default')
     parser.add_argument('--high_dimension', action='store_true', default=False, help='High dimension contract')
     parser.add_argument('--live_mode', action='store_true', default=False)
-    parser.add_argument('--scrapper', action='store_true', default=False, help='Run the scrapper in background.')
-    parser.add_argument('--rate', type=int, default=30*60, help='Scrapper Refresh interval in seconds')
+    parser.add_argument('--scraper', action='store_true', default=False, help='Run the scraper in background.')
+    parser.add_argument('--rate', type=int, default=30*60, help='scraper Refresh interval in seconds')
     
     args = parser.parse_args()
     
     print("------------------------------------")
 
-    if not args.scrapper and args.live_mode :
-        print("Info: Simulation mode disabled. Either run the scrapper externaly or restart this application with -scrapper.")
+    if not args.scraper and args.live_mode :
+        print("Info: Simulation mode disabled. Either run the scraper externaly or restart this application with -scraper.")
 
     if not args.live_mode :
         print(f"Info: Simulation mode requires at least {PREDICTION_WINDOW} posts in {DB_PATH}")
 
-    if args.scrapper :
-        background_process = subprocess.Popen(["python3", "scrapper", "--rate", args.rate])
+    if args.scraper :
+        background_process = subprocess.Popen(["python3", "scraper", "--rate", args.rate])
         atexit.register(lambda: cleanup(background_process))
 
     globalState.dimension = DIMENSION if args.high_dimension else 2
@@ -55,7 +55,7 @@ def cleanup(background_process) :
     # print("Cleaning up the background process...")
     background_process.terminate()
     background_process.wait()
-    print("Scrapper terminated.")
+    print("scraper terminated.")
 
 if __name__ == "__main__":
     main()

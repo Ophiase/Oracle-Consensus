@@ -111,8 +111,8 @@ def show_predictions(oracles_predictions : List[np.array], timestamps : List[str
     # date = datetime.strptime(timestamps[-1], '%Y-%m-%d %H:%M:%S').astimezone(tz=timezone.fromutc) 
     eel.writeToConsole(f"fetched {len(oracles_predictions)} predictions from {timestamps[-1]} UTC")
     
-    # reduce dimension
-    reduced_oracles_predictions = [ x[:dimension] for x in oracles_predictions ]
+    # # reduce dimension
+    # reduced_oracles_predictions = [ x[:dimension] for x in oracles_predictions ]
     # pprint("Last predictions: ")
     # pprint(reduced_oracles_predictions)
 
@@ -120,6 +120,7 @@ def simulation_fetch(classifier) :
     posts, timestamps, globalState.simulation_step = read_window_from_db(globalState.simulation_step)
     sentiment_analysis_results = sentiment_analysis(classifier, posts)
     oracles_predictions = gen_oracles_predictions(sentiment_analysis_results)
+    globalState.predictions = oracles_predictions
     
     show_predictions(oracles_predictions, timestamps, globalState.dimension)
 

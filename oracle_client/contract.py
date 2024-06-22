@@ -3,7 +3,6 @@ import os
 
 from starknet_py.net.full_node_client import FullNodeClient
 from starknet_py.net.account.account import Account
-from starknet_py.net.full_node_client import FullNodeClient
 from starknet_py.net.models.chains import StarknetChainId
 from starknet_py.net.signer.stark_curve_signer import KeyPair
 from starknet_py.contract import Contract
@@ -14,6 +13,7 @@ from starknet_py.hash.casm_class_hash import compute_casm_class_hash
 from starknet_py.net.client_models import ResourceBounds, EstimatedFee, PriceUnit
 from pprint import pprint
 
+from typing import List, Tuple
 from common import globalState
 
 # import aioconsole
@@ -24,6 +24,10 @@ import numpy as np
 # ----------------------------------------------------------------------
 
 ACCOUNTS_PATH = os.path.join("data", "sepolia.json")
+
+RESSOURCE_BOUND_UPDATE_PREDICTION = ResourceBounds(400000, 40932837875699)
+RESSOURCE_BOUND_UPDATE_PROPOSITION = ResourceBounds(400000, 40932837875699)
+RESSOURCE_BOUND_VOTE_FOR_A_PREDICTION = ResourceBounds(400000, 40932837875699)
 
 # ----------------------------------------------------------------------
 
@@ -67,30 +71,101 @@ def retrieve_account_data():
         ))
 
 # ----------------------------------------------------------------------
+# CALL
+# ----------------------------------------------------------------------
+
+def call_generic(function_name : str) :
+    contract = globalState.default_contract
+    return asyncio.run(
+        contract.functions[function_name].call()
+    )[0]
 
 def call_consensus() -> np.array :
-    contract = globalState.default_contract
-    consensus = asyncio.run(
-        contract.functions['get_consensus_value'].call()
-    )
-    
-    globalState.remote_consensus = [wad_to_float(x) for x in consensus[0]]
+    value = call_generic('get_consensus_value')
+    globalState.remote_consensus = [wad_to_float(x) for x in value]
     return globalState.remote_consensus
 
 def call_first_pass_consensus_reliability() -> float :
-    contract = globalState.default_contract
-    first_pass_consensus_reliability = asyncio.run(
-        contract.functions['get_first_pass_consensus_reliability'].call()
-    )[0]
-    
-    globalState.remote_first_pass_consensus_reliability = wad_to_float(first_pass_consensus_reliability)
+    value = call_generic("get_first_pass_consensus_reliability")
+    globalState.remote_first_pass_consensus_reliability = wad_to_float(value)
     return globalState.remote_first_pass_consensus_reliability
 
 def call_second_pass_consensus_reliability() -> float :
-    contract = globalState.default_contract
-    second_pass_consensus_reliability = asyncio.run(
-        contract.functions['get_second_pass_consensus_reliability'].call()
-    )[0]
-    
-    globalState.remote_second_pass_consensus_reliability = wad_to_float(second_pass_consensus_reliability)
+    value = call_generic('get_second_pass_consensus_reliability')
+    globalState.remote_second_pass_consensus_reliability = wad_to_float(value)
     return globalState.remote_second_pass_consensus_reliability
+
+def call_consensus_active() -> bool :
+    value = call_generic('consensus_active')
+    globalState.remote_consensus_active = value
+    return globalState.remote_consensus_active
+
+def call_admin_list() -> List[str] :
+    value = call_generic('get_admin_list')
+    globalState.remote_admin_list = [to_hex(x) for x in value]
+    return globalState.remote_admin_list
+
+def call_oracle_list() -> List[str] :
+    value = call_generic('get_oracle_list')
+    globalState.remote_oracle_list = [to_hex(x) for x in value]
+    return globalState.remote_oracle_list
+
+def call_dimension() -> int:
+    value = call_generic('get_predictions_dimension')
+    globalState.remote_dimension = value
+    return globalState.remote_dimension
+
+def call_replacement_propositions() -> List :
+    value = call_generic('get_replacement_propositions')
+    globalState.remote_replacement_propositions = value
+    return globalState.remote_replacement_propositions
+
+#  'get_a_specific_proposition': <starknet_py.contract.ContractFunction at 0x7672b8868410>}
+#  'get_oracle_value_list': <starknet_py.contract.ContractFunction at 0x7672b880de90>,
+
+# ----------------------------------------------------------------------
+# INVOKE
+# ----------------------------------------------------------------------
+
+# requires globalState.remote_dimension
+def update_all_the_predictions(predictions: List[np.array]):
+    print("update propositions : [ ", end="")
+    for i, (account, prediction) in enumerate(zip(globalState.accounts, predictions)) :
+        invoke_update_prediction(account, prediction)
+        print("done {i}, ", end="")
+    print("]")
+
+# requires globalState.remote_dimension
+def invoke_update_prediction(account, prediction: np.array) :
+    contract = asyncio.run(
+        Contract.from_address(
+                provider=account, 
+                address=globalState.DEPLOYED_ADDRESS
+    ))
+
+    prediction_as_felt = [
+       float_to_wad(x) for x in prediction[:globalState.remote_dimension]
+    ]
+
+    asyncio.run(
+        contract.functions["update_prediction"].invoke_v3(
+            prediction=prediction_as_felt, l1_resource_bounds=RESSOURCE_BOUND_UPDATE_PREDICTION
+        )
+    )
+
+def invoke_update_proposition(acccount, prediction: List) :
+    # RESSOURCE_BOUND_UPDATE_PROPOSITION
+    raise NotImplementedError()
+
+def invoke_vote_for_a_proposition(acccount, which_one) :
+    contract = asyncio.run(
+        Contract.from_address(provider=acccount, address=globalState.DECLARED_ADDRESS)
+    )
+
+    asyncio.run(
+        contract.functions["vote_for_a_proposition"].invoke_v3(
+            which_one=which_one, l1_resource_bounds=RESSOURCE_BOUND_VOTE_FOR_A_PREDICTION
+        )
+    )
+
+
