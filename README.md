@@ -1,5 +1,9 @@
 # Stochastic Vector Oracle Consensus
 
+<center> 
+    <img src="./resources/consensus_graphic.png" width=500>
+</center>
+
 Sponsorized by [StarkHack Hackaton](https://ethglobal.com/events/starkhack).
 
 Establish on-chain consensus over predictions from multiple oracles that can evolve over time.
@@ -15,12 +19,9 @@ We also provide an oracle client for demonstration purposes.
 
 ![](resources/application_screenshot.png)
 
+
 ## Documentations.
 
 - Mathematical details : [documentation/README.md](documentation/README.md).
 - Smart contract interface for oracles : [oracle_contract/README.md](oracle_contract/README.md).
 - Oracle Client : [oracle_client/README.md](oracle_client/README.md).
-
----
-
-![](resources/consensus_graphic.png)
