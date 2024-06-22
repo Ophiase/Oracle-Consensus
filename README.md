@@ -1,7 +1,7 @@
 # Stochastic Vector Oracle Consensus
 
 <p align="center">
-    <img src="./resources/consensus_graphic_bis.png" width=500>
+    <img src="./resources/consensus_graphic_4.png" width=500>
 </p>
 ![](image.png)
 Sponsorized by [StarkHack Hackaton](https://ethglobal.com/events/starkhack).
