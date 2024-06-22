@@ -31,10 +31,20 @@ Required :
 
 Declaration/Deployment explained in [oracle_contract/README.md](oracle_contract/README.md)
 
-``data/contract_info.json``
+``data/sepolia.json``
 ```json
 {
-    "addresses" : [
+    "admins_addresses": [
+        "<INSERT>",
+        "<INSERT>",
+        "<INSERT>"
+    ],
+    "admins_private_keys": [
+        "<INSERT>",
+        "<INSERT>",
+        "<INSERT>"
+    ],
+    "oracles_addresses" : [
         "<INSERT>",
         "<INSERT>",
         "<INSERT>",
@@ -44,7 +54,7 @@ Declaration/Deployment explained in [oracle_contract/README.md](oracle_contract/
         "<INSERT>",
         "<INSERT>"
     ],
-    "private_keys": [
+    "oracles_private_keys": [
         "<INSERT>",
         "<INSERT>",
         "<INSERT>",
@@ -59,6 +69,8 @@ Declaration/Deployment explained in [oracle_contract/README.md](oracle_contract/
 
 It's not safe to put your private keys in a json file. \
 We assume you are using test accounts specificaly for Sepolia.
+
+Remark: I deployed the contract with 7 oracles, thus I need 8 oracles to demonstrate client ability to replace oracles.
 
 ## Execution
 

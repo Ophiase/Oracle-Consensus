@@ -68,7 +68,10 @@ class GlobalState:
         self.client = FullNodeClient(node_url=self.RPC)
         self.addresses = None
         self.private_keys = None
-        self.accounts = None
-        self.oracles_accounts = None
+
+        self.admin_accounts = None
+        self.oracle_accounts = None
+        self.default_contract = None
+
 
 globalState = GlobalState()

@@ -6,6 +6,9 @@ import_contracts:
 run_scraper:
 	python3 scraper.py
 
+run_with_scraper:
+	python3 main.py --scraper
+
 run:
 	python3 main.py
 

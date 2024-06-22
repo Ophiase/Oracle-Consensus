@@ -58,7 +58,7 @@ We recommand you to declare/deploy using Argent :
 <oracle_address_03>,
 <oracle_address_04>,
 <oracle_address_05>,
-<oracle_address_06
+<oracle_address_06>
 
 # two oracle cannot have the same address
 # two admins cannot have the same address
