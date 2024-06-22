@@ -68,6 +68,8 @@ function updateProgressBar(index, percentage) {
     chart.update();
 }
 
+eel.expose(updateProgressBar)
+
 document.addEventListener('DOMContentLoaded', function() {
     initializeProgressBars();
     updateProgressBar(0, 40);

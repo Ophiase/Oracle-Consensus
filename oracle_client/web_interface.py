@@ -78,7 +78,7 @@ def query(text : str):
         # -------------------------------------
 
         case "fetch":
-            print("Processing ..")
+            eel.writeToConsole("Processing ..")
             simulation_fetch(gen_classifier())
         case "auto_fetch":
             if unexpected_argument(2, splitted) : return
@@ -106,8 +106,14 @@ def query(text : str):
             ]))
         case "reliability_first_pass" :
             eel.writeToConsole(f"reliability_first_pass : {call_first_pass_consensus_reliability()}")
+            eel.updateProgressBar(
+                0, int(globalState.remote_first_pass_consensus_reliability*100)
+            )
         case "reliability" :
             eel.writeToConsole(f"reliability : {call_second_pass_consensus_reliability()}")
+            eel.updateProgressBar(
+                1, int(globalState.remote_second_pass_consensus_reliability*100)
+            )
         
         case "resume" :
             for x in ["consensus", "reliability_first_pass", "reliability"] :
