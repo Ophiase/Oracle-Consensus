@@ -26,9 +26,9 @@ import numpy as np
 
 ACCOUNTS_PATH = os.path.join("data", "sepolia.json")
 
-RESOURCE_BOUND_UPDATE_PREDICTION = ResourceBounds(400000, 40932837875699)
-RESOURCE_BOUND_UPDATE_PROPOSITION = ResourceBounds(400000, 40932837875699)
-RESOURCE_BOUND_VOTE_FOR_A_PREDICTION = ResourceBounds(400000, 40932837875699)
+RESOURCE_BOUND_UPDATE_PREDICTION = ResourceBounds(700000, 70932837875699)
+RESOURCE_BOUND_UPDATE_PROPOSITION = ResourceBounds(700000, 70932837875699)
+RESOURCE_BOUND_VOTE_FOR_A_PREDICTION = ResourceBounds(600000, 70932837875699)
 
 UPPER_BOUND_FELT252 = 3618502788666131213697322783095070105623107215331596699973092056135872020481
 UPPER_BOUND__I128 = (2**127) - 1 # included
@@ -183,8 +183,13 @@ def call_replacement_propositions() -> List :
     globalState.remote_replacement_propositions = value
     return globalState.remote_replacement_propositions
 
+def call_oracle_value_list() -> List :
+    value = call_generic('get_oracle_value_list')
+    globalState.remote_oracle_value_list = value
+    return globalState.remote_oracle_value_list
+
+
 #  'get_a_specific_proposition': <starknet_py.contract.ContractFunction at 0x7672b8868410>}
-#  'get_oracle_value_list': <starknet_py.contract.ContractFunction at 0x7672b880de90>,
 
 # ----------------------------------------------------------------------
 # INVOKE

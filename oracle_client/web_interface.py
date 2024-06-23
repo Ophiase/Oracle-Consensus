@@ -3,7 +3,7 @@ import time
 from threading import Thread
 from oracle_scheduler import simulation_mode, simulation_fetch, gen_classifier
 from common import globalState
-from contract import address_to_admin_index, address_to_oracle_index, admin_index_to_address, call_consensus, call_first_pass_consensus_reliability, \
+from contract import address_to_admin_index, address_to_oracle_index, admin_index_to_address, call_consensus, call_first_pass_consensus_reliability, call_oracle_value_list, \
 call_second_pass_consensus_reliability, oracle_index_to_address, to_hex, update_all_the_predictions, \
 invoke_update_proposition, invoke_vote_for_a_proposition, \
 call_replacement_propositions, call_dimension, call_oracle_list, \
@@ -38,6 +38,8 @@ Commands :
     - (S) admin_list
     - (S) oracle_list
     - (S) dimension
+    - (S) replacement_menu
+        - show the menu to replace oracle
     - (S) replacement_propositions
 
     - (S) update_proposition <caller_admin> None
@@ -104,6 +106,18 @@ def make_admin_index(input: str) -> int :
         return address_to_admin_index(int(input, 16))
     else : return int(input)
 
+def propositions_as_str(only_not_none = False) -> str:
+    propositions = call_replacement_propositions()
+    text = ""
+    for index, proposition in enumerate(propositions) :
+        if proposition is None :
+            if not only_not_none:
+                text += f"- Admin {index} : None\n"
+        else :
+            text += f"- Admin {index} : \n"
+            text += f" - {proposition[0]} -> {to_hex(proposition[1])} \n"
+    return text
+
 # ----------------------------------------------------------------------
 
 def on_off_to_bool(x):
@@ -127,11 +141,28 @@ def query(text : str):
 
         # -------------------------------------
 
+        case "refresh_replacement_menu":
+            admins = call_admin_list()
+            oracles = call_oracle_list()
+
+            propositions = propositions_as_str(only_not_none=True)
+            failing_oracles = ""
+
+            eel.refreshReplacementMenu(
+                [f"Admin {i}" for i in range(len(admins))],
+                [f"Oracle {i}" for i in range(len(oracles))],
+                propositions,
+                failing_oracles,
+            )
+
         case "contract_declaration_address" :
             eel.writeToConsole(f"Contract Declaration Address :\n{globalState.DECLARED_ADDRESS}")            
 
         case "contract_address" :
             eel.writeToConsole(f"Contract Address :\n{globalState.DEPLOYED_ADDRESS}")
+
+        case "replacement_menu":
+            eel.toggleOracleManagementMenu()
 
         case "fetch":
             eel.writeToConsole("Processing ..")
@@ -214,14 +245,8 @@ def query(text : str):
             eel.writeToConsole(f"Dimension: {call_dimension()}")
 
         case "replacement_propositions" : 
-            propositions = call_replacement_propositions()
             eel.writeToConsole("Replacement propositions :")
-            for index, proposition in enumerate(propositions) :
-                if proposition is None :
-                    eel.writeToConsole(f"- Admin {index} : None")
-                else :
-                    eel.writeToConsole(f"- Admin {index} :")
-                    eel.writeToConsole(f" - {proposition[0]} -> {to_hex(proposition[1])}")
+            eel.writeToConsole(propositions_as_str())
 
         case "update_proposition" :
             try :
@@ -264,6 +289,10 @@ def query(text : str):
             except Exception as e :
                 eel.writeToConsole("An error has occurred")
                 print(e)
+
+        # not currently implemented
+        case "get_oracle_value_list":
+            eel.writeToConsole(call_oracle_value_list())
 
         # -------------------------------------
 

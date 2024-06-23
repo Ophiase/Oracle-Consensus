@@ -1,5 +1,5 @@
 {
     "rpc": "https://free-rpc.nethermind.io/sepolia-juno",
-    "declared_address" : "0x4495d00f2fe1e445d3fd80d2cb54b8e22da1115dc4fb738e923a3aec116e8b",
-    "deployed_address" : "0x65ceaa458dddff2cc6821bb4eab02704847af9c796aa2fafd778389da81936d"
+    "declared_address" : "0x05896973b1e00838efbf9aafd6479ed5c25bdf651afdce7d6c8ac24904b0010b",
+    "deployed_address" : "0x65b5007e55c0973b86e5766a1c138e919bc910eb8de496a52881826b2ddfc01"
 }

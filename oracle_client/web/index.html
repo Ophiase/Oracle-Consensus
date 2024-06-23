@@ -4,15 +4,79 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Scatter Plot Visualization</title>
-    <link rel="stylesheet" href="styles.css"> <!-- Inclure le fichier CSS externe -->
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="title-container">
-        <h1 class="page-title">Stochastic Vector Oracle Consensus</h1> <!-- Titre centré -->
+    <div id="oracle-management-menu">
+        <div id="oracle-menu-content">
+            <h2>Oracle Management</h2>        
+            <button class="btn" onclick="refresh_replacement_menu">Refresh</button>
+            <div>
+                <h3>Current propositions</h3>
+                <div id="oracle_propositions"></div>
+                <h3>Failing oracles (remote)</h3>
+                <div id="failing_oracles"></div>
+            </div>
+            
+            <div>
+                <h3>Add a propostion</h3>
+
+                <div class="form-group">
+                    <p class="argument-text">Admin that proposes :</p>
+                    <select class="button" id="build_proposition_caller">
+                        <option disabled selected hidden>Choose an Admin</option>
+                        <option>None</option>
+                    </select>
+                </div>
+            
+                <div class="form-group">
+                    <p class="argument-text">Oracle to replace :</p>
+                    <select id="build_proposition_old_oracle">
+                        <option disabled selected hidden>Choose an Oracle</option>
+                        <option>None</option>
+                    </select>
+                </div>
+            
+                <div class="form-group">
+                    <p class="argument-text">New oracle :</p>
+                    <input id="build_proposition_new_oracle" type="text">
+                </div>
+
+            <div>
+                <h3>Vote for a proposition</h3>
+                
+                <div class="form-group">
+                    <p class="argument-text">Admin that votes :</p>
+                    <select class="button" id="build_proposition_vote_caller">
+                        <option disabled selected hidden>Choose an Admin</option>
+                        <option>None</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <p class="argument-text">An admin's proposition :</p>
+                    <select class="button" id="build_proposition_vote_proposition">
+                        <option disabled selected hidden>Choose an Admin</option>
+                        <option>None</option>
+                    </select>
+                </div>
+
+            </div>
+
+
+                <button class="btn" onclick="">Submit</button>
+                <button class="btn" onclick="toggleOracleManagementMenu()">Exit</button>
+            </div>
+        </div>
     </div>
 
-    </br> 
-    </br>
+    <div class="title-container">
+        <h1 class="page-title">Stochastic Vector Oracle Consensus</h1>
+    </div>
+
+
+    <br>
+    <br>
 
     <div>
         <div id="plots-container" class="a"></div>
@@ -21,8 +85,6 @@
     <div class="container">
         <div class="bot-container">
             <h2>Simulation</h2>
-            <!-- <button class="btn" onclick="">Enable Auto-Fetch</button> -->
-            <!-- <button class="btn" onclick="">Enable Auto-Commit</button> -->
             <button class="btn" onclick="query('fetch')">Fetch Data</button>
             <button class="btn" onclick="query('commit')">Commit Predictions</button>
             <h3>Simulation data :</h3>
@@ -56,13 +118,10 @@
                     <button class="btn" onclick="query('resume')">Resume</button>
                     <button class="btn" onclick="query('admin_list')">Admins</button>
                     <button class="btn" onclick="query('oracle_list')">Oracles</button>
-                    <button class="btn" onclick="query('replacement_propositions')">Propositions</button>            
+                    <!-- <button class="btn" onclick="query('replacement_propositions')">Propositions</button> -->
+                    <button class="btn" onclick="toggleOracleManagementMenu()">Oracle Replacement</button> <!-- Nouveau bouton -->
                 </div>
             </div>
-            
-
-            <!-- <canvas id="progress-bar-3" width="400" height="100"></canvas>
-            <div id="progress-text-3"></div> -->
 
             <div id="sepolia_infos" class="console-short">
                 Nothing, please query a Sepolia Resume.
@@ -75,5 +134,6 @@
     <script src="scripts/main.js"></script>
     <script src="scripts/sepolia_graphics.js"></script>
     <script src="scripts/simulation_graphics.js"></script>
+    <script src="scripts/oracle_management.js"></script> <!-- Inclusion du script oracle_management.js -->
 </body>
 </html>

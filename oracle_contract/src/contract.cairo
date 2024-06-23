@@ -517,6 +517,14 @@ mod OracleConsensusNDS {
         }
     }
 
+    fn is_admin(self: @ContractState, admin : @ContractAddress) -> bool {
+        match find_admin_index(self, admin) {
+            Option::None => false,
+            Option::Some(_x) => true
+        }
+    }
+
+
     // ------------------------------------------------------------------------------
     // ADMIN VOTES
     // ------------------------------------------------------------------------------
@@ -550,25 +558,6 @@ mod OracleConsensusNDS {
 
         reinitialize_replacement_propositions(ref self, @n_admins);
         reinitialize_vote_matrix(ref self, @n_admins);
-    }
-
-    // ------------------------------------------------------------------------------
-    // OTHER
-    // ------------------------------------------------------------------------------
-
-    fn is_admin(self: @ContractState, user : @ContractAddress) -> bool {
-        let mut i = 0;
-        loop {
-            if i == self.n_admins.read() {
-                break(false);
-            }
-
-            if self.admins.read(i) == *user {
-                break(true);
-            } 
-            
-            i += 1;
-        }
     }
 
     // ==============================================================================
