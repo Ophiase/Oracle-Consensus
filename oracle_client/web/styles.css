@@ -5,7 +5,7 @@ body {
     align-items: center;
     justify-content: center;
     padding: 20px;
-    background-color: #272a31;
+    background-color: #d9d2cc;
 }
 
 #plots-container {
@@ -15,7 +15,7 @@ body {
 }
 
 .active-plot {
-    background: white;
+    background: #eae5e0;
     border: 4px solid #ff00cb;
     padding: 20px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -27,7 +27,7 @@ body {
   }
 
 .plot {
-    background: white;
+    background: #eae5e0;
     border: 1px solid #ccc;
     padding: 20px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -48,7 +48,7 @@ canvas {
     margin-bottom: 20px;
     font-size: 24px;
     font-weight: bold;
-    color: white;
+    color: #353535;
 }
 
 .container {
@@ -58,7 +58,7 @@ canvas {
 }
 
 .bot-container {
-    background: #47505b;
+    background: #c8bdb0;
     border: 1px solid #292c31;
     padding: 20px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -68,19 +68,19 @@ canvas {
 
 .bot-container h2 {
     font-size: 20px;
-    color: #fff;
+    color: #312f2f;
     text-align: center;
 }
 
 .bot-container h3 {
     font-size: 16px;
-    color: #fff;
+    color: #241d1d;
     /* text-align: center; */
 }
 
 .console, .console-short, .console-mid {
     border: 1px solid #ccc;
-    background-color: #f9f9f9;
+    background-color: #dfd6cb;
     font-family: monospace;
     padding: 10px;
 }
@@ -106,12 +106,12 @@ canvas {
     padding: 10px;
     width: 480px;
     overflow-y: auto;
-    background-color: #f9f9f9;
+    background-color: #dbd3c3;
     font-family: monospace;
 }
 
 .btn {
-    background-color: #5cafa1;
+    background-color: #7a8684;
     color: white;
     padding: 10px 20px;
     margin: 10px 0;
