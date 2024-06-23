@@ -49,4 +49,6 @@ function query(text) {
     eel.query(text)
 }
 
+eel.expose(query)
+
 // -----------------------------------------------------------------

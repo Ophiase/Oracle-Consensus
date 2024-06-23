@@ -199,9 +199,17 @@ def query(text : str):
         case "is_consensus_active" : 
             eel.writeToConsole(f"Is consensus active: {call_consensus_active()}")
         case "admin_list" : 
-            eel.writeToConsole(f"Admin list: {call_admin_list()}")
+            eel.writeToConsole(f"[Admin list]")
+            list = call_admin_list()
+            for idx, oracle in enumerate(list) :
+                eel.writeToConsole(f"Admin {idx} : {oracle}")
+            eel.writeToConsole(f"")
         case "oracle_list" : 
-            eel.writeToConsole(f"Oracle list: {call_oracle_list()}")
+            eel.writeToConsole(f"[Oracle list]")
+            list = call_oracle_list()
+            for idx, oracle in enumerate(list) :
+                eel.writeToConsole(f"Oracle {idx} : {oracle}")
+            eel.writeToConsole(f"")
         case "dimension" : 
             eel.writeToConsole(f"Dimension: {call_dimension()}")
 

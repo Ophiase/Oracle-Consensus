@@ -1,6 +1,6 @@
 let simulation_charts = []; // Array to hold Chart instances
 
-Chart.defaults.borderColor = '#363636';
+Chart.defaults.borderColor = '#606060';
 Chart.defaults.color = '#000';
 
 initComponents(3);
@@ -24,8 +24,8 @@ function initComponents(dimension) {
                     label: `Prediction ${i*2},${i*2 + 1}`,
                     data: [], // Initial empty data
                     backgroundColor: ['rgba(54, 54, 54, 0.6)'],  // Dark gray background
-                    borderColor: 'rgba(34, 34, 34, 1)',        // Even darker border
-                    borderWidth: 1,
+                    borderColor: 'rgba(34, 34, 34, 0.1)',        // Even darker border
+                    borderWidth: 5,
                     pointRadius: 5
                 }, {
                     label: "Median",
@@ -33,13 +33,13 @@ function initComponents(dimension) {
                     backgroundColor: 'rgba(100, 200, 50, 0.6)',  // Dark gray background
                     borderColor: 'rgba(34, 134, 34, 0.2)',        // Even darker border
                     borderWidth: 20,
-                    pointRadius: 15
+                    pointRadius: 20
                 }, {
                     label: "Mean",
                     data: [], // Initial empty data
                     backgroundColor: 'rgba(100, 54, 200, 0.6)',  // Dark gray background
-                    borderColor: 'rgba(34, 34, 34, 1)',        // Even darker border
-                    borderWidth: 1
+                    borderColor: 'rgba(34, 34, 34, 0.3)',        // Even darker border
+                    borderWidth: 5
                 }]
             },
             options: {
@@ -95,7 +95,7 @@ function updateComponents(components, mean=null, median=null) {
         chart.options.scales.y.title.text = component.columnNames[1];
     
         chart.data.datasets[0].backgroundColor = component.data.map((point, i) => {
-            return point.score > 0.2 ? 'rgba(54, 54, 54, 0.6)' : 'rgba(240, 30, 30)';
+            return point.score > 0.2 ? 'rgba(54, 54, 54, 0.6)' : 'rgba(220, 60, 60)';
         });
 
         if (median) {

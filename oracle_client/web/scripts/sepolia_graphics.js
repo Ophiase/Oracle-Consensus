@@ -16,8 +16,8 @@ function initializeProgressBars() {
             datasets: [{
                 label: 'Completion',
                 data: [percentages[index]],
-                backgroundColor: percentages[index] < 50 ? 'rgba(255, 99, 132, 0.2)' : 'rgba(75, 192, 192, 0.2)',
-                borderColor: percentages[index] < 50 ? 'rgba(255, 99, 132, 1)' : 'rgba(75, 192, 192, 1)',
+                backgroundColor: percentages[index] < 50 ? 'rgba(255, 99, 100, 0.8)' : 'rgba(75, 192, 255, 0.8)',
+                borderColor: percentages[index] < 50 ? 'rgba(255, 99, 100, 1)' : 'rgba(75, 192, 255, 1)',
                 borderWidth: 1
             }]
         };
@@ -62,7 +62,7 @@ function updateProgressBar(index, percentage) {
     const progressText = document.getElementById(textId);
 
     chart.data.datasets[0].data[0] = percentage;
-    chart.data.datasets[0].backgroundColor = percentage < 50 ? 'rgba(255, 99, 132, 0.2)' : 'rgba(75, 192, 192, 0.2)';
+    chart.data.datasets[0].backgroundColor = percentage < 50 ? 'rgba(255, 99, 60, 0.8)' : 'rgba(20, 192, 120, 0.8)';
     chart.data.datasets[0].borderColor = percentage < 50 ? 'rgba(255, 99, 132, 1)' : 'rgba(75, 192, 192, 1)';
     // progressText.innerText = `${labels[index]}: ${percentage}%`;
     chart.update();

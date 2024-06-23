@@ -1,3 +1,4 @@
+from oracle_scheduler import gen_classifier, simulation_fetch
 from web_interface import init_server
 import eel
 import atexit
@@ -14,6 +15,7 @@ def main():
     parser = argparse.ArgumentParser(description="Oracle Scheduler")
 
     parser.add_argument('--disable_sepolia', action='store_true', default=False, help='Do not load data/sepolia.json by default')
+    parser.add_argument('--disable_startup_fetch', action='store_true', default=False, help='Do not load data/sepolia.json by default')
     parser.add_argument('--dimension', type=int, default=DIMENSION, help='contract dimension')
     parser.add_argument('--live_mode', action='store_true', default=False)
     parser.add_argument('--scraper', action='store_true', default=False, help='Run the scraper in background.')
@@ -42,7 +44,14 @@ def main():
         retrieve_account_data()
 
     init_server()
+
     eel.initComponents(DIMENSION // 2)
+
+    if not args.disable_sepolia :
+        eel.query("resume")
+
+    if not args.disable_sepolia and not args.disable_startup_fetch :
+        eel.query("fetch")
 
     # if args.live_mode :
     #     Thread(target=lambda: live_mode(args.rate, dimension)).start()
