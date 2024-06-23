@@ -25,17 +25,12 @@
             <!-- <button class="btn" onclick="">Enable Auto-Commit</button> -->
             <button class="btn" onclick="query('fetch')">Fetch Data</button>
             <button class="btn" onclick="query('commit')">Commit Predictions</button>
-            <button class="btn" onclick="query('resume')">Sepolia Resume</button>
-            <button class="btn" onclick="query('admin_list')">Sepolia Admins</button>
-            <button class="btn" onclick="query('oracle_list')">Sepolia Oracles</button>
-            <button class="btn" onclick="query('replacement_propositions')">Replacement propositions</button>
-            
             <h3>Simulation data :</h3>
             <div id="simulation-output" class="console-short">
                 Nothing, please fetch.
             </div>
         </div>
-
+        
         <div class="bot-container">
             <h2>Console</h2>
             <div id="console-output" class="console">
@@ -43,19 +38,28 @@
             </div>
             <input id="console-input" type="text" autofocus>
         </div>
-
+        
         <div class="bot-container">
             <h2>On-Chain State (Sepolia)</h2>
+            <div class="content-wrapper">
+                <div class="left-content">
+                    <h3>Second Pass Reliability</h3>
+                    <canvas id="progress-bar-2" width="400" height="90"></canvas>
+                    <div id="progress-text-2"></div>
+                    
+                    <h3>First Pass Reliability</h3>
+                    <canvas id="progress-bar-1" width="400" height="90"></canvas>
+                    <div id="progress-text-1"></div>
+                    
+                </div>
+                <div class="right-content">
+                    <button class="btn" onclick="query('resume')">Resume</button>
+                    <button class="btn" onclick="query('admin_list')">Admins</button>
+                    <button class="btn" onclick="query('oracle_list')">Oracles</button>
+                    <button class="btn" onclick="query('replacement_propositions')">Propositions</button>            
+                </div>
+            </div>
             
-            <h3>Second Pass Reliability</h3>
-            <canvas id="progress-bar-2" width="400" height="60"></canvas>
-            <div id="progress-text-2"></div>
-
-            <h3>First Pass Reliability</h3>
-            <canvas id="progress-bar-1" width="400" height="60"></canvas>
-            <div id="progress-text-1"></div>
-
-            </br>
 
             <!-- <canvas id="progress-bar-3" width="400" height="100"></canvas>
             <div id="progress-text-3"></div> -->

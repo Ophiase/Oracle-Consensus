@@ -123,3 +123,24 @@ canvas {
 #progress-text-1, #progress-text-2, #progress-text-3 {
     color: white;
 }
+
+.content-wrapper {
+    display: flex;
+    gap: 20px;
+    padding-bottom: 20px;
+}
+
+.left-content, .right-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.left-content {
+    padding-right: 10px;
+    border-right: 1px solid #ccc;
+}
+
+.right-content {
+    padding-left: 10px;
+}
