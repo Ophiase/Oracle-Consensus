@@ -91,7 +91,7 @@ def gen_oracles_predictions(sentiment_analysis : List[np.array]) -> List[np.arra
 
     return oracles_values
 
-def rank_array(list : List[float]) -> List[float] :
+def rank_array(list : List[float], normalized=True) -> List[float] :
     '''
         Takes a list of values.
         Replace them with a deviation score (the highest the best).
@@ -99,15 +99,16 @@ def rank_array(list : List[float]) -> List[float] :
     s = np.argsort(list)
     rev_indexes = [0 for i in range(len(s))]
     for from_idx, to_idx in enumerate(s):
-        rev_indexes[to_idx] = s.size - from_idx - 1 
-    return np.array(rev_indexes) / (s.size - 1)
+        rev_indexes[to_idx] = s.size - from_idx - 1
+
+    return np.array(rev_indexes) / (s.size - 1), np.array(rev_indexes)
 
 def predictions_to_eel_values(oracles_predictions : List[np.array]):
     mean = np.mean(oracles_predictions, axis=0)
     median = np.median(oracles_predictions, axis=0)
 
     deviation_from_median = [np.linalg.norm(pred - median) for pred in oracles_predictions]
-    normalized_ranks = rank_array(deviation_from_median)
+    normalized_ranks, ranks = rank_array(deviation_from_median)
 
     component = []
     for i in range(0, DIMENSION, 2) :
@@ -130,20 +131,20 @@ def predictions_to_eel_values(oracles_predictions : List[np.array]):
         })
 
     # pprint(component)
-    return component, mean, median
+    return component, mean, median, ranks
 
 def show_predictions(oracles_predictions : List[np.array], timestamps : List[str], dimension : int) -> None :
-    eel_values, mean, median = predictions_to_eel_values(oracles_predictions)
-
+    eel_values, mean, median, ranks = predictions_to_eel_values(oracles_predictions)
     eel.updateComponents(eel_values, list(mean), list(median))
 
     # date = datetime.strptime(timestamps[-1], '%Y-%m-%d %H:%M:%S').astimezone(tz=timezone.fromutc) 
     eel.writeToConsole(f"fetched {len(oracles_predictions)} predictions from {timestamps[-1]} UTC")
     
-    s = "LABELS : " + str(LABELS_KEYS) + "\n----------------\n"
+    s = "LABELS :\n" + ', '.join(LABELS_KEYS) + "\n----------------\n"
     for index, prediction in enumerate(oracles_predictions) :
         prediction_str = [float(f"{x:0.2f}") for x in prediction]
-        s += f"oracle {index:2d} : {prediction_str} \n"
+        f = "[ ]" if ranks[index] >= N_FAILING_ORACLES else "[X]"
+        s += f"{f} | oracle {index:2d} : {prediction_str} \n"
     eel.setSimulationConsole(s)
 
     # # reduce dimension

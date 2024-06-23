@@ -78,7 +78,7 @@ canvas {
     /* text-align: center; */
 }
 
-.console, .console-short {
+.console, .console-short, .console-mid {
     border: 1px solid #ccc;
     background-color: #f9f9f9;
     font-family: monospace;
@@ -86,7 +86,12 @@ canvas {
 }
 
 .console {
-    height: 300px;
+    height: 340px;
+    overflow-y: auto;
+}
+
+.console-mid {
+    height: 150px;
     overflow-y: auto;
 }
 
