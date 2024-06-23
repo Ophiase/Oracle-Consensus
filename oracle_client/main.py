@@ -4,6 +4,7 @@ import atexit
 import subprocess
 import atexit
 import web_interface
+import os
 import argparse
 from threading import Thread
 from common import globalState, DB_PATH, N_ORACLES, N_FAILING_ORACLES, SIMULATION_REFRESH_RATE, PREDICTION_WINDOW, BOOTSTRAPING_SUBSET, LABELS, LABELS_KEYS, DIMENSION
@@ -22,11 +23,14 @@ def main():
     
     print("------------------------------------")
 
+    if not os.path.exists(os.path.join("data", "sepolia.json")) :
+        print("[Warning] : Offline mode - Did not find data/sepolia.json !")
+
     if not args.scraper and args.live_mode :
-        print("Info: Simulation mode disabled. Either run the scraper externaly or restart this application with -scraper.")
+        print("[Info] : Simulation mode disabled. Either run the scraper externaly or restart this application with -scraper.")
 
     if not args.live_mode :
-        print(f"Info: Simulation mode requires at least {PREDICTION_WINDOW} posts in {DB_PATH}")
+        print(f"[Info] : Simulation mode requires at least {PREDICTION_WINDOW} posts in {DB_PATH}")
 
     if args.scraper :
         background_process = subprocess.Popen(["python3", "scraper.py", "--rate", str(args.rate)])

@@ -14,7 +14,7 @@ from starknet_py.hash.casm_class_hash import compute_casm_class_hash
 from starknet_py.net.client_models import ResourceBounds, EstimatedFee, PriceUnit
 from pprint import pprint
 
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 from common import globalState, N_ORACLES
 
 # import aioconsole
@@ -26,9 +26,9 @@ import numpy as np
 
 ACCOUNTS_PATH = os.path.join("data", "sepolia.json")
 
-RESSOURCE_BOUND_UPDATE_PREDICTION = ResourceBounds(400000, 40932837875699)
-RESSOURCE_BOUND_UPDATE_PROPOSITION = ResourceBounds(400000, 40932837875699)
-RESSOURCE_BOUND_VOTE_FOR_A_PREDICTION = ResourceBounds(400000, 40932837875699)
+RESOURCE_BOUND_UPDATE_PREDICTION = ResourceBounds(400000, 40932837875699)
+RESOURCE_BOUND_UPDATE_PROPOSITION = ResourceBounds(400000, 40932837875699)
+RESOURCE_BOUND_VOTE_FOR_A_PREDICTION = ResourceBounds(400000, 40932837875699)
 
 UPPER_BOUND_FELT252 = 3618502788666131213697322783095070105623107215331596699973092056135872020481
 UPPER_BOUND__I128 = (2**127) - 1 # included
@@ -87,6 +87,41 @@ def retrieve_account_data():
                 provider=globalState.admin_accounts[int(admins_addresses[0], 16)], 
                 address=globalState.DEPLOYED_ADDRESS
         ))
+
+
+# ----------------------------------------------------------------------
+
+def address_to_oracle_index(address : int) -> int:
+    '''
+    Converts an address to the corresponding index
+    '''
+    oracle_list = call_oracle_list()
+    for index, oracle in enumerate(oracle_list) :
+        if oracle == address : return index
+    raise IndexError()
+
+def oracle_index_to_address(index : int) -> int:
+    '''
+    Converts an index to the corresponding address
+    '''
+    return int(call_oracle_list()[index], 16)
+
+def address_to_admin_index(address : int) -> int:
+    '''
+    Converts an address to the corresponding index
+    '''
+    admin_list = call_admin_list()
+    for index, admin in enumerate(admin_list) :
+        if admin == address : return index
+    raise IndexError()
+
+def admin_index_to_address(index : int) -> int:
+    '''
+    Converts an index to the corresponding address
+    '''
+    return int(call_admin_list()[index], 16)
+
+
 
 # ----------------------------------------------------------------------
 # CALL
@@ -178,25 +213,48 @@ def invoke_update_prediction(account, prediction: np.array, debug=False, which_i
 
     asyncio.run(
         contract.functions["update_prediction"].invoke_v3(
-            prediction=prediction_as_felt, l1_resource_bounds=RESSOURCE_BOUND_UPDATE_PREDICTION
+            prediction=prediction_as_felt, l1_resource_bounds=RESOURCE_BOUND_UPDATE_PREDICTION
         )
     )
 
     eel.writeToConsole(f"Updated [{which_index+1}/{N_ORACLES}] with : \n{prediction_as_felt}")
 
-def invoke_update_proposition(acccount, prediction: List) :
-    # RESSOURCE_BOUND_UPDATE_PROPOSITION
-    raise NotImplementedError()
+def invoke_update_proposition(acccount : Account, 
+            old_oracle_index : Optional[int] = None,  
+            new_oracle_address : Optional[int] = None
+    ) :
+    
+    if (old_oracle_index is None) != (new_oracle_address is None) :
+        raise ValueError()
 
-def invoke_vote_for_a_proposition(acccount, which_one) :
     contract = asyncio.run(
-        Contract.from_address(provider=acccount, address=globalState.DECLARED_ADDRESS)
+        Contract.from_address(provider=acccount, address=globalState.DEPLOYED_ADDRESS)
+    )
+
+    proposition = None if old_oracle_index is None else (old_oracle_index, new_oracle_address)
+
+    asyncio.run(
+        contract.functions["update_proposition"].invoke_v3(
+            proposition=proposition, l1_resource_bounds=RESOURCE_BOUND_UPDATE_PROPOSITION
+        )
+    )
+
+    eel.writeToConsole("Done")
+    print("Done.")
+
+def invoke_vote_for_a_proposition(acccount : Account, which_admin_proposition : int, support_his_proposition : bool) :
+    contract = asyncio.run(
+        Contract.from_address(provider=acccount, address=globalState.DEPLOYED_ADDRESS)
     )
 
     asyncio.run(
         contract.functions["vote_for_a_proposition"].invoke_v3(
-            which_one=which_one, l1_resource_bounds=RESSOURCE_BOUND_VOTE_FOR_A_PREDICTION
+            which_admin=which_admin_proposition, support_his_proposition=support_his_proposition,
+            l1_resource_bounds=RESOURCE_BOUND_VOTE_FOR_A_PREDICTION
         )
     )
+
+    eel.writeToConsole("Done")
+    print("Done.")
 
 

@@ -62,7 +62,7 @@ canvas {
     border: 1px solid #292c31;
     padding: 20px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    width: 400px;
+    width: 500px;
     height: auto;
 }
 
@@ -99,7 +99,7 @@ canvas {
     border: 0px solid #ccc;
     border-color: #272a31;
     padding: 10px;
-    width: 380px;
+    width: 480px;
     overflow-y: auto;
     background-color: #f9f9f9;
     font-family: monospace;
