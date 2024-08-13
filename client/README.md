@@ -29,7 +29,13 @@ Required :
 }
 ```
 
-Declaration/Deployment explained in [oracle_contract/README.md](oracle_contract/README.md)
+In ``contract.py`` adjust the resource bounds
+```python
+28: # LINE TO ADJUST
+29: RESSOURCE_BOUND_COMMON = ResourceBounds(329806, 60932837875699)
+```
+
+Declaration/Deployment explained in [contract/README.md](/contract/README.md)
 
 ``data/sepolia.json``
 ```json
@@ -81,6 +87,6 @@ Launch ``scraper.py`` a first time to fill it (30 posts / 10 minutes with defaul
 It can also be executed at ``main.py`` startup with ``--scraper`` option.
 
 ```bash
-python3 scraper.py # real time database
-python3 main.py # simulate the oracles using real datas
+python3 scraper.py # Real time database
+python3 main.py # Simulate the oracles using real data
 ```

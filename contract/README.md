@@ -91,6 +91,7 @@ To manage floats, we use the wsad convention on ``i128``.
 - The signed wsad implementation is based on the code from alexandria.
     - Original wad implementation was unsigned, so I created wsad.
     - ``i128`` limitation: wsad are multiplied by $1e6$ instead of $1e18$.
+- 🚧 Warning : I developped a more robust math library in my project at *ETH Global Brussels* : [Astral ZK-ML](https://github.com/Ophiase/Astral-ZK-ML/tree/main/contract/src/math)
 
 Currently, the implementations are uncrypted and can be called by anyone.
 A payment system will be added in the future.

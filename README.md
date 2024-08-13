@@ -4,7 +4,10 @@
     <img src="./resources/consensus_graphic_4.png" width=500>
 </p>
 
-Sponsorized by [StarkHack Hackaton](https://ethglobal.com/events/starkhack).
+Sponsorized by [ETH Global - StarkHack](https://ethglobal.com/events/starkhack). \
+Prizes : 
+- **Starkware** - Best use of Starknet Promising Projects
+- **Nethermind** - Best Runner Up Integration of AI in transaction simulation
 
 Establish on-chain consensus over predictions from multiple oracles that can evolve over time.
 - ✅ Security: The consensus is implemented directly on the Starknet blockchain using smart contracts developed in Cairo.
@@ -16,12 +19,14 @@ We also provide an oracle client for demonstration purposes.
 - Data is scraped in real-time from Hacker News.
 - Oracle predictions are based on sentiment analysis over stochastic samples of comments.
 
+🚧 Warning: This project was developed as a proof of concept during a Hackaton. \
+Therefore, the smart contracts and math tools will be obsolete in the future versions of Cairo/Starknet.
+
 
 ![](resources/application_screenshot.png)
-
 
 ## Documentations.
 
 - Mathematical details : [documentation/README.md](documentation/README.md).
-- Smart contract interface for oracles : [oracle_contract/README.md](oracle_contract/README.md).
-- Oracle Client : [oracle_client/README.md](oracle_client/README.md).
+- Smart contract interface for oracles : [contract/README.md](contract/README.md).
+- Oracle Client : [client/README.md](client/README.md).

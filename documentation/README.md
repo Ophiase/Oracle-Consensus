@@ -11,7 +11,8 @@
     - [Consensus](#consensus)
     - [Replacement Vote Implementation](#replacement-vote-implementation)
     - [Benchmarks](#benchmark---identify-the-failing-oracles-uniformely-distributed)
-
+- [Miscellaneous](#miscellaneous)
+    - [Payment System / Asynchronous Update](#payment-system-and-better-asynchronous-commits)
 
 ## Global Modeling
 
@@ -65,11 +66,11 @@ the denormalized prediction $f(X)$ is a gaussian law centered in $e$ :
     - $f^{-1} : Y \to {arctan(Y) \over \pi} + 0.5$
 - $f(X) \sim \mathcal N(e, \sigma Id_M)^N \sim \mathcal N(E, \sigma Id_{MN})$
 
-The samples in ``oracle_contract/drafts/gaussian_algorithm_demo.ipynb`` suggests that the use of the normalizing function is hardly workable. \
+The samples in ``contract/drafts/gaussian_algorithm_demo.ipynb`` suggests that the use of the normalizing function is hardly workable. \
 Hence, the gaussian assumption cannot hold on $]0, 1[$.
 
 Instead, we will now consider the [Bêta](https://fr.wikipedia.org/wiki/Loi_b%C3%AAta) law and [Kumaraswamy](https://fr.wikipedia.org/wiki/Loi_de_Kumaraswamy) law. \
-Experiments are done in ``oracle_contract/drafts/beta_kumaraswamy_algorithm_demo``.
+Experiments are done in ``contract/drafts/beta_kumaraswamy_algorithm_demo``.
 
 Those laws seem more to fit the basic intution we have on the distribution of predictions. \
 The essence will now be modelized by the mode of the distribution.
@@ -185,7 +186,7 @@ Example :
 
 ### Python tests of the first pass constrained estimator :
 
-source code in ``oracle_contract/drafts/beta_kumaraswamy_algorithm_demo``
+source code in ``contract/drafts/beta_kumaraswamy_algorithm_demo``
 
 ```python
 def rank_array(list : List[float], normalized=True) -> List[float] :
@@ -338,3 +339,35 @@ a=100 | b=(100.00000, 1000000.0000)     | identification success: 10.67 % | true
 a=100 | b=(1000000.00000, -1000000.0000)| identification success: 11.67 % | true consensus reliability : 96.53 % 
 a=100 | b=(100000000.00000, 0.0000)     | identification success: 13.67 % | true consensus reliability : 96.06 % 
 ```
+
+## Miscellaneous
+
+### Payment System and better asynchronous commits
+---
+
+Remarks : 
+
+- 🚧 Requires an encryption of the storage
+- The update of the consensus works in two passes.
+- Oracle commit asynchronously.
+- There are two list of oracles (Rapid, Slow).
+- An oracle can only commit twice during an epoch.
+    - Only the second commit will be deloyed to next epoch.
+- Users pay fees to the bank of the smart contract
+
+**First Pass** : \
+When a majority of oracles have commited, they are moved in the "Rapid" bucket \
+The consensus has now enough informations to be updated. \
+Each next commits during the second pass will enrich it.
+
+**Second Pass** : \
+Slow oracles that commits during the second pass are sent to the "Slow" bucket.
+
+**Rewards** : \
+For instance we can define the score as : \
+$s_i := $ $ \alpha (1 - {||c_i - e||^2 \over \max_i || c_i - e ||^2}) + (\mathbb{1}_\text{rapid} - \alpha)$ \
+
+Then $\beta$ percent of the bank will be distributed to the oracles accordingly to their scores.
+
+**Next Epoch** : \
+When enough oracles have commited for a second time during the epoch, they are sent to the rapid bucket of the next epoch.

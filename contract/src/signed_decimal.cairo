@@ -76,18 +76,12 @@ impl I128Display of Display<i128> {
 /// https://github.com/aave/aave-v3-core/blob/master/contracts/protocol/libraries/math/WadRayMath.sol
 
 pub(crate) const WSAD: i128 = 1_000_000; // 1e6 instead of  1e18
-pub(crate) const HALF_WSAD: i128 = 500_000_000; // 0.5e6 instead of 0.5e18
+pub(crate) const HALF_WSAD: i128 = 500_000; // 0.5e6 instead of 0.5e18
 
-/// Return the wsad value
-/// # Returns
-/// * `i128` - The value
 pub fn wsad() -> i128 {
     return WSAD;
 }
 
-/// Return the half wsad value
-/// # Returns
-/// * `i128` - The value
 pub fn half_wsad() -> i128 {
     return HALF_WSAD;
 }
@@ -110,23 +104,10 @@ pub fn safe_wsad_mul(a: i128, b: i128) -> i128 {
 }
 
 
-
-/// Multiplies two wsad, rounding half up to the nearest wsad
-/// # Arguments
-/// * a Wsad
-/// * b Wsad
-/// # Returns
-/// * a*b, in wsad
 pub fn wsad_mul(a: i128, b: i128) -> i128 {
     return (a * b + HALF_WSAD) / WSAD;
 }
 
-/// Divides two wsad, rounding half up to the nearest wsad
-/// # Arguments
-/// * a Wsad
-/// * b Wsad
-/// # Returns
-/// * a/b, in wsad
 pub fn wsad_div(a: i128, b: i128) -> i128 {
     return (a * WSAD + (b / 2)) / b;
 }
