@@ -1,4 +1,4 @@
-let simulation_charts = []; // Array to hold Chart instances
+let simulation_charts = [];
 
 Chart.defaults.borderColor = '#606060';
 Chart.defaults.color = '#000';
@@ -122,81 +122,5 @@ function updateComponents(components, mean=null, median=null) {
     
         chart.update();
     });
-
-    // // Calculate and add mean, median, and confidence ellipsoid
-    // const data = component.data;
-    // const mean = calculateMean(data);
-    // const median = calculateMedian(data);
-    // const confidenceEllipsoid = calculateConfidenceEllipsoid(data);
-
-    // chart.options.plugins.annotation.annotations = [
-    //     {
-    //         type: 'point',
-    //         xValue: mean.x,
-    //         yValue: mean.y,
-    //         backgroundColor: 'rgba(255, 0, 0, 0.6)',
-    //         radius: 5,
-    //         label: {
-    //             enabled: true,
-    //             content: 'Mean'
-    //         }
-    //     },
-    //     {
-    //         type: 'point',
-    //         xValue: median.x,
-    //         yValue: median.y,
-    //         backgroundColor: 'rgba(0, 0, 255, 0.6)',
-    //         radius: 5,
-    //         label: {
-    //             enabled: true,
-    //             content: 'Median'
-    //         }
-    //     },
-    //     {
-    //         type: 'ellipse',
-    //         xValue: confidenceEllipsoid.x,
-    //         yValue: confidenceEllipsoid.y,
-    //         width: confidenceEllipsoid.width,
-    //         height: confidenceEllipsoid.height,
-    //         borderColor: 'rgba(0, 255, 0, 0.6)',
-    //         borderWidth: 2,
-    //         label: {
-    //             enabled: true,
-    //             content: 'Confidence Ellipsoid'
-    //         }
-    //     }
-    // ];
 }
 eel.expose(updateComponents);
-
-function calculateMean(data) {
-    const mean = { x: 0, y: 0 };
-    data.forEach(point => {
-        mean.x += point.x;
-        mean.y += point.y;
-    });
-    mean.x /= data.length;
-    mean.y /= data.length;
-    return mean;
-}
-
-function calculateMedian(data) {
-    const sortedX = data.map(p => p.x).sort((a, b) => a - b);
-    const sortedY = data.map(p => p.y).sort((a, b) => a - b);
-    const median = {
-        x: sortedX[Math.floor(sortedX.length / 2)],
-        y: sortedY[Math.floor(sortedY.length / 2)]
-    };
-    return median;
-}
-
-function calculateConfidenceEllipsoid(data) {
-    // Placeholder: Replace this with actual confidence ellipsoid calculation
-    // The calculation of a confidence ellipsoid would involve covariance matrix and eigenvalues
-    return {
-        x: 0.5, // Center of ellipsoid
-        y: 0.5,
-        width: 0.3, // Width of ellipsoid
-        height: 0.2 // Height of ellipsoid
-    };
-}
