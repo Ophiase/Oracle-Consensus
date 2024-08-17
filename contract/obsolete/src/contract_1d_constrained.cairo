@@ -3,8 +3,8 @@ use oracle_consensus::structs::Oracle;
 
 #[starknet::interface]
 trait IOracleConsensus1DC<TContractState> {
-    fn update_prediction(ref self: TContractState, prediction : i128);
-    
+    fn update_prediction(ref self: TContractState, prediction: i128);
+
     fn consensus_active(self: @TContractState) -> bool;
     fn get_consensus_value(self: @TContractState) -> i128;
     fn get_first_pass_consensus_reliability(self: @TContractState) -> i128;
@@ -12,15 +12,21 @@ trait IOracleConsensus1DC<TContractState> {
 
     fn get_admin_list(self: @TContractState) -> Array<ContractAddress>;
     fn get_oracle_list(self: @TContractState) -> Array<ContractAddress>;
-    
+
     // only admins can get call this one
     fn get_oracle_value_list(self: @TContractState) -> Array<Oracle>;
 
-    fn update_proposition(ref self: TContractState, proposition : Option<(usize, ContractAddress)>);
-    fn vote_for_a_proposition(ref self: TContractState, which_admin : usize, support_his_proposition : bool);
-    
-    fn get_replacement_propositions(self: @TContractState) -> Array<Option<(usize, ContractAddress)>>;
-    fn get_a_specific_proposition(self: @TContractState, which_admin : usize) -> Option<(usize, ContractAddress)>;
+    fn update_proposition(ref self: TContractState, proposition: Option<(usize, ContractAddress)>);
+    fn vote_for_a_proposition(
+        ref self: TContractState, which_admin: usize, support_his_proposition: bool
+    );
+
+    fn get_replacement_propositions(
+        self: @TContractState
+    ) -> Array<Option<(usize, ContractAddress)>>;
+    fn get_a_specific_proposition(
+        self: @TContractState, which_admin: usize
+    ) -> Option<(usize, ContractAddress)>;
 }
 
 
@@ -34,53 +40,47 @@ mod OracleConsensus1DC {
     use starknet::syscalls::storage_write_syscall;
     use starknet::get_caller_address;
 
-    use oracle_consensus::structs::{
-        Oracle, VoteCoordinate
-    };
+    use oracle_consensus::structs::{Oracle, VoteCoordinate};
 
     use starknet::contract_address::{Felt252TryIntoContractAddress, ContractAddressIntoFelt252};
 
-    use oracle_consensus::math::{median, smooth_median, quadratic_risk, average, interval_check, sqrt};
+    use oracle_consensus::math::{
+        median, smooth_median, quadratic_risk, average, interval_check, sqrt
+    };
     use oracle_consensus::sort::IndexedMergeSort;
     use oracle_consensus::utils::{fst, snd, contractaddress_to_bytearray, wsad_to_string};
     use oracle_consensus::signed_decimal::{
-        I128Div, I128Display, I128SignedBasics, unsigned_to_signed,
-        wsad_div, wsad_mul, half_wsad
+        I128Div, I128Display, I128SignedBasics, unsigned_to_signed, wsad_div, wsad_mul, half_wsad
     };
     use alexandria_math::{pow};
-    
+
     #[storage]
     struct Storage {
-        n_admins : usize,
-        admins : LegacyMap<usize, ContractAddress>,
-        
-        enable_oracle_replacement : bool,
-        required_majority : usize,
-        
-        n_failing_oracles : usize,
-        n_oracles : usize,
+        n_admins: usize,
+        admins: LegacyMap<usize, ContractAddress>,
+        enable_oracle_replacement: bool,
+        required_majority: usize,
+        n_failing_oracles: usize,
+        n_oracles: usize,
         oracles: LegacyMap<usize, Oracle>,
- 
-        n_active_oracles : usize,
-        consensus_active : bool,
-
-        vote_matrix : LegacyMap<VoteCoordinate, bool>,
-        replacement_propositions : LegacyMap<usize, Option<(usize, ContractAddress)>>,
-
+        n_active_oracles: usize,
+        consensus_active: bool,
+        vote_matrix: LegacyMap<VoteCoordinate, bool>,
+        replacement_propositions: LegacyMap<usize, Option<(usize, ContractAddress)>>,
         consensus_value: i128, // wsad convention
-        consensus_reliability_second_pass : i128, // wsad convention
-        consensus_reliability_first_pass : i128 // wsad convention
+        consensus_reliability_second_pass: i128, // wsad convention
+        consensus_reliability_first_pass: i128 // wsad convention
     }
 
     // ==============================================================================
 
-    fn fill_admins(ref self: ContractState, array : Span<ContractAddress>) {
+    fn fill_admins(ref self: ContractState, array: Span<ContractAddress>) {
         let mut i = 0;
         loop {
             if i == array.len() {
-                break();
+                break ();
             }
-            
+
             let value = *array.at(i);
             self.admins.write(i, value);
 
@@ -90,18 +90,15 @@ mod OracleConsensus1DC {
         self.n_admins.write(array.len());
     }
 
-    fn fill_oracles(ref self: ContractState, array : Span<ContractAddress>) {
+    fn fill_oracles(ref self: ContractState, array: Span<ContractAddress>) {
         let mut i = 0;
         loop {
             if i == array.len() {
-                break();
+                break ();
             }
-            
+
             let oracle = Oracle {
-                address : *array.at(i),
-                value : 0_i128,
-                enabled : false,
-                reliable : true
+                address: *array.at(i), value: 0_i128, enabled: false, reliable: true
             };
 
             self.oracles.write(i, oracle);
@@ -113,43 +110,44 @@ mod OracleConsensus1DC {
         self.n_oracles.write(array.len());
     }
 
-    fn reinitialize_vote_matrix(ref self: ContractState, n_admins : @usize) {
+    fn reinitialize_vote_matrix(ref self: ContractState, n_admins: @usize) {
         let mut i = 0;
         loop {
-            if i == *n_admins { break(); }
+            if i == *n_admins {
+                break ();
+            }
             let mut j = 0;
             loop {
-                if j == *n_admins { break(); }
+                if j == *n_admins {
+                    break ();
+                }
 
-                self.vote_matrix.write(VoteCoordinate{
-                    vote_emitter: i,
-                    vote_receiver: j
-                }, false);
+                self.vote_matrix.write(VoteCoordinate { vote_emitter: i, vote_receiver: j }, false);
 
                 j += 1;
             };
             i += 1;
         };
-
     }
 
-    fn reinitialize_replacement_propositions(ref self: ContractState, n_admins : @usize) {
+    fn reinitialize_replacement_propositions(ref self: ContractState, n_admins: @usize) {
         let mut i = 0;
         loop {
-            if i == *n_admins { break(); }
+            if i == *n_admins {
+                break ();
+            }
             self.replacement_propositions.write(i, Option::None);
             i += 1;
         };
     }
-    
-    #[constructor]
-    fn constructor(ref self: ContractState, 
-        admins : Span<ContractAddress>,
 
-        enable_oracle_replacement : bool,
-        required_majority : usize,
-        n_failing_oracles : usize, 
-        
+    #[constructor]
+    fn constructor(
+        ref self: ContractState,
+        admins: Span<ContractAddress>,
+        enable_oracle_replacement: bool,
+        required_majority: usize,
+        n_failing_oracles: usize,
         oracles: Span<ContractAddress>,
     ) {
         fill_admins(ref self, admins);
@@ -157,11 +155,11 @@ mod OracleConsensus1DC {
 
         reinitialize_vote_matrix(ref self, @admins.len());
         reinitialize_replacement_propositions(ref self, @admins.len());
-        
+
         self.enable_oracle_replacement.write(enable_oracle_replacement);
         self.required_majority.write(required_majority);
         self.n_failing_oracles.write(n_failing_oracles);
-        
+
         self.consensus_value.write(0_i128);
         self.consensus_reliability_first_pass.write(0_i128);
         self.consensus_reliability_second_pass.write(0_i128);
@@ -174,11 +172,11 @@ mod OracleConsensus1DC {
     // require that all oracle have already commited once
     fn oracles_optional_values(self: @ContractState) -> Array<Option<i128>> {
         let mut result = ArrayTrait::new();
-     
+
         let mut i = 0;
         loop {
             if i == self.n_oracles.read() {
-                break();
+                break ();
             }
 
             let oracle = self.oracles.read(i);
@@ -187,7 +185,7 @@ mod OracleConsensus1DC {
             } else {
                 result.append(Option::None);
             }
-            
+
             i += 1;
         };
 
@@ -195,67 +193,67 @@ mod OracleConsensus1DC {
     }
 
     // require that all oracle have already commited once
-    fn compute_oracle_values(self: @ContractState, only_reliable : bool) -> Array<i128> {
+    fn compute_oracle_values(self: @ContractState, only_reliable: bool) -> Array<i128> {
         let mut result = ArrayTrait::new();
-     
+
         let mut i = 0;
         loop {
             if i == self.n_oracles.read() {
-                break();
+                break ();
             }
 
             let oracle = self.oracles.read(i);
             if oracle.reliable || !only_reliable {
                 result.append(oracle.value);
             }
-            
+
             i += 1;
         };
 
         result
     }
 
-    fn update_a_single_oracle(ref self: ContractState, oracle_index : @usize, prediction : @i128) {
+    fn update_a_single_oracle(ref self: ContractState, oracle_index: @usize, prediction: @i128) {
         let mut oracle = self.oracles.read(*oracle_index);
-        
+
         if !oracle.enabled {
             self.n_active_oracles.write(self.n_active_oracles.read() + 1);
         }
 
         oracle.value = *prediction;
         oracle.enabled = true;
-        
+
         self.oracles.write(*oracle_index, oracle);
     }
 
-    fn update_oracles_reliability(ref self: ContractState, scores : @Array<(usize, i128)>) {
+    fn update_oracles_reliability(ref self: ContractState, scores: @Array<(usize, i128)>) {
         let treshold = self.n_oracles.read() - self.n_failing_oracles.read();
 
         let mut i = 0;
         loop {
             if i == self.n_oracles.read() {
-                break();
+                break ();
             }
-            
+
             let (which_oracle, _foo) = *scores.at(i);
-            
+
             let mut oracle = self.oracles.read(which_oracle);
             oracle.reliable = (i < treshold);
 
             self.oracles.write(which_oracle, oracle);
-            
+
             i += 1;
         };
     }
 
 
-    fn update_consensus(ref self: ContractState, oracle_index : @usize, prediction : @i128) {
+    fn update_consensus(ref self: ContractState, oracle_index: @usize, prediction: @i128) {
         update_a_single_oracle(ref self, oracle_index, prediction);
 
         if self.n_oracles.read() != self.n_active_oracles.read() {
-            return();
+            return ();
         }
-        
+
         // ----------------------------
         // FIRST PASS
         // ----------------------------
@@ -267,7 +265,7 @@ mod OracleConsensus1DC {
         let essence_first_pass = smooth_median(@oracles_values);
 
         // quadratic_risk
-     
+
         let quadratic_risk_values = quadratic_risk(@oracles_values, @essence_first_pass);
         let reliability_first_pass = wsad() - (sqrt(average(@quadratic_risk_values)) * 2);
         interval_check(@reliability_first_pass);
@@ -278,50 +276,50 @@ mod OracleConsensus1DC {
         // ----------------------------
         // SECOND PASS
         // ----------------------------
-        
+
         let reliable_values = compute_oracle_values(@self, true);
-        
+
         // ESSENCE
 
         let essence = smooth_median(@reliable_values);
         self.consensus_value.write(essence);
-        
+
         // quadratic_risk
 
         let quadratic_risk_values = quadratic_risk(@reliable_values, @essence_first_pass);
         let reliability_second_pass = wsad() - (sqrt(average(@quadratic_risk_values)) * 2);
         interval_check(@reliability_second_pass);
         self.consensus_reliability_second_pass.write(reliability_second_pass);
-        
-        self.consensus_active.write(true);        
+
+        self.consensus_active.write(true);
     }
 
-    fn find_oracle_index (self: @ContractState, oracle : @ContractAddress) -> Option<usize> {
+    fn find_oracle_index(self: @ContractState, oracle: @ContractAddress) -> Option<usize> {
         let mut i = 0;
         loop {
             if i == self.n_oracles.read() {
-                break(Option::None);
+                break (Option::None);
             }
 
             if self.oracles.read(i).address == *oracle {
-                break(Option::Some(i));
+                break (Option::Some(i));
             }
-            
+
             i += 1;
         }
     }
 
-    fn find_admin_index (self: @ContractState, admin : @ContractAddress) -> Option<usize> {
+    fn find_admin_index(self: @ContractState, admin: @ContractAddress) -> Option<usize> {
         let mut i = 0;
         loop {
             if i == self.n_admins.read() {
-                break(Option::None);
+                break (Option::None);
             }
 
             if self.admins.read(i) == *admin {
-                break(Option::Some(i));
+                break (Option::Some(i));
             }
-            
+
             i += 1;
         }
     }
@@ -330,17 +328,19 @@ mod OracleConsensus1DC {
     // ADMIN VOTES
     // ------------------------------------------------------------------------------
 
-    fn check_for_replacement(ref self: ContractState, which_proposition : usize) {
+    fn check_for_replacement(ref self: ContractState, which_proposition: usize) {
         // COUNT THE NUMBER OF VOTES
         let n_admins = self.n_admins.read();
         let mut n_votes = 0;
         let mut i = 0;
         loop {
-            if i == n_admins { break(); }
-            
-            if self.vote_matrix.read(VoteCoordinate{
-                vote_emitter: i, vote_receiver: which_proposition
-            }) {
+            if i == n_admins {
+                break ();
+            }
+
+            if self
+                .vote_matrix
+                .read(VoteCoordinate { vote_emitter: i, vote_receiver: which_proposition }) {
                 n_votes += 1;
             }
 
@@ -348,7 +348,9 @@ mod OracleConsensus1DC {
         };
 
         // CHECK :
-        if self.required_majority.read() > n_votes { return; }
+        if self.required_majority.read() > n_votes {
+            return;
+        }
 
         // APPLY
         let proposition = self.replacement_propositions.read(which_proposition).unwrap();
@@ -365,17 +367,17 @@ mod OracleConsensus1DC {
     // OTHER
     // ------------------------------------------------------------------------------
 
-    fn is_admin(self: @ContractState, user : @ContractAddress) -> bool {
+    fn is_admin(self: @ContractState, user: @ContractAddress) -> bool {
         let mut i = 0;
         loop {
             if i == self.n_admins.read() {
-                break(false);
+                break (false);
             }
 
             if self.admins.read(i) == *user {
-                break(true);
-            } 
-            
+                break (true);
+            }
+
             i += 1;
         }
     }
@@ -384,24 +386,21 @@ mod OracleConsensus1DC {
     // PUBLIC
     // ==============================================================================
 
-
-
     #[abi(embed_v0)]
     impl OracleConsensusImpl of super::IOracleConsensus1DC<ContractState> {
-        fn update_prediction(ref self: ContractState, prediction : i128) {
+        fn update_prediction(ref self: ContractState, prediction: i128) {
             interval_check(@prediction);
 
             match find_oracle_index(@self, @get_caller_address()) {
                 Option::None => assert(false, 'not an oracle'),
                 Option::Some(oracle_index) => update_consensus(ref self, @oracle_index, @prediction)
             }
-
         }
 
         fn consensus_active(self: @ContractState) -> bool {
             self.consensus_active.read()
         }
-        
+
         fn get_consensus_value(self: @ContractState) -> i128 {
             self.consensus_value.read()
         }
@@ -415,8 +414,10 @@ mod OracleConsensus1DC {
         fn get_second_pass_consensus_reliability(self: @ContractState) -> i128 {
             self.consensus_reliability_second_pass.read()
         }
-        
-        fn update_proposition(ref self: ContractState, proposition : Option<(usize, ContractAddress)>) {
+
+        fn update_proposition(
+            ref self: ContractState, proposition: Option<(usize, ContractAddress)>
+        ) {
             assert!(self.enable_oracle_replacement.read(), "replacement disabled");
 
             let admin_index = find_admin_index(@self, @get_caller_address());
@@ -425,12 +426,14 @@ mod OracleConsensus1DC {
 
             match proposition {
                 Option::None => self.replacement_propositions.write(admin_index, proposition),
-                Option::Some((old_oracle_index, new_oracle_address)) => {
+                Option::Some((
+                    old_oracle_index, new_oracle_address
+                )) => {
                     assert(
-                        (0 <= old_oracle_index) && (old_oracle_index < self.n_oracles.read()), 
-                        'wrong old oracle index');
+                        (0 <= old_oracle_index) && (old_oracle_index < self.n_oracles.read()),
+                        'wrong old oracle index'
+                    );
 
-                    
                     assert!(
                         find_oracle_index(@self, @new_oracle_address).is_none(),
                         "the oracle is already in the team"
@@ -442,41 +445,51 @@ mod OracleConsensus1DC {
                     let mut i = 0;
                     loop {
                         if i == self.n_admins.read() {
-                            break();
+                            break ();
                         }
 
-                        self.vote_matrix.write(VoteCoordinate{
-                            vote_emitter: i,
-                            vote_receiver: admin_index
-                        }, false);
+                        self
+                            .vote_matrix
+                            .write(
+                                VoteCoordinate { vote_emitter: i, vote_receiver: admin_index },
+                                false
+                            );
 
                         i += 1;
                     };
 
                     // vote for itself
-                    self.vote_matrix.write(VoteCoordinate{
-                        vote_emitter: admin_index, vote_receiver: admin_index
-                    }, true);
-                    
+                    self
+                        .vote_matrix
+                        .write(
+                            VoteCoordinate {
+                                vote_emitter: admin_index, vote_receiver: admin_index
+                            },
+                            true
+                        );
+
                     self.replacement_propositions.write(admin_index, proposition);
                 }
             };
-            
         }
 
         // if a proposition get enough vote, but the oracle is not replaceable yet
         // it will be necessary to vote again for the proposition when the oracle will be replaceable
-        fn vote_for_a_proposition(ref self: ContractState, which_admin : usize, support_his_proposition : bool) {
+        fn vote_for_a_proposition(
+            ref self: ContractState, which_admin: usize, support_his_proposition: bool
+        ) {
             assert!(self.enable_oracle_replacement.read(), "replacement disabled");
 
             let voter_index = find_admin_index(@self, @get_caller_address());
             assert(!voter_index.is_none(), 'not an admin');
             let voter_index = voter_index.unwrap();
 
-            self.vote_matrix.write(VoteCoordinate{
-                vote_emitter: voter_index,
-                vote_receiver: which_admin
-            }, support_his_proposition);
+            self
+                .vote_matrix
+                .write(
+                    VoteCoordinate { vote_emitter: voter_index, vote_receiver: which_admin },
+                    support_his_proposition
+                );
 
             check_for_replacement(ref self, which_admin);
         }
@@ -487,11 +500,13 @@ mod OracleConsensus1DC {
 
             let mut i = 0;
             loop {
-                if i == n_admins { break(); }
+                if i == n_admins {
+                    break ();
+                }
                 result.append(self.admins.read(i));
                 i += 1;
             };
-            
+
             result
         }
 
@@ -501,11 +516,13 @@ mod OracleConsensus1DC {
 
             let mut i = 0;
             loop {
-                if i == n_oracles { break(); }
+                if i == n_oracles {
+                    break ();
+                }
                 result.append(self.oracles.read(i).address);
                 i += 1;
             };
-            
+
             result
         }
 
@@ -517,16 +534,20 @@ mod OracleConsensus1DC {
 
             let mut i = 0;
             loop {
-                if i == n_oracles { break(); }
+                if i == n_oracles {
+                    break ();
+                }
                 result.append(self.oracles.read(i));
                 i += 1;
             };
-            
+
             result
         }
 
 
-        fn get_replacement_propositions(self: @ContractState) -> Array<Option<(usize, ContractAddress)>> {
+        fn get_replacement_propositions(
+            self: @ContractState
+        ) -> Array<Option<(usize, ContractAddress)>> {
             assert!(self.enable_oracle_replacement.read(), "replacement disabled");
 
             let mut result = ArrayTrait::new();
@@ -534,18 +555,21 @@ mod OracleConsensus1DC {
 
             let mut i = 0;
             loop {
-                if i == n_admins { break(); }
+                if i == n_admins {
+                    break ();
+                }
                 result.append(self.replacement_propositions.read(i));
                 i += 1;
             };
-            
+
             result
         }
-        
-        fn get_a_specific_proposition(self: @ContractState, which_admin : usize) -> Option<(usize, ContractAddress)> {
+
+        fn get_a_specific_proposition(
+            self: @ContractState, which_admin: usize
+        ) -> Option<(usize, ContractAddress)> {
             assert!(self.enable_oracle_replacement.read(), "replacement disabled");
             self.replacement_propositions.read(which_admin)
         }
-
     }
 }

@@ -16,13 +16,15 @@ pub impl IndexedMergeSort of IndexedSortable {
     }
 }
 
-fn add_index_to_array<T, +Copy<T>, +Drop<T>, +PartialOrd<T>>(values: @Array<T>) -> Array<(usize, T)> {
+fn add_index_to_array<T, +Copy<T>, +Drop<T>, +PartialOrd<T>>(
+    values: @Array<T>
+) -> Array<(usize, T)> {
     let mut result = ArrayTrait::<(usize, T)>::new();
 
     let mut i = 0;
     loop {
         if values.len() == i {
-            break();
+            break ();
         }
         result.append((i, *values.at(i)));
         i += 1;
@@ -32,7 +34,9 @@ fn add_index_to_array<T, +Copy<T>, +Drop<T>, +PartialOrd<T>>(values: @Array<T>) 
 }
 
 
-fn sort_aux<T, +Copy<T>, +Drop<T>, +PartialOrd<T>>(mut array: Span<(usize, T)>) -> Array<(usize, T)> {
+fn sort_aux<T, +Copy<T>, +Drop<T>, +PartialOrd<T>>(
+    mut array: Span<(usize, T)>
+) -> Array<(usize, T)> {
     let len = array.len();
     if len == 0 {
         return array![];
@@ -52,7 +56,7 @@ fn sort_aux<T, +Copy<T>, +Drop<T>, +PartialOrd<T>>(mut array: Span<(usize, T)>) 
 
     let mut result_arr = array![];
     merge_recursive(sorted_left, sorted_right, ref result_arr, 0, 0);
-    
+
     result_arr
 }
 
@@ -89,7 +93,7 @@ fn merge_recursive<T, +Copy<T>, +Drop<T>, +PartialOrd<T>>(
     let (_tmp, left_value) = *left_arr.at(left_arr_ix);
     let (_tmp, right_value) = *right_arr.at(right_arr_ix);
 
-    if left_value < right_value{
+    if left_value < right_value {
         result_arr.append(*left_arr[left_arr_ix]);
         merge_recursive(left_arr, right_arr, ref result_arr, left_arr_ix + 1, right_arr_ix)
     } else {

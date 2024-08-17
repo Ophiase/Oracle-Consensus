@@ -3,19 +3,19 @@
 use core::fmt::{Display, Formatter, Error};
 
 trait SignedBasics {
-    fn is_positive(self : @i128) -> bool;
-    fn as_unsigned(self : @i128) -> u128;
-    fn as_felt(self : @i128) -> felt252;
-    fn as_unsigned_felt(self : @i128) -> felt252;
+    fn is_positive(self: @i128) -> bool;
+    fn as_unsigned(self: @i128) -> u128;
+    fn as_felt(self: @i128) -> felt252;
+    fn as_unsigned_felt(self: @i128) -> felt252;
     fn abs(self: @i128) -> i128;
 }
 
 impl I128SignedBasics of SignedBasics {
-    fn is_positive(self : @i128) -> bool {
+    fn is_positive(self: @i128) -> bool {
         *self >= 0_i128
     }
 
-    fn as_unsigned(self : @i128) -> u128 {
+    fn as_unsigned(self: @i128) -> u128 {
         if self.is_positive() {
             (*self).try_into().unwrap()
         } else {
@@ -23,11 +23,11 @@ impl I128SignedBasics of SignedBasics {
         }
     }
 
-    fn as_felt(self : @i128) -> felt252 {
+    fn as_felt(self: @i128) -> felt252 {
         (*self).try_into().unwrap()
     }
 
-    fn as_unsigned_felt(self : @i128) -> felt252 {
+    fn as_unsigned_felt(self: @i128) -> felt252 {
         self.as_unsigned().try_into().unwrap()
     }
 
@@ -35,7 +35,7 @@ impl I128SignedBasics of SignedBasics {
         if self.is_positive() {
             *self
         } else {
-            *self * -1_i128 
+            *self * -1_i128
         }
     }
 }
@@ -44,7 +44,7 @@ fn unsigned_to_signed(x: @u128) -> i128 {
     (*x).try_into().unwrap()
 }
 
-fn felt_to_i128(x : @felt252) -> i128 {
+fn felt_to_i128(x: @felt252) -> i128 {
     (*x).try_into().unwrap()
 }
 
@@ -64,7 +64,11 @@ impl I128Div of Div<i128> {
 
 impl I128Display of Display<i128> {
     fn fmt(self: @i128, ref f: Formatter) -> Result<(), Error> {
-        let sign : ByteArray = if self.is_positive() { "" } else { "-" };
+        let sign: ByteArray = if self.is_positive() {
+            ""
+        } else {
+            "-"
+        };
         write!(f, "{}{}", sign, self.as_unsigned())
     }
 }
@@ -90,17 +94,16 @@ pub fn half_wsad() -> i128 {
 // const OVERFLOW_REDUCTION : i128 = 10000000000000; // 1e10
 pub fn safe_wsad_mul(a: i128, b: i128) -> i128 {
     wsad_mul(a, b)
+// let x = a / OVERFLOW_REDUCTION;
+// println!(":: {}", x);
+// let y = b / OVERFLOW_REDUCTION;
+// println!(":: {}", y);
+// println!(":: {}", x*y);
+// println!(":: {}", (x*y) * (OVERFLOW_REDUCTION*OVERFLOW_REDUCTION));
+// 1
 
-    // let x = a / OVERFLOW_REDUCTION;
-    // println!(":: {}", x);
-    // let y = b / OVERFLOW_REDUCTION;
-    // println!(":: {}", y);
-    // println!(":: {}", x*y);
-    // println!(":: {}", (x*y) * (OVERFLOW_REDUCTION*OVERFLOW_REDUCTION));
-    // 1
-
-    // (OVERFLOW_REDUCTION*OVERFLOW_REDUCTION) * 
-    // ((a/OVERFLOW_REDUCTION) * (b/OVERFLOW_REDUCTION) + HALF_WSAD) / WSAD
+// (OVERFLOW_REDUCTION*OVERFLOW_REDUCTION) * 
+// ((a/OVERFLOW_REDUCTION) * (b/OVERFLOW_REDUCTION) + HALF_WSAD) / WSAD
 }
 
 
