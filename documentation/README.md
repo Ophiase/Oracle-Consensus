@@ -6,7 +6,7 @@
     - [Statistical Model](#statistical-model)
     - [Example](#example)
 - [Unimodal Modeling](#unimodal-modeling)
-- [Multimodal Modeling](#multimodal-modeling)
+- [Multimodal Modeling (Mixture Model)](#multimodal-modeling-mixture-model)
 - [Algorithms](#algorithms)
     - [Consensus](#consensus)
     - [Replacement Vote Implementation](#replacement-vote-implementation)
@@ -87,7 +87,7 @@ Essence is then the $\mu$ parameter of the distribution, and reliability a funct
 
 Thus, the estimator is :
 
-## Multimodal Modeling
+## Multimodal Modeling (Mixture Model)
 
 In a second time we might even consider a case with $K$ instances of $e$ with $\mu_k$ centered in $e$. \
 Each oracle will have a probability of $p_k$ to follow $\mu_k$. Mathematicaly :
@@ -365,7 +365,7 @@ Slow oracles that commits during the second pass are sent to the "Slow" bucket.
 
 **Rewards** : \
 For instance we can define the score as : \
-$s_i := $ $ \alpha (1 - {||c_i - e||^2 \over \max_i || c_i - e ||^2}) + (\mathbb{1}_\text{rapid} - \alpha)$ \
+$s_i :=$ $\alpha (1 - {||c_i - e||^2 \over \max_i || c_i - e ||^2}) + (\mathbb{1}_\text{rapid} - \alpha)$
 
 Then $\beta$ percent of the bank will be distributed to the oracles accordingly to their scores.
 
